@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+// use Illuminate\Filesystem\Filesystem;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        // Fix untuk error: Target class [files] does not exist
+        // $this->app->bind('files', function ($app) {
+        //     return new Filesystem;
+        // });
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        //
+    }
+
+    public const HOME = '/dashboard';
+    public const ADMIN = '/admin';
+}
