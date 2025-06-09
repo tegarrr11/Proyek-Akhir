@@ -18,16 +18,32 @@
         Tidak
       </button>
 
-      <!-- Tombol Ya -->
-      <button @click="
+    <!-- Tombol Ya -->
+    <button 
+      type="button"
+      @click="
         showPopup = false;
         showSuccess = true;
-        setTimeout(() => showSuccess = false, 2000);
-        submitForm();
+        setTimeout(() => {
+          showSuccess = false;
+          $refs.peminjamanForm?.submit(); 
+        }, 2000);
       "
-        class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">
-        Ya
-      </button>
+      class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">
+      Ya
+    </button>
+
+
+
     </div>
   </div>
 </div>
+
+<script>
+  function submitForm() {
+    const form = document.querySelector('form');
+    if (form) {
+      form.submit();
+    }
+  }
+</script>

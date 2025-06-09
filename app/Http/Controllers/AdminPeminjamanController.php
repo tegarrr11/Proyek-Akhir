@@ -32,42 +32,48 @@ class AdminPeminjamanController extends Controller
             return redirect()->back()->with('error', 'Peminjaman belum disetujui oleh BEM.');
         }
 
-        // Update status
         $peminjaman->verifikasi_sarpras = 'diterima';
         $peminjaman->save();
 
-        // Kirim notifikasi ke mahasiswa
+        // Notifikasi ke mahasiswa
         $mahasiswa = $peminjaman->user;
         $judul = 'Pengajuan Disetujui';
         $pesan = 'Pengajuan "' . $peminjaman->judul_kegiatan . '" telah disetujui oleh Admin.';
-
         NotifikasiHelper::kirimKeUser($mahasiswa, $judul, $pesan);
 
         return redirect()->back()->with('success', 'Pengajuan berhasil disetujui oleh Sarpras.');
     }
 
+    public function verifikasi(Request $request, $id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+        $peminjaman->verifikasi_sarpras = $request->verifikasi_sarpras;
+        $peminjaman->save();
+
+        return redirect()->back()->with('success', 'Status berhasil diperbarui.');
+    }
+
     public function show($id)
     {
-    $peminjaman = Peminjaman::with(['detailPeminjaman.fasilitas', 'gedung', 'user'])
-        ->findOrFail($id);
+        $peminjaman = Peminjaman::with(['detailPeminjaman.fasilitas', 'gedung', 'user'])->findOrFail($id);
 
-    return response()->json([
-        'judul_kegiatan' => $peminjaman->judul_kegiatan,
-        'tgl_kegiatan' => $peminjaman->tgl_kegiatan,
-        'waktu_mulai' => $peminjaman->waktu_mulai,
-        'waktu_berakhir' => $peminjaman->waktu_berakhir,
-        'aktivitas' => $peminjaman->aktivitas,
-        'organisasi' => $peminjaman->organisasi,
-        'penanggung_jawab' => $peminjaman->penanggung_jawab,
-        'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
-        'dokumen' => $peminjaman->proposal, // nama kolom file proposal
-        'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
-        'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
-            return [
-                'nama' => $detail->fasilitas->nama_barang ?? 'N/A',
-                'jumlah' => $detail->jumlah,
-            ];
-        }),
-    ]);
+        return response()->json([
+            'judul_kegiatan' => $peminjaman->judul_kegiatan,
+            'tgl_kegiatan' => $peminjaman->tgl_kegiatan,
+            'waktu_mulai' => $peminjaman->waktu_mulai,
+            'waktu_berakhir' => $peminjaman->waktu_berakhir,
+            'aktivitas' => $peminjaman->aktivitas,
+            'organisasi' => $peminjaman->organisasi,
+            'penanggung_jawab' => $peminjaman->penanggung_jawab,
+            'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
+            'link_dokumen' => asset('storage/proposal/' . $peminjaman->proposal),
+            'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
+            'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
+                return [
+                    'nama' => $detail->fasilitas->nama_barang ?? 'N/A',
+                    'jumlah' => $detail->jumlah,
+                ];
+            }),
+        ]);
     }
 }

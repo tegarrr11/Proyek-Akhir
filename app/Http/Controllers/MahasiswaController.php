@@ -5,18 +5,56 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Gedung;
 use App\Models\Peminjaman;
+use Illuminate\Support\Facades\Auth;
 
 class MahasiswaController extends Controller
 {
     /**
      * Menampilkan halaman dashboard mahasiswa dengan daftar gedung.
      */
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $gedungs = Gedung::all();
-        return view('pages.mahasiswa.dashboard', compact('gedungs'));
+        $selectedGedungId = $request->get('gedung_id', $gedungs->first()?->id);
+
+        $events = Peminjaman::where('gedung_id', $selectedGedungId)
+            ->where('user_id', Auth::id())
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id'    => $item->id,
+                    'title' => $item->judul_kegiatan . ' (' . $item->organisasi . ')',
+                    'start' => $item->tgl_kegiatan . 'T' . $item->waktu_mulai,
+                    'end'   => $item->tgl_kegiatan . 'T' . $item->waktu_berakhir,
+                    'color' => match ($item->status_peminjaman) {
+                        'pending' => '#facc15',
+                        'booked' => '#0ea5e9',
+                        'selesai' => '#10b981',
+                        default => '#ef4444'
+                    },
+                ];
+            });
+
+        return view('pages.mahasiswa.dashboard', [
+            'gedungs' => $gedungs,
+            'selectedGedungId' => $selectedGedungId,
+            'events' => $events->toArray() 
+        ]);
     }
 
+    public function show($id)
+    {
+        $peminjaman = \App\Models\Peminjaman::findOrFail($id);
+
+        return response()->json([
+            'organisasi'     => $peminjaman->organisasi,
+            'tgl_kegiatan'   => $peminjaman->tgl_kegiatan,
+            'judul_kegiatan' => $peminjaman->judul_kegiatan,
+            'waktu_mulai'    => $peminjaman->waktu_mulai,
+            'waktu_berakhir' => $peminjaman->waktu_berakhir,
+            'keterangan'     => $peminjaman->keterangan,
+        ]);
+    }
     /**
      * Menampilkan halaman peminjaman mahasiswa dengan data pengajuan dan riwayat.
      */

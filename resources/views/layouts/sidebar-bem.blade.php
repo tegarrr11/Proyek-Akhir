@@ -4,15 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>@yield('title')</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+
+  @include('layouts.partials.head')
   @yield('head')
+
   <meta name="csrf-token" content="{{ csrf_token() }}">
   @if(Auth::check())
-  <meta name="user-id" content="{{ Auth::id() }}">
+    <meta name="user-id" content="{{ Auth::id() }}">
   @endif
-  @vite('resources/js/app.js')
+
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-@yield('scripts')
+
 <body class="bg-gray-50 h-screen flex flex-col md:flex-row">
 
   <!-- Mobile Header -->
@@ -54,24 +57,14 @@
         <a href="{{ route('bem.dashboard') }}"
            class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
            {{ request()->routeIs('bem.dashboard') || request()->routeIs('bem.auditorium') || request()->routeIs('bem.gsg') || request()->routeIs('bem.gor') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100' }}">
-           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" 
-            d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 
-            2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 6z..." />
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
           Dashboard
         </a>
 
         <a href="{{ route('bem.peminjaman') }}"
            class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
            {{ request()->routeIs('bem.peminjaman') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100' }}">
-           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" 
-            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 
-            2.25-2.25V6.108..." />
-          </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list-icon lucide-clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
           Peminjaman
         </a>
       </nav>
@@ -174,6 +167,7 @@
     });
   </script>
   <script src="https://unpkg.com/alpinejs" defer></script>
+  @stack('scripts')
 </body>
 </html>
 

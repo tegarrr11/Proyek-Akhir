@@ -12,28 +12,26 @@ class Peminjaman extends Model
     protected $table = 'peminjaman'; // nama tabel sesuai migrasi kamu
 
     protected $fillable = [
-        'judul_kegiatan',
-        'tgl_kegiatan',
-        'waktu_mulai',
-        'waktu_berakhir',
-        'aktivitas',
-        'organisasi',
-        'penanggung_jawab',
-        'deskripsi_kegiatan',
-        'status',
-        'verifikasi_bem',
-        'verifikasi_sarpras',
-        'gedung_id',
-        'user_id',
-        'approver_dosen_id',
-        'approver_rt_id',
-        'status_peminjaman',
-        'status_pengembalian',
+    'user_id', 
+    'judul_kegiatan', 
+    'tgl_kegiatan', 
+    'waktu_mulai', 
+    'waktu_berakhir',
+    'aktivitas', 
+    'organisasi', 
+    'penanggung_jawab', 
+    'deskripsi_kegiatan',
+    'gedung_id', 
+    'jenis_kegiatan', 
+    'proposal', 
+    'undangan_pembicara',
+    'status_peminjaman', 
+    'status_pengembalian',
     ];
 
     public function detailPeminjaman()
     {
-        return $this->hasMany(DetailPeminjaman::class);
+        return $this->hasMany(\App\Models\DetailPeminjaman::class);
     }
 
     public function user()
@@ -42,8 +40,9 @@ class Peminjaman extends Model
     }
 
     public function gedung()
-{
-    return $this->belongsTo(Gedung::class);
-}
+    {
+        return $this->belongsTo(Gedung::class);
+    }
+    
 
 }

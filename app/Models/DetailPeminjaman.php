@@ -26,6 +26,7 @@ class DetailPeminjaman extends Model
     // Relasi ke tabel fasilitas
     public function fasilitas()
     {
-        return $this->belongsTo(Fasilitas::class);
-    }
+        return $this->belongsTo(\App\Models\Fasilitas::class);
+    } 
+  
 }

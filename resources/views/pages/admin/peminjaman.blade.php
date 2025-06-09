@@ -5,95 +5,164 @@
 @section('content')
   <x-header title="Peminjaman" breadcrumb="Peminjaman > Pengajuan" />
 
+  {{-- Notifikasi sukses --}}
   @if(session('success'))
-    <div class="mb-4 bg-green-100 text-green-700 px-4 py-2 rounded">{{ session('success') }}</div>
+    <div class="mb-4 bg-green-100 text-green-700 px-4 py-2 rounded">
+      {{ session('success') }}
+    </div>
   @endif
 
-  <div class="bg-white rounded-md shadow p-6">
+  {{-- Card utama --}}
+  <div class="bg-white rounded-lg shadow p-6">
     {{-- Tabs --}}
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex gap-4 border-b">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex gap-6 relative">
         <button onclick="showTab('pengajuan')" id="tabPengajuan"
-          class="border-b-2 border-[#003366] font-semibold text-[#003366] px-2 pb-1">Pengajuan</button>
-        <button onclick="showTab('riwayat')" id="tabRiwayat"
-          class="text-gray-500 px-2 pb-1 hover:text-[#003366]">Riwayat</button>
-      </div>
-      <div class="flex gap-2">
-        <input type="text" placeholder="Cari........"
-          class="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-[#003366]">
-        <button class="border px-3 py-1 rounded text-sm text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white">
-          Filter
+          class="pb-2 relative text-sm font-semibold text-[#003366]">
+          <span>Pengajuan</span>
+          <span class="absolute left-0 -bottom-0.5 w-full h-[2px] bg-[#003366] scale-x-100 origin-left transition-transform duration-300" id="underlinePengajuan"></span>
         </button>
-        <a href="{{ route('download.riwayat.admin') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-        Download Riwayat
-        </a>
+
+        <button onclick="showTab('riwayat')" id="tabRiwayat"
+          class="pb-2 relative text-sm font-semibold text-gray-500">
+          <span>Riwayat</span>
+          <span class="absolute left-0 -bottom-0.5 w-full h-[2px] bg-[#003366] scale-x-0 origin-left transition-transform duration-300" id="underlineRiwayat"></span>
+        </button>
       </div>
     </div>
 
-    {{-- Tabel Pengajuan --}}
+    {{-- Tab Pengajuan --}}
     <div id="pengajuanTab">
-      <x-table-pengajuan :items="$pengajuans" />
+      <table class="w-full text-sm text-left">
+        <thead class="text-gray-700 border-b">
+          <tr>
+            <th class="px-4 py-2">No</th>
+            <th class="px-4 py-2">Pengajuan</th>
+            <th class="px-4 py-2">Tanggal</th>
+            <th class="px-4 py-2">Verifikasi BEM</th>
+            <th class="px-4 py-2">Verifikasi Sarpras</th>
+            <th class="px-4 py-2">Organisasi</th>
+            <th class="px-4 py-2">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach ($pengajuans as $index => $item)
+            <tr class="border-b">
+              <td class="px-4 py-2">{{ $index + 1 }}</td>
+              <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
+              <td class="px-4 py-2">{{ $item->tgl_kegiatan }}</td>
+              <td class="px-4 py-2">{{ ucfirst($item->verifikasi_bem) }}</td>
+              <td class="px-4 py-2">{{ ucfirst($item->verifikasi_sarpras) ?? 'Diajukan' }}</td>
+              <td class="px-4 py-2">{{ $item->organisasi }}</td>
+              <td class="px-4 py-2">
+                <div class="flex gap-2 items-center">
+                  <form method="POST" action="{{ route('admin.peminjaman.verifikasi', $item->id) }}">
+                    @csrf
+                    <input type="hidden" name="verifikasi_sarpras" value="diterima">
+                    <button type="submit"
+                      class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded">✔ Terima</button>
+                  </form>
+                  <form method="POST" action="{{ route('admin.peminjaman.verifikasi', $item->id) }}">
+                    @csrf
+                    <input type="hidden" name="verifikasi_sarpras" value="ditangguhkan">
+                    <button type="submit"
+                      class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded">✘ Tangguhkan</button>
+                  </form>
+                  <button type="button" onclick="showDetail({{ $item->id }})"
+                    class="text-blue-600 hover:text-blue-800 text-xs">🔍 Detail</button>
+                </div>
+              </td>
+            </tr>
+          @endforeach
+        </tbody>
+      </table>
     </div>
 
-    {{-- Tabel Riwayat --}}
+    {{-- Tab Riwayat --}}
     <div id="riwayatTab" class="hidden">
       <x-table-riwayat :items="$riwayats" />
     </div>
   </div>
+  @include('components.card-detail-peminjaman')
+@endsection
 
-  <!-- {{-- Popup Detail --}}
-  <div id="popupDetail" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-lg w-full max-w-lg relative">
-      <button onclick="closeDetail()" class="absolute top-2 right-2 text-gray-500 hover:text-black">✖</button>
-      <h3 class="text-lg font-semibold mb-3">Detail Pengajuan</h3>
-      <div id="popupContent" class="text-sm text-gray-700">Loading...</div>
-    </div>
-  </div> -->
-
-  <script>
+@push('scripts')
+<script>
     function showTab(tab) {
-      document.getElementById('pengajuanTab').classList.add('hidden');
-      document.getElementById('riwayatTab').classList.add('hidden');
-      document.getElementById('tabPengajuan').classList.remove('border-b-2', 'text-[#003366]');
-      document.getElementById('tabRiwayat').classList.remove('border-b-2', 'text-[#003366]');
+      const tabs = ['pengajuan', 'riwayat'];
 
-      if (tab === 'pengajuan') {
-        document.getElementById('pengajuanTab').classList.remove('hidden');
-        document.getElementById('tabPengajuan').classList.add('border-b-2', 'text-[#003366]');
-      } else {
-        document.getElementById('riwayatTab').classList.remove('hidden');
-        document.getElementById('tabRiwayat').classList.add('border-b-2', 'text-[#003366]');
-      }
+      tabs.forEach(id => {
+        const tabEl = document.getElementById(`tab${capitalize(id)}`);
+        const underline = document.getElementById(`underline${capitalize(id)}`);
+
+        if (id === tab) {
+          tabEl.classList.remove('text-gray-500');
+          tabEl.classList.add('text-[#003366]');
+          underline.classList.add('scale-x-100');
+          underline.classList.remove('scale-x-0');
+          document.getElementById(`${id}Tab`).classList.remove('hidden');
+        } else {
+          tabEl.classList.add('text-gray-500');
+          tabEl.classList.remove('text-[#003366]');
+          underline.classList.add('scale-x-0');
+          underline.classList.remove('scale-x-100');
+          document.getElementById(`${id}Tab`).classList.add('hidden');
+        }
+      });
     }
 
-    // function showDetail(id) {
-    //   fetch(`/sarpras/peminjaman/${id}/detail`)
-    //     .then(res => res.json())
-    //     .then(data => {
-    //       let fasilitasList = data.detail_peminjaman.map(item => {
-    //         return `<li>${item.fasilitas.nama_barang} — Jumlah: ${item.jumlah}</li>`;
-    //       }).join('');
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
 
-    //       let html = `
-    //         <p><strong>Judul:</strong> ${data.judul_kegiatan}</p>
-    //         <p><strong>Tanggal:</strong> ${data.tgl_kegiatan}</p>
-    //         <p><strong>Waktu:</strong> ${data.waktu_mulai} s/d ${data.waktu_berakhir}</p>
-    //         <p><strong>Aktivitas:</strong> ${data.aktivitas}</p>
-    //         <p><strong>Organisasi:</strong> ${data.organisasi}</p>
-    //         <p><strong>Penanggung Jawab:</strong> ${data.penanggung_jawab}</p>
-    //         <p><strong>Deskripsi:</strong> ${data.deskripsi_kegiatan}</p>
-    //         <p><strong>Status BEM:</strong> ${data.verifikasi_bem}</p>
-    //         <p><strong>Status Sarpras:</strong> ${data.verifikasi_sarpras}</p>
-    //         <p class="mt-2"><strong>Fasilitas Dipinjam:</strong></p>
-    //         <ul class="list-disc list-inside">${fasilitasList}</ul>
-    //       `;
-    //       document.getElementById('popupContent').innerHTML = html;
-    //       document.getElementById('popupDetail').classList.remove('hidden');
-    //     });
-    // }
+    document.addEventListener('DOMContentLoaded', function () {
+      showTab('pengajuan');
+    });
 
-    // function closeDetail() {
-    //   document.getElementById('popupDetail').classList.add('hidden');
-    // }
-  </script>
-@endsection
+  function showDetail(id) {
+    fetch(`/admin/peminjaman/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        const el = id => document.getElementById(id);
+        el('judulKegiatan').textContent = data.judul_kegiatan || '-';
+        el('waktuKegiatan').textContent = `${data.tgl_kegiatan} ${data.waktu_mulai} - ${data.waktu_berakhir}`;
+        el('aktivitas').textContent = data.aktivitas || '-';
+        el('organisasi').textContent = data.organisasi || '-';
+        el('penanggungJawab').textContent = data.penanggung_jawab || '-';
+        el('keterangan').textContent = data.deskripsi_kegiatan || '-';
+        el('ruangan').textContent = data.nama_ruangan || '-';
+        el('linkDokumen').href = data.link_dokumen || '#';
+
+        const perlengkapanList = el('perlengkapan');
+        perlengkapanList.innerHTML = '';
+        if (data.perlengkapan?.length > 0) {
+          data.perlengkapan.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.nama} - ${item.jumlah}`;
+            perlengkapanList.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          li.className = 'italic text-gray-400';
+          li.textContent = 'Tidak ada perlengkapan';
+          perlengkapanList.appendChild(li);
+        }
+
+        el('diskusiArea').textContent = 'belum ada diskusi';
+        document.getElementById('detailModal').classList.remove('hidden');
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Gagal memuat detail peminjaman.');
+      });
+  }
+
+  function closeModal() {
+    document.getElementById('detailModal')?.classList.add('hidden');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    showTab('pengajuan');
+  });
+</script>
+@endpush

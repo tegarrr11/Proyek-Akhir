@@ -45,39 +45,9 @@
 
         {{-- Aksi --}}
         <td class="px-4 py-2 text-center">
-          @php
-            $role = strtolower(auth()->user()->role);
-          @endphp
-
-          @if ($role === 'admin')
-            @if ($vb === 'diterima' && $vs === 'diajukan')
-              <form action="{{ route('admin.peminjaman.approve', $item->id) }}" method="POST" class="inline-block">
-                @csrf
-                <button type="submit" class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">
-                  Approve
-                </button>
-              </form>
-            @elseif ($vb !== 'diterima')
-              <span class="bg-gray-100 text-gray-400 text-xs px-3 py-1 rounded italic">Menunggu BEM</span>
-            @else
-              <span class="bg-gray-100 text-gray-400 text-xs px-3 py-1 rounded italic">Sudah Diproses</span>
-            @endif
-
-          @elseif ($role === 'bem')
-            @if ($vb === 'diajukan')
-              <form action="{{ route('bem.peminjaman.approve', $item->id) }}" method="POST" class="inline-block">
-                @csrf
-                <button type="submit" class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">
-                  Approve
-                </button>
-              </form>
-            @else
-              <span class="bg-gray-100 text-gray-400 text-xs px-3 py-1 rounded italic">Sudah Diverifikasi</span>
-            @endif
-
-          @else
-            <span class="text-gray-400 text-sm italic">Menunggu</span>
-          @endif
+          <button onclick="showDetail({{ $item->id }})" class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">
+            Detail
+          </button>
         </td>
       </tr>
     @empty
@@ -88,52 +58,57 @@
   </tbody>
 </table>
 
+{{-- Modal --}}
 @include('components.card-detail-peminjaman')
 
 <script>
   function showDetail(id) {
     const modal = document.getElementById('detailModal');
-    const content = document.getElementById('modalContent');
-
     modal.classList.remove('hidden');
-    content.innerHTML = 'Memuat data...';
+
+    // Reset
+    ['judulKegiatan', 'waktuKegiatan', 'aktivitas', 'organisasi', 'penanggungJawab', 'keterangan', 'ruangan'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = '';
+    });
+
+    const link = document.getElementById('linkDokumen');
+    if (link) link.href = '#';
+
+    const perlengkapan = document.getElementById('perlengkapan');
+    if (perlengkapan) perlengkapan.innerHTML = '';
 
     fetch(`/peminjaman/${id}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Gagal fetch data');
-        }
-        return response.json();
-      })
+      .then(res => res.json())
       .then(data => {
-        content.innerHTML = `
-          <div class="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p><strong>Judul Kegiatan:</strong> ${data.judul_kegiatan}</p>
-              <p><strong>Waktu Kegiatan:</strong> ${data.tgl_kegiatan} ${data.waktu_mulai} - ${data.waktu_berakhir}</p>
-              <p><strong>Aktivitas:</strong> ${data.aktivitas}</p>
-              <p><strong>Organisasi:</strong> ${data.organisasi}</p>
-              <p><strong>Penanggung Jawab:</strong> ${data.penanggung_jawab}</p>
-              <p><strong>Keterangan:</strong> ${data.deskripsi_kegiatan}</p>
-              <p><strong>Dokumen:</strong> <a href="/storage/${data.dokumen}" target="_blank" class="text-blue-600 underline">Download</a></p>
-            </div>
-            <div>
-              <p><strong>Ruangan:</strong> ${data.nama_ruangan}</p>
-              <p><strong>Perlengkapan:</strong></p>
-              <ul class="list-disc list-inside">
-                ${data.perlengkapan.map(p => `<li>${p.nama} - ${p.jumlah}</li>`).join('')}
-              </ul>
-            </div>
-          </div>
-        `;
+        if (document.getElementById('judulKegiatan')) document.getElementById('judulKegiatan').innerText = data.judul_kegiatan;
+        if (document.getElementById('waktuKegiatan')) document.getElementById('waktuKegiatan').innerText = `${data.tgl_kegiatan} ${data.waktu_mulai} - ${data.waktu_berakhir}`;
+        if (document.getElementById('aktivitas')) document.getElementById('aktivitas').innerText = data.aktivitas;
+        if (document.getElementById('organisasi')) document.getElementById('organisasi').innerText = data.organisasi;
+        if (document.getElementById('penanggungJawab')) document.getElementById('penanggungJawab').innerText = data.penanggung_jawab;
+        if (document.getElementById('keterangan')) document.getElementById('keterangan').innerText = data.deskripsi_kegiatan;
+        if (document.getElementById('ruangan')) document.getElementById('ruangan').innerText = data.nama_ruangan;
+        if (link && data.dokumen) link.href = `/storage/${data.dokumen}`;
+
+        if (Array.isArray(data.perlengkapan)) {
+          data.perlengkapan.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.nama} - ${item.jumlah}`;
+            perlengkapan.appendChild(li);
+          });
+        }
       })
-      .catch(error => {
-        content.innerHTML = `<p class="text-red-500">Gagal memuat data. (${error.message})</p>`;
-        console.error(error);
+      .catch(err => {
+        console.error(err);
+        alert('Gagal memuat detail peminjaman.');
       });
   }
 
   function closeModal() {
-    document.getElementById('detailModal').classList.add('hidden');
+    const modal = document.getElementById('detailModal');
+    modal.classList.add('hidden');
   }
+
+  
 </script>
+

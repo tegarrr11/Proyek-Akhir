@@ -29,6 +29,12 @@ class RuanganSeeder extends Seeder
                 'kapasitas' => '200 orang',
                 'jam_operasional' => '07:00 - 18:00'
             ],
+            [
+                'slug' => 'R.361',
+                'desc' => 'Seminar',
+                'kapasitas' => '70 orang',
+                'jam_operasional' => '07:00 - 18:00'
+            ],
         ];
 
         foreach ($data as $ruangan) {

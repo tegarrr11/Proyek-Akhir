@@ -27,6 +27,16 @@ class BemPeminjamanController extends Controller
         return view('pages.bem.peminjaman', compact('pengajuans', 'riwayats'));
     }
 
+    public function verifikasi(Request $request, $id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+        $peminjaman->verifikasi_bem = $request->verifikasi_bem;
+        $peminjaman->save();
+
+        return redirect()->back()->with('success', 'Status berhasil diperbarui.');
+    }
+
+
     public function approve($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);

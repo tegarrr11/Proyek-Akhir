@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('organisasi');
             $table->string('penanggung_jawab');
             $table->text('deskripsi_kegiatan');
+            $table->string('proposal')->nullable();
+            $table->string('undangan_pembicara')->nullable();
             $table->enum('status', ['menunggu', 'diterima', 'ditolak']);
             $table->foreignId('gedung_id')->constrained('gedungs')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users'); // peminjam

@@ -4,16 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>@yield('title')</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  @yield('head')
+
+  @include('layouts.partials.head')
+
   <meta name="csrf-token" content="{{ csrf_token() }}">
   @if(Auth::check())
-  <meta name="user-id" content="{{ Auth::id() }}">
+    <meta name="user-id" content="{{ Auth::id() }}">
   @endif
-  @vite('resources/js/app.js')
+
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-@yield('scripts')
-<body class="bg-gray-50 h-screen flex flex-col md:flex-row">
+
+<body class=" font-sans bg-gray-50 h-screen flex flex-col md:flex-row">
 
   <!-- Mobile Header -->
   <header class="md:hidden flex justify-between items-center px-4 py-3 bg-white border-b">
@@ -54,31 +56,14 @@
         <a href="{{ route('admin.dashboard') }}"
            class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
            {{ request()->routeIs('admin.dashboard') || request()->routeIs('admin.auditorium') || request()->routeIs('admin.gsg') || request()->routeIs('admin.gor') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100' }}">
-           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" 
-            d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 
-            2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 6zM3.75 15.75A2.25 2.25 0 
-            0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 
-            2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25zM13.5 6a2.25 2.25 0 
-            0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 
-            10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 
-            0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 
-            2.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25z" />
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
           Dashboard
         </a>
 
         <a href="{{ route('admin.fasilitas') }}"
           class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
           {{ request()->routeIs('admin.fasilitas') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100' }}">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" 
-                  d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 
-                  6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 
-                  21h18M12 6.75h.008v.008H12V6.75Z" />
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list-icon lucide-clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
           Fasilitas
         </a>
 
@@ -86,19 +71,8 @@
         <a href="{{ route('admin.peminjaman') }}"
            class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
            {{ request()->routeIs('admin.peminjaman') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100' }}">
-           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" 
-            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 
-            2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 
-            48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 
-            0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 
-            0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 
-            1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 
-            4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 
-            1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
-          </svg>
-          Peminjaman
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history-icon lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          Persetujuan & Riwayat
         </a>
       </nav>
     </div>
@@ -122,7 +96,9 @@
   <main class="flex-1 p-6 overflow-auto">
     @yield('content')
   </main>
-
+  <!-- detail peminjaman -->
+  @include('components.card-detail-peminjaman')
+  
   <!-- Toast Container -->
   <div id="notif-toast" class="fixed bottom-6 right-6 z-50 space-y-2 text-sm"></div>
 
@@ -202,6 +178,70 @@
     });
   </script>
   <script src="https://unpkg.com/alpinejs" defer></script>
+  @stack('scripts')
+  @push('scripts')
+<script>
+  function showTab(tab) {
+    document.getElementById('pengajuanTab').classList.add('hidden');
+    document.getElementById('riwayatTab').classList.add('hidden');
+    document.getElementById('tabPengajuan').classList.remove('border-b-2', 'text-[#003366]');
+    document.getElementById('tabRiwayat').classList.remove('border-b-2', 'text-[#003366]');
+
+    if (tab === 'pengajuan') {
+      document.getElementById('pengajuanTab').classList.remove('hidden');
+      document.getElementById('tabPengajuan').classList.add('border-b-2', 'text-[#003366]');
+    } else {
+      document.getElementById('riwayatTab').classList.remove('hidden');
+      document.getElementById('tabRiwayat').classList.add('border-b-2', 'text-[#003366]');
+    }
+  }
+
+  window.showDetail = function(id) {
+    fetch(`/admin/peminjaman/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        const el = id => document.getElementById(id);
+        el('judulKegiatan').textContent = data.judul_kegiatan || '-';
+        el('waktuKegiatan').textContent = `${data.tgl_kegiatan} ${data.waktu_mulai} - ${data.waktu_berakhir}`;
+        el('aktivitas').textContent = data.aktivitas || '-';
+        el('organisasi').textContent = data.organisasi || '-';
+        el('penanggungJawab').textContent = data.penanggung_jawab || '-';
+        el('keterangan').textContent = data.deskripsi_kegiatan || '-';
+        el('ruangan').textContent = data.nama_ruangan || '-';
+        el('linkDokumen').href = data.link_dokumen || '#';
+
+        const perlengkapanList = el('perlengkapan');
+        perlengkapanList.innerHTML = '';
+        if (data.perlengkapan && data.perlengkapan.length > 0) {
+          data.perlengkapan.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.nama} - ${item.jumlah}`;
+            perlengkapanList.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          li.className = 'italic text-gray-400';
+          li.textContent = 'Tidak ada perlengkapan';
+          perlengkapanList.appendChild(li);
+        }
+
+        el('diskusiArea').textContent = 'belum ada diskusi';
+        document.getElementById('detailModal').classList.remove('hidden');
+      })
+      .catch(err => {
+        alert('Gagal mengambil data detail.');
+        console.error(err);
+      });
+  }
+
+  window.closeModal = function() {
+    const modal = document.getElementById('detailModal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => showTab('pengajuan'));
+</script>
+@endpush
 </body>
 </html>
 
