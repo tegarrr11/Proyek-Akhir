@@ -29,4 +29,5 @@ class Fasilitas extends Model
     {
         return $this->belongsTo(Gedung::class, 'gedung_id');
     }
+
 }

@@ -18,11 +18,13 @@ use App\Http\Controllers\BemPeminjamanController;
 use App\Http\Controllers\AdminPeminjamanController;
 use App\Http\Controllers\KalenderController;
 
+
 // ========== LANDING PAGE ==========
-/* Route::get('/', function () {
+Route::get('/', function () {
     $gedungs = Gedung::all();
 
-    $selectedGedungId = request('gedung_id') ?? $gedungs->first()?->id;
+    $selectedGedungId = request('gedung_id') ?? ($gedungs->first()->id ?? null);
+
     if (!$selectedGedungId) {
         return view('pages.landing', [
             'gedungs' => [],
@@ -39,14 +41,14 @@ use App\Http\Controllers\KalenderController;
                 'id' => $item->id,
                 'title' => $item->organisasi ? "({$item->organisasi})" : '(MAHASISWA)',
                 'start' => "{$item->tgl_kegiatan}T{$item->waktu_mulai}",
-                'end' => "{$item->tgl_kegiatan}T{$item->waktu_berakhir}"
+                'end' => "{$item->tgl_kegiatan}T{$item->waktu_berakhir}",
             ];
         });
 
     return view('pages.landing', compact('gedungs', 'selectedGedungId', 'events'));
-})->name('landing'); */
+})->name('landing');
 
-Route::get('/', fn () => view('auth.login'))->name('login');
+Route::get('/login', fn () => view('auth.login'))->name('login');
 
 Route::get('/quick-login/{role}', function ($role) {
     $user = User::firstOrCreate(
@@ -85,6 +87,9 @@ Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
 Route::get('/bem/dashboard', [BemController::class, 'dashboard']);
 Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('mahasiswa.peminjaman');
 Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
+Route::get('/api/fasilitas-tambahan', function () {
+    return Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
+});
 
 // ========== AUTH GROUP ==========
 Route::middleware(['auth'])->group(function () {
@@ -138,6 +143,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/peminjaman/{id}/approve', [BemPeminjamanController::class, 'approve'])->name('bem.peminjaman.approve');
         Route::get('/peminjaman/{id}/detail', [BemPeminjamanController::class, 'show'])->name('bem.peminjaman.show');
         Route::post('/peminjaman/{id}/verifikasi', [BemPeminjamanController::class, 'verifikasi'])->name('bem.peminjaman.verifikasi');
+        Route::patch('/bem/peminjaman/{id}/terima', [BEMPeminjamanController::class, 'terima'])->name('bem.peminjaman.terima');
     });
 
     // === DOSEN ===

@@ -38,19 +38,20 @@
     display: inline-block;
     margin-bottom: 4px;
     white-space: nowrap;
-    cursor: pointer; /* supaya bisa di-klik */
+    cursor: pointer; 
   }
   .fc-event:hover {
     opacity: 0.9;
   }
 </style>
 
-<div class="bg-white rounded-lg shadow-md p-6">
-  <!-- Header Judul dan Aksi -->
-  <div class="flex justify-between items-center mb-4 pb-4 border-b">
+<div class="bg-white rounded-xl shadow px-4 sm:px-6 md:px-8 lg:px-12 py-6 pb-18">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4 border-b pb-4">
     <h2 class="text-xl font-bold text-gray-800">Kalender</h2>
-    <div class="flex gap-3">
-      <!-- Dropdown Gedung -->
+      <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <div class="h-[2px] bg-gray-200 mb-4"></div>
+      <!-- Dropdown -->
       <form method="GET" action="{{ Request::url() }}">
         <select name="gedung_id"
         onchange="this.form.submit()"
@@ -64,15 +65,6 @@
       </form>
 
       <!-- Tombol Ajukan -->
-        @if(!empty($fromLanding))
-        <a href="{{ route('login') }}"
-              class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded hover:bg-[#002244] transition">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M3 10a7 7 0 1114 0 7 7 0 01-14 0zm6-1V6a1 1 0 112 0v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3z" clip-rule="evenodd" />
-              </svg>
-            Login
-        </a>
-        @else
           <a href="{{ route('peminjaman.create') }}"
             class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -80,7 +72,6 @@
             </svg>
             Ajukan Peminjaman
           </a>
-        @endif
     </div>
   </div>
 
@@ -154,7 +145,7 @@
         const startTime = event.start.substring(11, 16);
         const endTime = event.end.substring(11, 16);
         const role = event.title.split('(').pop()?.replace(')', '').trim().toLowerCase();
-        const isMahasiswa = ['mahasiswa', 'bem', 'blm', 'ukm','hima'].includes(role);
+        const isMahasiswa = ['mahasiswa', 'bem', 'blm', 'ukm','hima','km'].includes(role);
         const labelColor = isMahasiswa ? '#28839D' : '#facc15';
 
         return {

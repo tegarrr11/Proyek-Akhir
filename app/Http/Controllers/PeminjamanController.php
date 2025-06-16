@@ -17,92 +17,115 @@ use Illuminate\Support\Facades\Mail;
 
 class PeminjamanController extends Controller
 {
-    /**
-     * Menampilkan form pengajuan peminjaman.
-     */
-    public function create()
-    {
-        return view('mahasiswa.peminjaman.create');
-    }
+
+public function create(Request $request)
+{
+    $gedungs = Gedung::all();
+    $selectedGedung = Gedung::where('slug', $request->gedung)->first();
+
+    $fasilitasUtama = $selectedGedung
+        ? Fasilitas::where('gedung_id', $selectedGedung->id)->where('stok', '>', 0)->get()
+        : collect();
+
+    $fasilitasLainnya = Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
+
+    return view('pages.mahasiswa.peminjaman.create', compact(
+        'gedungs', 'selectedGedung', 'fasilitasUtama', 'fasilitasLainnya'
+    ));
+}
 
     /**
      * Menyimpan data pengajuan peminjaman ke database.
      */
-public function store(Request $request)
-{
-    $request->validate([
-        'judul_kegiatan' => 'required|string|max:255',
-        'tgl_kegiatan' => 'required|date',
-        'waktu_mulai' => 'required',
-        'waktu_berakhir' => 'required',
-        'aktivitas' => 'required|string|max:255',
-        'organisasi' => 'required|string|max:255',
-        'penanggung_jawab' => 'required|string|max:255',
-        'deskripsi_kegiatan' => 'nullable|string',
-        'gedung' => 'required|string',
-        'barang' => 'required|array',
-        'barang.*.id' => 'required|integer|exists:fasilitas,id',
-        'barang.*.jumlah' => 'required|integer|min:1',
-        'proposal' => 'nullable|mimes:pdf|max:3072',
-        'undangan_pembicara' => 'nullable|mimes:pdf|max:3072',
-    ]);
+    public function store(Request $request)
+    {
+        $request->validate([
+            'judul_kegiatan' => 'required|string|max:255',
+            'tgl_kegiatan' => 'required|date',
+            'waktu_mulai' => 'required',
+            'waktu_berakhir' => 'required',
+            'aktivitas' => 'required|string|max:255',
+            'organisasi' => 'required|string|max:255',
+            'penanggung_jawab' => 'required|string|max:255',
+            'deskripsi_kegiatan' => 'nullable|string',
+            'gedung' => 'required|string',
+            'barang' => 'required|array',
+            'barang.*.id' => 'required|integer|exists:fasilitas,id',
+            'barang.*.jumlah' => 'required|integer|min:1',
+            'proposal' => 'nullable|mimes:pdf|max:3072',
+            'undangan_pembicara' => 'nullable|mimes:pdf|max:3072',
+            'fasilitas_tambahan' => 'nullable|array',
+            'fasilitas_tambahan.*.id' => 'integer|exists:fasilitas,id',
+            'fasilitas_tambahan.*.jumlah' => 'integer|min:1',
+        ]);
 
-    $fileProposal = null;
-    if ($request->hasFile('proposal')) {
-        $fileProposal = $request->file('proposal')->store('proposal', 'public');
-    }
+        $fileProposal = $request->hasFile('proposal')
+            ? $request->file('proposal')->store('proposal', 'public')
+            : null;
 
-    $fileUndangan = null;
-    if ($request->hasFile('undangan_pembicara')) {
-        $fileUndangan = $request->file('undangan_pembicara')->store('undangan', 'public');
-    }
+        $fileUndangan = $request->hasFile('undangan_pembicara')
+            ? $request->file('undangan_pembicara')->store('undangan', 'public')
+            : null;
 
-    // Ambil ID gedung berdasarkan slug
-    $gedung = Gedung::where('slug', $request->gedung)->first();
-    if (!$gedung) {
-        return back()->with('error', 'Gedung tidak ditemukan.');
-    }
-
-    // Simpan data utama peminjaman
-    $peminjaman = Peminjaman::create([
-        'judul_kegiatan' => $request->judul_kegiatan,
-        'tgl_kegiatan' => $request->tgl_kegiatan,
-        'waktu_mulai' => $request->waktu_mulai,
-        'waktu_berakhir' => $request->waktu_berakhir,
-        'aktivitas' => $request->aktivitas,
-        'organisasi' => $request->organisasi,
-        'penanggung_jawab' => $request->penanggung_jawab,
-        'deskripsi_kegiatan' => $request->deskripsi_kegiatan,
-        'status' => 'menunggu',
-        'gedung_id' => $gedung->id,
-        'user_id' => Auth::id(),
-        'proposal' => $fileProposal,
-        'undangan_pembicara' => $fileUndangan,
-
-    ]);
-
-    // Simpan detail barang/fasilitas yang dipinjam
-    foreach ($request->barang as $item) {
-        $fasilitas = Fasilitas::find($item['id']);
-        if ($fasilitas && $item['jumlah'] <= $fasilitas->stok) {
-            DetailPeminjaman::create([
-                'peminjaman_id' => $peminjaman->id,
-                'fasilitas_id' => $fasilitas->id,
-                'jumlah' => $item['jumlah'],
-            ]);
-
-            // Kurangi stok dan update status ketersediaan
-            $fasilitas->decrement('stok', $item['jumlah']);
-            $fasilitas->is_available = $fasilitas->stok > 0;
-            $fasilitas->save();
+        $gedung = Gedung::where('slug', $request->gedung)->first();
+        if (!$gedung) {
+            return back()->with('error', 'Gedung tidak ditemukan.');
         }
-    }
-        // Trigger Notifikasi ke BEM & Admin
+
+        $peminjaman = Peminjaman::create([
+            'judul_kegiatan' => $request->judul_kegiatan,
+            'tgl_kegiatan' => $request->tgl_kegiatan,
+            'waktu_mulai' => $request->waktu_mulai,
+            'waktu_berakhir' => $request->waktu_berakhir,
+            'aktivitas' => $request->aktivitas,
+            'organisasi' => $request->organisasi,
+            'penanggung_jawab' => $request->penanggung_jawab,
+            'deskripsi_kegiatan' => $request->deskripsi_kegiatan,
+            'status' => 'menunggu',
+            'gedung_id' => $gedung->id,
+            'user_id' => Auth::id(),
+            'proposal' => $fileProposal,
+            'undangan_pembicara' => $fileUndangan,
+        ]);
+
+        // Simpan fasilitas utama
+        foreach ($request->barang as $item) {
+            $fasilitas = Fasilitas::find($item['id']);
+            if ($fasilitas && $item['jumlah'] <= $fasilitas->stok) {
+                DetailPeminjaman::create([
+                    'peminjaman_id' => $peminjaman->id,
+                    'fasilitas_id' => $fasilitas->id,
+                    'jumlah' => $item['jumlah'],
+                ]);
+
+                $fasilitas->decrement('stok', $item['jumlah']);
+                $fasilitas->is_available = $fasilitas->stok > 0;
+                $fasilitas->save();
+            }
+        }
+
+        // Simpan fasilitas tambahan
+        if ($request->has('fasilitas_tambahan')) {
+            foreach ($request->fasilitas_tambahan as $item) {
+                $fasilitas = Fasilitas::find($item['id']);
+                if ($fasilitas && $item['jumlah'] <= $fasilitas->stok) {
+                    DetailPeminjaman::create([
+                        'peminjaman_id' => $peminjaman->id,
+                        'fasilitas_id' => $fasilitas->id,
+                        'jumlah' => $item['jumlah'],
+                    ]);
+
+                    $fasilitas->decrement('stok', $item['jumlah']);
+                    $fasilitas->is_available = $fasilitas->stok > 0;
+                    $fasilitas->save();
+                }
+            }
+        }
+        /*Mentrigger notifikasi ke masing masing role */
         NotifikasiHelper::kirimKeRoles(['bem', 'admin'], 'Pengajuan Baru', 'Pengajuan oleh ' . Auth::user()->name);
 
-        return redirect()->route('mahasiswa.peminjaman')->with('success', 'Pengajuan berhasil disimpan.');
+        return redirect()->route('mahasiswa.peminjaman')->with('success', 'Peminjaman berhasil diajukan.');
     }
-
     /**
      * Menampilkan daftar pengajuan dan riwayat peminjaman mahasiswa.
      */
@@ -201,11 +224,11 @@ public function store(Request $request)
     public function show($id)
     {
         $peminjaman = Peminjaman::with([
-            'detailPeminjaman.fasilitas', // jika ada relasi fasilitas
+            'detailPeminjaman.fasilitas', // pastikan relasi ini ada di model
             'gedung'
         ])->findOrFail($id);
 
-        // Validasi jika hanya bisa melihat data miliknya (khusus mahasiswa)
+        // Validasi: mahasiswa hanya bisa akses miliknya
         if (auth()->user()->role === 'mahasiswa' && $peminjaman->user_id !== auth()->id()) {
             abort(403, 'Tidak diizinkan mengakses data ini.');
         }
@@ -220,11 +243,12 @@ public function store(Request $request)
             'penanggung_jawab' => $peminjaman->penanggung_jawab,
             'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
             'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
-            'link_dokumen' => asset('storage/' . $peminjaman->dokumen),
+            'link_dokumen' => $peminjaman->dokumen ? asset('storage/' . $peminjaman->dokumen) : null,
+            
             'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
                 return [
-                    'nama' => $detail->fasilitas->nama ?? '-',
-                    'jumlah' => $detail->jumlah,
+                    'nama' => optional($detail->fasilitas)->nama_barang ?? '-',
+                    'jumlah' => $detail->jumlah ?? 0,
                 ];
             }),
         ]);

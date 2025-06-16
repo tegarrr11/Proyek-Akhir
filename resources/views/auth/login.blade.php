@@ -1,3 +1,4 @@
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,7 @@
   <title>Login - Peminjaman</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#fffff] min-h-screen flex items-center justify-center px-4">
+<body class="font-poppins bg-[#fffff] min-h-screen flex items-center justify-center px-4">
 
   <div class="bg-white p-6 sm:p-8 rounded-xl shadow-md text-center w-full max-w-xs sm:max-w-sm">
   <img src="{{ asset('images/sarpras-logo.png') }}" alt="Logo" class="mx-auto w-40 mb-4">

@@ -11,7 +11,7 @@
         <h1 class="text-xl font-semibold text-[#003366]">Prosedur Peminjaman</h1>
       </div>
       <a href="{{ route('peminjaman.create') }}" 
-        class="bg-[#003366] hover:bg-[#002952] text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+        class="bg-[#003366] hover:bg-[#002952] text-white px-4 py-2 rounded text-sm flex items-center gap-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
         </svg>

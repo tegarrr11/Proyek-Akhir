@@ -17,7 +17,7 @@
 </head>
 
 <body class="bg-gray-50 h-screen flex flex-col md:flex-row">
-
+<div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-30 hidden md:hidden"></div>
   <!-- Mobile Header -->
   <header class="md:hidden flex justify-between items-center px-4 py-3 bg-white border-b">
     <div class="flex items-center gap-4">
@@ -49,10 +49,9 @@
     <!-- Sidebar -->
   <aside id="sidebar" class="w-56 bg-white border-r flex flex-col justify-between md:static fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40">
     <div class="p-6">
-      <div class="text-center mt-12 mb-8 hidden md:block">
-        <img src="{{ asset('images/sarpras-logo.png') }}" alt="Logo" class="w-40 mx-auto mb-2">
+      <div class="text-center mt-4 mb-6 md:mt-12 md:mb-8 block">
+        <img src="{{ asset('images/sarpras-logo.png') }}" alt="Logo" class="w-32 md:w-40 mx-auto mb-2">
       </div>
-
       <nav class="space-y-2">
         <a href="{{ route('mahasiswa.dashboard') }}"
            class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
@@ -102,12 +101,19 @@
 
   <!-- Scripts -->
   <script>
-    const mobileToggle = document.getElementById('sidebarToggleMobile');
-    const sidebar = document.getElementById('sidebar');
+  const mobileToggle = document.getElementById('sidebarToggleMobile');
+  const overlay = document.getElementById('sidebarOverlay');
+  const sidebar = document.getElementById('sidebar');
 
-    mobileToggle?.addEventListener('click', () => {
+  overlay?.addEventListener('click', () => {
+    sidebar.classList.add('-translate-x-full');     // sembunyikan sidebar
+    overlay.classList.add('hidden');                // sembunyikan overlay
+  });
+
+  mobileToggle?.addEventListener('click', () => {
       sidebar.classList.toggle('-translate-x-full');
-    });
+      overlay.classList.toggle('hidden'); 
+  });
 
     function notifDropdown() {
       return {

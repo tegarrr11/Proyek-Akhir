@@ -42,9 +42,6 @@
     </div>
   </div>
 
-  {{-- Komponen Modal --}}
-  @include('components.card-detail-peminjaman')
-
   {{-- Script --}}
   <script>
     function showTab(tab) {
@@ -78,47 +75,47 @@
       showTab('pengajuan');
     });
 
-  function showModal(id) {
-    fetch(`/admin/peminjaman/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        const el = id => document.getElementById(id);
-        el('judulKegiatan').textContent = data.judul_kegiatan || '-';
-        el('waktuKegiatan').textContent = `${data.tgl_kegiatan} ${data.waktu_mulai} - ${data.waktu_berakhir}`;
-        el('aktivitas').textContent = data.aktivitas || '-';
-        el('organisasi').textContent = data.organisasi || '-';
-        el('penanggungJawab').textContent = data.penanggung_jawab || '-';
-        el('keterangan').textContent = data.deskripsi_kegiatan || '-';
-        el('ruangan').textContent = data.nama_ruangan || '-';
-        el('linkDokumen').href = data.link_dokumen || '#';
+    function showModal(id) {
+      fetch(`/admin/peminjaman/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          const el = id => document.getElementById(id);
+          el('judulKegiatan').textContent = data.judul_kegiatan || '-';
+          el('waktuKegiatan').textContent = `${data.tgl_kegiatan} ${data.waktu_mulai} - ${data.waktu_berakhir}`;
+          el('aktivitas').textContent = data.aktivitas || '-';
+          el('organisasi').textContent = data.organisasi || '-';
+          el('penanggungJawab').textContent = data.penanggung_jawab || '-';
+          el('keterangan').textContent = data.deskripsi_kegiatan || '-';
+          el('ruangan').textContent = data.nama_ruangan || '-';
+          el('linkDokumen').href = data.link_dokumen || '#';
 
-        const perlengkapanList = el('perlengkapan');
-        perlengkapanList.innerHTML = '';
-        if (data.perlengkapan?.length > 0) {
-          data.perlengkapan.forEach(item => {
+          const perlengkapanList = el('perlengkapan');
+          perlengkapanList.innerHTML = '';
+          if (data.perlengkapan?.length > 0) {
+            data.perlengkapan.forEach(item => {
+              const li = document.createElement('li');
+              li.textContent = `${item.nama} - ${item.jumlah}`;
+              perlengkapanList.appendChild(li);
+            });
+          } else {
             const li = document.createElement('li');
-            li.textContent = `${item.nama} - ${item.jumlah}`;
+            li.className = 'italic text-gray-400';
+            li.textContent = 'Tidak ada perlengkapan';
             perlengkapanList.appendChild(li);
-          });
-        } else {
-          const li = document.createElement('li');
-          li.className = 'italic text-gray-400';
-          li.textContent = 'Tidak ada perlengkapan';
-          perlengkapanList.appendChild(li);
-        }
+          }
 
-        el('diskusiArea').textContent = 'belum ada diskusi';
-        document.getElementById('detailModal').classList.remove('hidden');
-      })
-      .catch(err => {
-        console.error(err);
-        alert('Gagal memuat detail peminjaman.');
-      });
-  }
+          el('diskusiArea').textContent = 'belum ada diskusi';
+          document.getElementById('detailModal').classList.remove('hidden');
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Gagal memuat detail peminjaman.');
+        });
+    }
 
-  function closeModal() {
-    document.getElementById('detailModal')?.classList.add('hidden');
-  }
+    function closeModal() {
+      document.getElementById('detailModal')?.classList.add('hidden');
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       showTab('pengajuan');
