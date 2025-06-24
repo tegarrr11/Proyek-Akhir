@@ -17,16 +17,28 @@
         <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
         <td class="px-4 py-2">{{ $item->created_at->format('d/m/Y') }}</td>
         <td class="px-4 py-2">
-          <span class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">Diterima</span>
+          <span class="px-3 py-1 text-xs rounded
+            @if($item->verifikasi_bem === 'diterima')
+              bg-green-500 text-white
+            @elseif($item->verifikasi_bem === 'ditolak')
+              bg-red-100 text-red-600
+            @else
+              bg-yellow-500 text-white
+            @endif">
+            {{ ucfirst($item->verifikasi_bem) }}
+          </span>
         </td>
         <td class="px-4 py-2">
-          @if ($item->verifikasi_sarpras === 'diterima')
-            <span class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">Diterima</span>
-          @elseif ($item->verifikasi_sarpras === 'ditolak')
-            <span class="bg-green-100 text-red-800 text-xs font-semibold px-3 py-1 rounded hover:bg-red-200 transition">Ditolak</span>
-          @else
-            <span class="bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yello-600">Proses</span>
-          @endif
+          <span class="px-3 py-1 text-xs rounded
+            @if($item->verifikasi_sarpras === 'diterima')
+              bg-green-500 text-white
+            @elseif($item->verifikasi_sarpras === 'ditolak')
+              bg-red-100 text-red-600
+            @else
+              bg-yellow-500 text-white
+            @endif">
+            {{ ucfirst($item->verifikasi_sarpras) }}
+          </span>
         </td>
         <td class="px-4 py-2">{{ $item->organisasi }}</td>
         <td class="px-4 py-2">
@@ -42,54 +54,6 @@
     @endforelse
   </tbody>
 </table>
-
-<script>
-  function showDetail(id) {
-    const modal = document.getElementById('detailModal');
-    const content = document.getElementById('modalContent');
-
-    modal.classList.remove('hidden');
-    content.innerHTML = 'Memuat data...';
-
-    fetch(`/peminjaman/${id}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Gagal fetch data');
-        }
-        return response.json();
-      })
-      .then(data => {
-        content.innerHTML = `
-          <div class="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p><strong>Judul Kegiatan:</strong> ${data.judul_kegiatan}</p>
-              <p><strong>Waktu Kegiatan:</strong> ${data.tgl_kegiatan} ${data.waktu_mulai} - ${data.waktu_berakhir}</p>
-              <p><strong>Aktivitas:</strong> ${data.aktivitas}</p>
-              <p><strong>Organisasi:</strong> ${data.organisasi}</p>
-              <p><strong>Penanggung Jawab:</strong> ${data.penanggung_jawab}</p>
-              <p><strong>Keterangan:</strong> ${data.deskripsi_kegiatan}</p>
-              <p><strong>Dokumen:</strong> <a href="/storage/${data.dokumen}" target="_blank" class="text-blue-600 underline">Download</a></p>
-            </div>
-            <div>
-              <p><strong>Ruangan:</strong> ${data.nama_ruangan}</p>
-              <p><strong>Perlengkapan:</strong></p>
-              <ul class="list-disc list-inside">
-                ${data.perlengkapan.map(p => `<li>${p.nama} - ${p.jumlah}</li>`).join('')}
-              </ul>
-            </div>
-          </div>
-        `;
-      })
-      .catch(error => {
-        content.innerHTML = `<p class="text-red-500">Gagal memuat data. (${error.message})</p>`;
-        console.error(error);
-      });
-  }
-
-  function closeModal() {
-    document.getElementById('detailModal').classList.add('hidden');
-  }
-</script>
 
 
 

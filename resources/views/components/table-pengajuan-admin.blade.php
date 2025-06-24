@@ -17,7 +17,14 @@
         <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
         <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->tgl_kegiatan)->format('d/m/Y') }}</td>
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600' }}">
+          <span class="px-3 py-1 text-xs rounded
+            @if($item->verifikasi_bem === 'diterima')
+              bg-green-500 text-white
+            @elseif($item->verifikasi_bem === 'ditolak')
+              bg-red-100 text-red-600
+            @else
+              bg-yellow-500 text-white
+            @endif">
             {{ ucfirst($item->verifikasi_bem) }}
           </span>
         </td>
@@ -25,10 +32,10 @@
           <span class="px-3 py-1 text-xs rounded
             @if($item->verifikasi_sarpras === 'diterima')
               bg-green-500 text-white
-            @elseif($item->verifikasi_sarpras === 'ditangguhkan')
+            @elseif($item->verifikasi_sarpras === 'ditolak')
               bg-red-100 text-red-600
             @else
-              bg-gray-200 text-gray-600
+              bg-yellow-500 text-white
             @endif">
             {{ ucfirst($item->verifikasi_sarpras) }}
           </span>
@@ -106,15 +113,16 @@
         </ul>
 
         <p class="font-semibold text-[#1e2d5e]">Dokumen</p>
-        <a id="linkDokumen" href="#" target="_blank" class="text-blue-600 underline text-sm">Lihat Proposal</a>
+        <a id="linkDokumen" href="#" class="text-blue-600 underline text-sm">Lihat Proposal</a>
+        <span id="dokumenNotFound" class="text-gray-400 italic hidden">Tidak ada dokumen</span>
       </div>
 
       <div class="w-full md:w-1/3 border border-gray-200 rounded-lg p-4 flex flex-col">
         <p class="font-semibold text-[#1e2d5e] mb-1">Diskusi</p>
         <div id="diskusiArea" class="text-sm text-gray-400 italic flex-1">belum ada diskusi</div>
         <div class="mt-4">
-          <input type="text" placeholder="Ketikkan di sini" class="w-full border rounded px-3 py-2 text-sm mb-2" disabled>
-          <button class="bg-gray-300 text-white text-sm px-4 py-2 rounded cursor-not-allowed w-full" disabled>Kirim</button>
+          <input id="inputDiskusi" type="text" placeholder="Ketikkan di sini" class="w-full border rounded px-3 py-2 text-sm mb-2">
+          <button id="btnKirimDiskusi" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded w-full">Kirim</button>
         </div>
       </div>
     </div>
@@ -127,7 +135,42 @@
 
 @push('scripts')
 <script>
+  let currentPeminjamanId = null;
+
+  function bindDiskusiHandler() {
+    const btn = document.getElementById('btnKirimDiskusi');
+    if (!btn) return;
+    btn.onclick = function() {
+      const pesan = document.getElementById('inputDiskusi').value.trim();
+      if (!pesan || !currentPeminjamanId) return;
+      btn.setAttribute('disabled', true);
+      let csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      if (!csrf) {
+        const tokenInput = document.querySelector('input[name=_token]');
+        if (tokenInput) csrf = tokenInput.value;
+      }
+      fetch('/diskusi', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrf,
+        },
+        body: JSON.stringify({ peminjaman_id: currentPeminjamanId, pesan })
+      })
+      .then(res => res.json())
+      .then(resp => {
+        if (resp.success) {
+          showDetail(currentPeminjamanId); // refresh chat
+        } else {
+          alert(resp.error || 'Gagal mengirim pesan.');
+        }
+      })
+      .catch(() => alert('Gagal mengirim pesan.'));
+    };
+  }
+
   function showDetail(id) {
+    currentPeminjamanId = id;
     fetch(`/admin/peminjaman/${id}`)
       .then(res => res.json())
       .then(data => {
@@ -148,7 +191,43 @@
         el('penanggungJawab').textContent = data.penanggung_jawab || '-';
         el('keterangan').textContent = data.deskripsi_kegiatan || '-';
         el('ruangan').textContent = data.nama_ruangan || '-';
-        el('linkDokumen').href = data.link_dokumen || '#';
+
+        // Update dokumen link to use secure download route if dokumen exists
+        if (data.link_dokumen === 'ada') {
+          let prefix = window.location.pathname.split('/')[1];
+          if (!['admin','mahasiswa','bem','dosen','staff'].includes(prefix)) prefix = '';
+          let downloadUrl = prefix ? `/${prefix}/peminjaman/download-proposal/${data.id}` : `/peminjaman/download-proposal/${data.id}`;
+          el('linkDokumen').href = downloadUrl;
+          el('linkDokumen').onclick = function(e) {
+            e.preventDefault();
+            fetch(downloadUrl, {
+              method: 'GET',
+              credentials: 'same-origin',
+            })
+            .then(response => {
+              if (!response.ok) throw new Error('Gagal download dokumen');
+              return response.blob();
+            })
+            .then(blob => {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'proposal.pdf';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            })
+            .catch(() => alert('Gagal download dokumen.'));
+          };
+          el('linkDokumen').classList.remove('pointer-events-none', 'text-gray-400');
+          el('dokumenNotFound').classList.add('hidden');
+        } else {
+          el('linkDokumen').href = '#';
+          el('linkDokumen').onclick = null;
+          el('linkDokumen').classList.add('pointer-events-none', 'text-gray-400');
+          el('dokumenNotFound').classList.remove('hidden');
+        }
 
         const perlengkapanList = el('perlengkapan');
         perlengkapanList.innerHTML = '';
@@ -165,8 +244,22 @@
           perlengkapanList.appendChild(li);
         }
 
-        el('diskusiArea').textContent = 'belum ada diskusi';
+        // Diskusi
+        let diskusiHtml = 'belum ada diskusi';
+        if (Array.isArray(data.diskusi) && data.diskusi.length > 0) {
+          diskusiHtml = '';
+          data.diskusi.forEach(d => {
+            diskusiHtml += `<div class='mb-1'><span class='font-semibold text-xs text-blue-700'>${d.role}:</span> <span>${d.pesan}</span></div>`;
+          });
+        }
+        document.getElementById('diskusiArea').innerHTML = diskusiHtml;
+        document.getElementById('inputDiskusi').value = '';
+        document.getElementById('inputDiskusi').removeAttribute('disabled');
+        document.getElementById('btnKirimDiskusi').removeAttribute('disabled');
+        document.getElementById('btnKirimDiskusi').classList.remove('bg-gray-300', 'cursor-not-allowed');
+        document.getElementById('btnKirimDiskusi').classList.add('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
         document.getElementById('detailModal').classList.remove('hidden');
+        bindDiskusiHandler(); // <--- re-bind setiap modal dibuka
       })
       .catch(err => {
         console.error(err);

@@ -13,7 +13,7 @@
   }
 </style>
 
-<x-header title="Peminjaman" breadcrumb="Peminjaman > Ajukan Peminjaman" />
+<x-header title="Peminjaman" breadcrumb="Peminjaman > Mahasiswa - Ajukan Peminjaman" />
 
 <form id="peminjamanForm" method="POST" action="{{ route('mahasiswa.peminjaman.store') }}" enctype="multipart/form-data" onsubmit="return validateAndSubmit(event)">
   @csrf

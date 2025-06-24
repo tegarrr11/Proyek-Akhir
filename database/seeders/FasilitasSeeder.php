@@ -37,6 +37,13 @@ class FasilitasSeeder extends Seeder
             'jam_operasional' => '07:00 - 18:00'
         ]);
 
+        $r361 = Gedung::create([
+            'slug' => 'r361',
+            'nama' => 'R.361',
+            'kapasitas' => 40,
+            'jam_operasional' => '07:00 - 18:00'
+        ]);
+
         // Data fasilitas
         $items = [
             ['gedung_id' => $auditorium->id, 'nama_barang' => 'Kursi', 'stok' => 100],
@@ -49,6 +56,10 @@ class FasilitasSeeder extends Seeder
 
             ['gedung_id' => $gor->id, 'nama_barang' => 'Kursi Penonton', 'stok' => 200],
             ['gedung_id' => $gor->id, 'nama_barang' => 'Matras', 'stok' => 15],
+
+            ['gedung_id' => $r361->id, 'nama_barang' => 'Kursi', 'stok' => 40],
+            ['gedung_id' => $r361->id, 'nama_barang' => 'Meja', 'stok' => 10],
+            ['gedung_id' => $r361->id, 'nama_barang' => 'Proyektor', 'stok' => 1],
         ];
 
         foreach ($items as $item) {

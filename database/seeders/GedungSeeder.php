@@ -46,6 +46,15 @@ class GedungSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'slug' => 'r361',
+                'nama' => 'R.361',
+                'deskripsi' => 'Ruang kelas 361',
+                'kapasitas' => 40,
+                'jam_operasional' => '07:00 - 18:00',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }

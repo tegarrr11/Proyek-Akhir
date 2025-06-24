@@ -43,53 +43,5 @@
   </tbody>
 </table>
 
-<script>
-  function showDetail(id) {
-    const modal = document.getElementById('detailModal');
-    const content = document.getElementById('modalContent');
-
-    modal.classList.remove('hidden');
-    content.innerHTML = 'Memuat data...';
-
-    fetch(`/peminjaman/${id}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Gagal fetch data');
-        }
-        return response.json();
-      })
-      .then(data => {
-        content.innerHTML = `
-          <div class="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p><strong>Judul Kegiatan:</strong> ${data.judul_kegiatan}</p>
-              <p><strong>Waktu Kegiatan:</strong> ${data.tgl_kegiatan} ${data.waktu_mulai} - ${data.waktu_berakhir}</p>
-              <p><strong>Aktivitas:</strong> ${data.aktivitas}</p>
-              <p><strong>Organisasi:</strong> ${data.organisasi}</p>
-              <p><strong>Penanggung Jawab:</strong> ${data.penanggung_jawab}</p>
-              <p><strong>Keterangan:</strong> ${data.deskripsi_kegiatan}</p>
-              <p><strong>Dokumen:</strong> <a href="/storage/${data.dokumen}" target="_blank" class="text-blue-600 underline">Download</a></p>
-            </div>
-            <div>
-              <p><strong>Ruangan:</strong> ${data.nama_ruangan}</p>
-              <p><strong>Perlengkapan:</strong></p>
-              <ul class="list-disc list-inside">
-                ${data.perlengkapan.map(p => `<li>${p.nama} - ${p.jumlah}</li>`).join('')}
-              </ul>
-            </div>
-          </div>
-        `;
-      })
-      .catch(error => {
-        content.innerHTML = `<p class="text-red-500">Gagal memuat data. (${error.message})</p>`;
-        console.error(error);
-      });
-  }
-
-  function closeModal() {
-    document.getElementById('detailModal').classList.add('hidden');
-  }
-</script>
-
 
 

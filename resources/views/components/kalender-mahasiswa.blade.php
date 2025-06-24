@@ -65,16 +65,36 @@
       </form>
 
       <!-- Tombol Ajukan -->
-          <a href="{{ route('peminjaman.create') }}"
-            class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            Ajukan Peminjaman
-          </a>
+      @php $user = auth()->user(); @endphp
+      @if($user && $user->role === 'admin')
+        <a href="{{ route('admin.peminjaman.create') }}"
+          class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          Ajukan Peminjaman
+        </a>
+      @elseif($user && $user->role === 'dosen')
+        <a href="{{ route('dosen.peminjaman.create') }}"
+          class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          Ajukan Peminjaman
+        </a>
+      @elseif($user && $user->role === 'mahasiswa')
+        <a href="{{ route('peminjaman.create') }}"
+          class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          Ajukan Peminjaman
+        </a>
+      @else
+        {{-- Agar struktur if-elseif-else tetap valid, else kosong --}}
+      @endif
     </div>
   </div>
-
 <!-- Legend Status -->
 <div class="flex items-center gap-6 text-sm text-gray-600 mb-4">
   {{-- Mahasiswa --}}
@@ -98,15 +118,19 @@
   @include('components.card-detail-kalender')
 </div>
 
+@push('head')
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
+@endpush
+
 @once
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const calendarEl = document.getElementById('calendar');
     const events = @json($events);
-
-     console.log("Events loaded:", @json($events));
+    console.log('FullCalendar script loaded', events, calendarEl); // DEBUG
 
     function formatTanggal(tanggal) {
       const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -126,28 +150,47 @@
       },
       eventDisplay: 'block',
       displayEventTime: false,
-
       eventClick: function(info) {
-        fetch(`/mahasiswa/peminjaman/${info.event.id}`)
+        // Tentukan endpoint detail berdasarkan role, fallback ke mahasiswa jika tidak ada user
+        let detailUrl = '';
+        @php $user = auth()->user(); @endphp
+        @if($user && $user->role === 'dosen')
+          detailUrl = `/dosen/peminjaman/${info.event.id}`;
+        @elseif($user && $user->role === 'admin')
+          detailUrl = `/admin/peminjaman/${info.event.id}`;
+        @elseif($user && $user->role === 'bem')
+          detailUrl = `/bem/peminjaman/${info.event.id}`;
+        @else
+          detailUrl = `/mahasiswa/peminjaman/${info.event.id}`;
+        @endif
+        fetch(detailUrl)
           .then(res => res.json())
           .then(data => {
             showDetailModal({
-              organisasi: data.organisasi,
-              tanggal: formatTanggal(data.tgl_kegiatan),
-              kegiatan: data.judul_kegiatan,
-              jam: `${data.waktu_mulai} - ${data.waktu_berakhir}`,
-              jenis: data.keterangan ?? '-'
+              organisasi: data.organisasi || '-',
+              tanggal: data.tgl_kegiatan ? formatTanggal(data.tgl_kegiatan) : '-',
+              kegiatan: data.judul_kegiatan || '-',
+              jam: (data.waktu_mulai && data.waktu_berakhir) ? `${data.waktu_mulai} - ${data.waktu_berakhir}` : '-',
+              jenis: data.keterangan ?? data.jenis ?? '-'
+            });
+          })
+          .catch(() => {
+            showDetailModal({
+              organisasi: '-',
+              tanggal: '-',
+              kegiatan: '-',
+              jam: '-',
+              jenis: '-'
             });
           });
       },
-
-      events: @json($events).map(event => {
+      events: events.map(event => {
         const startTime = event.start.substring(11, 16);
         const endTime = event.end.substring(11, 16);
         const role = event.title.split('(').pop()?.replace(')', '').trim().toLowerCase();
         const isMahasiswa = ['mahasiswa', 'bem', 'blm', 'ukm','hima','km'].includes(role);
-        const labelColor = isMahasiswa ? '#28839D' : '#facc15';
-
+        const isStaff = ['staff', 'admin'].includes(role);
+        const labelColor = isMahasiswa ? '#28839D' : (isStaff ? '#facc15' : '#facc15');
         return {
           id: event.id,
           title: `${startTime} - ${endTime} (${role.toUpperCase()})`,
@@ -157,7 +200,6 @@
         };
       })
     });
-
     calendar.render();
   });
 </script>

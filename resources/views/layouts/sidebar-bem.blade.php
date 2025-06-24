@@ -6,7 +6,7 @@
   <title>@yield('title')</title>
 
   @include('layouts.partials.head')
-  @yield('head')
+  @stack('head')
 
   <meta name="csrf-token" content="{{ csrf_token() }}">
   @if(Auth::check())

@@ -84,8 +84,14 @@ public function create(Request $request)
             'status' => 'menunggu',
             'gedung_id' => $gedung->id,
             'user_id' => Auth::id(),
+            'jenis_kegiatan' => $request->jenis_kegiatan ?? null, // pastikan terisi jika ada
             'proposal' => $fileProposal,
             'undangan_pembicara' => $fileUndangan,
+            // Tambahan untuk mahasiswa agar workflow berjalan benar
+            'verifikasi_bem' => 'diajukan',
+            'verifikasi_sarpras' => 'diajukan',
+            'status_peminjaman' => null,
+            'status_pengembalian' => null,
         ]);
 
         // Simpan fasilitas utama
@@ -224,8 +230,9 @@ public function create(Request $request)
     public function show($id)
     {
         $peminjaman = Peminjaman::with([
-            'detailPeminjaman.fasilitas', // pastikan relasi ini ada di model
-            'gedung'
+            'detailPeminjaman.fasilitas',
+            'gedung',
+            'diskusi.user',
         ])->findOrFail($id);
 
         // Validasi: mahasiswa hanya bisa akses miliknya
@@ -234,6 +241,7 @@ public function create(Request $request)
         }
 
         return response()->json([
+            'id' => $peminjaman->id,
             'judul_kegiatan' => $peminjaman->judul_kegiatan,
             'tgl_kegiatan' => $peminjaman->tgl_kegiatan,
             'waktu_mulai' => $peminjaman->waktu_mulai,
@@ -243,12 +251,20 @@ public function create(Request $request)
             'penanggung_jawab' => $peminjaman->penanggung_jawab,
             'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
             'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
-            'link_dokumen' => $peminjaman->dokumen ? asset('storage/' . $peminjaman->dokumen) : null,
-            
+            'link_dokumen' => $peminjaman->proposal ? 'ada' : null,
             'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
                 return [
                     'nama' => optional($detail->fasilitas)->nama_barang ?? '-',
                     'jumlah' => $detail->jumlah ?? 0,
+                ];
+            }),
+            'diskusi' => $peminjaman->diskusi->map(function($d) {
+                return [
+                    'id' => $d->id,
+                    'role' => $d->role,
+                    'pesan' => $d->pesan,
+                    'user' => $d->user->name ?? '-',
+                    'created_at' => $d->created_at->toDateTimeString(),
                 ];
             }),
         ]);
@@ -261,4 +277,37 @@ public function create(Request $request)
     }
 
 
+    public function downloadProposal($id)
+    {
+        \Log::info('DOWNLOAD_PROPOSAL_ATTEMPT', [
+            'user' => auth()->user(),
+            'session_id' => session()->getId(),
+            'route' => request()->path(),
+            'cookies' => request()->cookies->all(),
+        ]);
+        $peminjaman = Peminjaman::findOrFail($id);
+        $user = auth()->user();
+        if (!$user) {
+            \Log::warning('DOWNLOAD_PROPOSAL_FORBIDDEN_NO_USER', ['id' => $id]);
+            return response('Session expired or not authenticated.', 401);
+        }
+        // Hanya mahasiswa pemilik atau admin/bem/dosen yang boleh download
+        if (
+            ($user->role === 'mahasiswa' && $peminjaman->user_id !== $user->id)
+        ) {
+            \Log::warning('DOWNLOAD_PROPOSAL_FORBIDDEN_UNAUTHORIZED', ['user_id' => $user->id, 'role' => $user->role, 'peminjaman_user_id' => $peminjaman->user_id]);
+            abort(403, 'Tidak diizinkan mengakses file ini.');
+        }
+        if (!$peminjaman->proposal) {
+            \Log::warning('DOWNLOAD_PROPOSAL_NOT_FOUND', ['id' => $id]);
+            abort(404, 'Dokumen tidak ditemukan');
+        }
+        $path = storage_path('app/public/' . $peminjaman->proposal);
+        if (!file_exists($path)) {
+            \Log::warning('DOWNLOAD_PROPOSAL_FILE_NOT_FOUND', ['path' => $path]);
+            abort(404, 'File tidak ditemukan');
+        }
+        \Log::info('DOWNLOAD_PROPOSAL_SUCCESS', ['user_id' => $user->id, 'role' => $user->role, 'file' => $path]);
+        return response()->download($path);
+    }
 }

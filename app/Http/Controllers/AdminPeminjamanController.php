@@ -8,18 +8,35 @@ use App\Helpers\NotifikasiHelper;
 
 class AdminPeminjamanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $gedungId = $request->get('gedung_id');
         $pengajuans = Peminjaman::with('user')
             ->where('verifikasi_sarpras', 'diajukan')
             ->where('verifikasi_bem', 'diterima')
-            ->latest()
-            ->get();
+            ->whereHas('user', function($q) {
+                $q->where('role', '!=', 'admin'); // Hanya non-admin
+            })
+            ->latest();
 
-        $riwayats = Peminjaman::with('user')
-            ->where('verifikasi_sarpras', 'diterima')
-            ->latest()
-            ->get();
+        $riwayats = Peminjaman::with('user', 'gedung')
+            ->where(function($query) use ($gedungId) {
+                $query->where('verifikasi_sarpras', 'diterima')
+                      ->orWhere(function($q) {
+                          $q->where('verifikasi_sarpras', 'diajukan')
+                            ->whereHas('user', function($q2) {
+                                $q2->where('role', 'admin');
+                            });
+                      });
+                if ($gedungId) {
+                    $query->where('gedung_id', $gedungId);
+                }
+            });
+        if ($gedungId) {
+            $riwayats = $riwayats->where('gedung_id', $gedungId);
+        }
+        $pengajuans = $pengajuans->get();
+        $riwayats = $riwayats->latest()->get();
 
         return view('pages.admin.peminjaman', compact('pengajuans', 'riwayats'));
     }
@@ -55,9 +72,10 @@ class AdminPeminjamanController extends Controller
 
     public function show($id)
     {
-        $peminjaman = Peminjaman::with(['detailPeminjaman.fasilitas', 'gedung', 'user'])->findOrFail($id);
+        $peminjaman = Peminjaman::with(['detailPeminjaman.fasilitas', 'gedung', 'user', 'diskusi.user'])->findOrFail($id);
 
         return response()->json([
+            'id' => $peminjaman->id,
             'judul_kegiatan' => $peminjaman->judul_kegiatan,
             'tgl_kegiatan' => $peminjaman->tgl_kegiatan,
             'waktu_mulai' => $peminjaman->waktu_mulai,
@@ -66,7 +84,7 @@ class AdminPeminjamanController extends Controller
             'organisasi' => $peminjaman->organisasi,
             'penanggung_jawab' => $peminjaman->penanggung_jawab,
             'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
-            'link_dokumen' => asset('storage/proposal/' . $peminjaman->proposal),
+            'link_dokumen' => $peminjaman->proposal ? 'ada' : null,
             'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
             'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
                 return [
@@ -74,6 +92,72 @@ class AdminPeminjamanController extends Controller
                     'jumlah' => $detail->jumlah,
                 ];
             }),
+            'diskusi' => $peminjaman->diskusi->map(function($d) {
+                return [
+                    'id' => $d->id,
+                    'role' => $d->role,
+                    'pesan' => $d->pesan,
+                    'user' => $d->user->name ?? '-',
+                    'created_at' => $d->created_at->toDateTimeString(),
+                ];
+            }),
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        // Validasi sesuai kebutuhan admin
+        $request->validate([
+            'judul_kegiatan' => 'required|string|max:255',
+            'tgl_kegiatan' => 'required|date',
+            'waktu_mulai' => 'required',
+            'waktu_berakhir' => 'required',
+            'aktivitas' => 'required|string|max:255',
+            'deskripsi_kegiatan' => 'nullable|string',
+            'gedung' => 'required|string',
+            // Untuk admin, barang tidak wajib
+        ]);
+
+        $gedung = \App\Models\Gedung::where('slug', $request->gedung)->first();
+        if (!$gedung) {
+            return back()->with('error', 'Gedung tidak ditemukan.');
+        }
+
+        $peminjaman = \App\Models\Peminjaman::create([
+            'judul_kegiatan' => $request->judul_kegiatan,
+            'tgl_kegiatan' => $request->tgl_kegiatan,
+            'waktu_mulai' => $request->waktu_mulai,
+            'waktu_berakhir' => $request->waktu_berakhir,
+            'aktivitas' => $request->aktivitas,
+            'deskripsi_kegiatan' => $request->deskripsi_kegiatan,
+            'gedung_id' => $gedung->id,
+            'user_id' => auth()->id(),
+            'status' => 'diterima', // pastikan status diterima
+            'verifikasi_bem' => 'diterima',
+            'verifikasi_sarpras' => 'diterima',
+            'organisasi' => $request->organisasi ?? '-',
+            'penanggung_jawab' => $request->penanggung_jawab ?? '-',
+            'status_peminjaman' => 'ambil', // status_peminjaman juga langsung aktif
+            'status_pengembalian' => 'proses', // status_pengembalian default proses
+        ]);
+
+        // Jika ada barang, simpan detail peminjaman
+        if ($request->has('barang') && is_array($request->barang)) {
+            foreach ($request->barang as $item) {
+                $fasilitas = \App\Models\Fasilitas::find($item['id']);
+                if ($fasilitas && $item['jumlah'] <= $fasilitas->stok) {
+                    \App\Models\DetailPeminjaman::create([
+                        'peminjaman_id' => $peminjaman->id,
+                        'fasilitas_id' => $fasilitas->id,
+                        'jumlah' => $item['jumlah'],
+                    ]);
+                    $fasilitas->decrement('stok', $item['jumlah']);
+                    $fasilitas->is_available = $fasilitas->stok > 0;
+                    $fasilitas->save();
+                }
+            }
+        }
+
+        return redirect()->route('admin.peminjaman')->with('success', 'Peminjaman berhasil diajukan.');
     }
 }

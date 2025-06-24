@@ -16,6 +16,9 @@ class BemPeminjamanController extends Controller
     {
         $pengajuans = Peminjaman::with('user')
             ->whereRaw("LOWER(verifikasi_bem) = 'diajukan'")
+            ->whereHas('user', function($q) {
+                $q->where('role', '!=', 'admin'); // Hanya non-admin
+            })
             ->latest()
             ->get();
 
@@ -56,26 +59,26 @@ class BemPeminjamanController extends Controller
 
     public function show($id)
     {
-    $peminjaman = Peminjaman::with(['detailPeminjaman.fasilitas', 'gedung', 'user'])
-        ->findOrFail($id);
+        $peminjaman = Peminjaman::with(['detailPeminjaman.fasilitas', 'gedung', 'user'])->findOrFail($id);
 
-    return response()->json([
-        'judul_kegiatan' => $peminjaman->judul_kegiatan,
-        'tgl_kegiatan' => $peminjaman->tgl_kegiatan,
-        'waktu_mulai' => $peminjaman->waktu_mulai,
-        'waktu_berakhir' => $peminjaman->waktu_berakhir,
-        'aktivitas' => $peminjaman->aktivitas,
-        'organisasi' => $peminjaman->organisasi,
-        'penanggung_jawab' => $peminjaman->penanggung_jawab,
-        'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
-        'dokumen' => $peminjaman->proposal, // nama kolom file proposal
-        'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
-        'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
-            return [
-                'nama' => $detail->fasilitas->nama_barang ?? 'N/A',
-                'jumlah' => $detail->jumlah,
-            ];
-        }),
-    ]);
+        return response()->json([
+            'id' => $peminjaman->id,
+            'judul_kegiatan' => $peminjaman->judul_kegiatan,
+            'tgl_kegiatan' => $peminjaman->tgl_kegiatan,
+            'waktu_mulai' => $peminjaman->waktu_mulai,
+            'waktu_berakhir' => $peminjaman->waktu_berakhir,
+            'aktivitas' => $peminjaman->aktivitas,
+            'organisasi' => $peminjaman->organisasi,
+            'penanggung_jawab' => $peminjaman->penanggung_jawab,
+            'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
+            'link_dokumen' => $peminjaman->proposal ? 'ada' : null,
+            'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
+            'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
+                return [
+                    'nama' => $detail->fasilitas->nama_barang ?? 'N/A',
+                    'jumlah' => $detail->jumlah,
+                ];
+            }),
+        ]);
     }
 }

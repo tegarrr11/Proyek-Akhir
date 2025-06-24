@@ -38,34 +38,57 @@
 
     {{-- Tab Riwayat --}}
     <div id="riwayatTab" class="hidden">
-      <x-table-riwayat :items="$riwayats" />
+      <div class="mb-4 flex items-center justify-between gap-2">
+        <form method="GET" action="" class="flex gap-2 mb-0" onsubmit="setRiwayatTabFlag()">
+          <select name="gedung_id" class="border rounded px-2 py-1 text-sm" onchange="setRiwayatTabFlag(); this.form.submit();">
+            <option value="">Semua Ruangan</option>
+            @foreach(App\Models\Gedung::all() as $gedung)
+              <option value="{{ $gedung->id }}" {{ request('gedung_id') == $gedung->id ? 'selected' : '' }}>{{ $gedung->nama }}</option>
+            @endforeach
+          </select>
+          <input type="hidden" name="tab" id="tabInput" value="riwayat">
+        </form>
+        <a href="{{ route('download.riwayat.admin') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow transition duration-200 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+          </svg>
+          Download Riwayat
+        </a>
+      </div>
+      <x-table-riwayat-admin :items="$riwayats" />
     </div>
   </div>
 @endsection
 
 @push('scripts')
 <script>
+  function setRiwayatTabFlag() {
+    document.getElementById('tabInput').value = 'riwayat';
+  }
+
   function showTab(tab) {
     const tabs = ['pengajuan', 'riwayat'];
-
     tabs.forEach(id => {
       const tabEl = document.getElementById(`tab${capitalize(id)}`);
       const underline = document.getElementById(`underline${capitalize(id)}`);
-
+      const tabDiv = document.getElementById(`${id}Tab`);
       if (id === tab) {
         tabEl.classList.remove('text-gray-500');
         tabEl.classList.add('text-[#003366]');
         underline.classList.add('scale-x-100');
         underline.classList.remove('scale-x-0');
-        document.getElementById(`${id}Tab`).classList.remove('hidden');
+        tabDiv.classList.remove('hidden');
       } else {
         tabEl.classList.add('text-gray-500');
         tabEl.classList.remove('text-[#003366]');
         underline.classList.add('scale-x-0');
         underline.classList.remove('scale-x-100');
-        document.getElementById(`${id}Tab`).classList.add('hidden');
+        tabDiv.classList.add('hidden');
       }
     });
+    // Sembunyikan modal detail setiap kali pindah tab
+    const modal = document.getElementById('detailModal');
+    if (modal) modal.classList.add('hidden');
   }
 
   function capitalize(str) {
@@ -73,7 +96,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    showTab('pengajuan');
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab') || 'pengajuan';
+    showTab(tab);
   });
 </script>
 @endpush

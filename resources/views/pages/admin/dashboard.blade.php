@@ -7,5 +7,9 @@
   <x-header title="Dashboard" breadcrumb="Dashboard > Ruangan" />
 
   {{-- Kalender Mahasiswa --}}
-  @include('components.kalender-mahasiswa')
+  @include('components.kalender-mahasiswa', [
+    'gedungs' => $gedungs,
+    'selectedGedungId' => $selectedGedungId,
+    'events' => $events
+  ])
 @endsection

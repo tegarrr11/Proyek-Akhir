@@ -14,14 +14,17 @@ class BemController extends Controller
         $gedungs = Gedung::all();
         $selectedGedungId = $request->get('gedung_id', $gedungs->first()?->id);
 
-        $events = Peminjaman::where('gedung_id', $selectedGedungId)->get()->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'title' => $item->judul_kegiatan . ' (' . $item->organisasi . ')',
-                'start' => $item->tgl_kegiatan . 'T' . $item->waktu_mulai,
-                'end'   => $item->tgl_kegiatan . 'T' . $item->waktu_berakhir,
-            ];
-        });
+        // Ambil semua peminjaman aktif di gedung terpilih
+        $events = \App\Models\Peminjaman::where('gedung_id', $selectedGedungId)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->judul_kegiatan . ' (' . $item->organisasi . ')',
+                    'start' => $item->tgl_kegiatan . 'T' . $item->waktu_mulai,
+                    'end'   => $item->tgl_kegiatan . 'T' . $item->waktu_berakhir,
+                ];
+            });
 
         return view('pages.bem.dashboard', compact('gedungs', 'selectedGedungId', 'events'));
     }

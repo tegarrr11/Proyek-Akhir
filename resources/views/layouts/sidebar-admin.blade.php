@@ -6,6 +6,7 @@
   <title>@yield('title')</title>
 
   @include('layouts.partials.head')
+  @stack('head')
 
   <meta name="csrf-token" content="{{ csrf_token() }}">
   @if(Auth::check())
@@ -98,7 +99,93 @@
   </main>
   <!-- detail peminjaman -->
   @include('components.card-detail-peminjaman')
-  
+  <script>
+  window.showDetail = function(id) {
+    console.log('Global showDetail called', id);
+    const modal = document.getElementById('detailModal');
+    const content = document.getElementById('modalContent');
+    modal.classList.remove('hidden');
+    if (content) content.innerHTML = 'Memuat data...';
+    fetch(`/admin/peminjaman/${id}/detail`)
+      .then(res => {
+        if (!res.ok) throw new Error('Gagal fetch data');
+        return res.json();
+      })
+      .then(data => {
+        const el = id => document.getElementById(id);
+        el('judulKegiatan').textContent = data.judul_kegiatan || '-';
+        el('waktuKegiatan').textContent = `${data.tgl_kegiatan} ${data.waktu_mulai} - ${data.waktu_berakhir}`;
+        el('aktivitas').textContent = data.aktivitas || '-';
+        el('organisasi').textContent = data.organisasi || '-';
+        el('penanggungJawab').textContent = data.penanggung_jawab || '-';
+        el('keterangan').textContent = data.deskripsi_kegiatan || '-';
+        el('ruangan').textContent = data.nama_ruangan || '-';
+        // DOKUMEN: gunakan route download aman
+        if (data.link_dokumen && data.id) {
+          let prefix = window.location.pathname.split('/')[1];
+          if (!['admin','mahasiswa','bem','dosen'].includes(prefix)) prefix = '';
+          let downloadUrl = prefix ? `/${prefix}/peminjaman/download-proposal/${data.id}` : `/peminjaman/download-proposal/${data.id}`;
+          el('linkDokumen').href = downloadUrl;
+          el('linkDokumen').onclick = function(e) {
+            e.preventDefault();
+            fetch(downloadUrl, {
+              method: 'GET',
+              credentials: 'same-origin',
+            })
+            .then(response => {
+              if (!response.ok) throw new Error('Gagal download dokumen');
+              return response.blob();
+            })
+            .then(blob => {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'proposal.pdf';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            })
+            .catch(() => alert('Gagal download dokumen.'));
+          };
+          el('linkDokumen').classList.remove('hidden');
+          el('dokumenNotFound').classList.add('hidden');
+        } else {
+          el('linkDokumen').href = '#';
+          el('linkDokumen').onclick = null;
+          el('linkDokumen').classList.add('hidden');
+          el('dokumenNotFound').classList.remove('hidden');
+        }
+        // Perlengkapan
+        const perlengkapanList = el('perlengkapan');
+        perlengkapanList.innerHTML = '';
+        if (data.perlengkapan && data.perlengkapan.length > 0) {
+          data.perlengkapan.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.nama} - ${item.jumlah}`;
+            perlengkapanList.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          li.className = 'italic text-gray-400';
+          li.textContent = 'Tidak ada perlengkapan';
+          perlengkapanList.appendChild(li);
+        }
+        el('diskusiArea').textContent = 'belum ada diskusi';
+      })
+      .catch(err => {
+        if (content) content.innerHTML = `<p class='text-red-500'>Gagal memuat data. (${err.message})</p>`;
+        alert('Gagal mengambil data detail.');
+        console.error(err);
+      });
+  }
+
+  window.closeModal = function() {
+    const modal = document.getElementById('detailModal');
+    if (modal) modal.classList.add('hidden');
+  }
+  </script>
+
   <!-- Toast Container -->
   <div id="notif-toast" class="fixed bottom-6 right-6 z-50 space-y-2 text-sm"></div>
 
@@ -128,7 +215,7 @@
         fetchNotif() {
           fetch('/notif/list')
             .then(res => res.json())
-            .then(data => {
+            .then data => {
               const list = document.getElementById('notif-list');
               const badge = document.getElementById('notif-badge');
 
@@ -204,7 +291,8 @@
   }
 
   window.showDetail = function(id) {
-    fetch(`/admin/peminjaman/${id}`)
+    console.log('Global showDetail called', id);
+    fetch(`/admin/peminjaman/${id}/detail`)
       .then(res => res.json())
       .then(data => {
         const el = id => document.getElementById(id);
@@ -215,8 +303,43 @@
         el('penanggungJawab').textContent = data.penanggung_jawab || '-';
         el('keterangan').textContent = data.deskripsi_kegiatan || '-';
         el('ruangan').textContent = data.nama_ruangan || '-';
-        el('linkDokumen').href = data.link_dokumen || '#';
-
+        // DOKUMEN: gunakan route download aman
+        if (data.link_dokumen && data.id) {
+          let prefix = window.location.pathname.split('/')[1];
+          if (!['admin','mahasiswa','bem','dosen'].includes(prefix)) prefix = '';
+          let downloadUrl = prefix ? `/${prefix}/peminjaman/download-proposal/${data.id}` : `/peminjaman/download-proposal/${data.id}`;
+          el('linkDokumen').href = downloadUrl;
+          el('linkDokumen').onclick = function(e) {
+            e.preventDefault();
+            fetch(downloadUrl, {
+              method: 'GET',
+              credentials: 'same-origin',
+            })
+            .then(response => {
+              if (!response.ok) throw new Error('Gagal download dokumen');
+              return response.blob();
+            })
+            .then(blob => {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'proposal.pdf';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            })
+            .catch(() => alert('Gagal download dokumen.'));
+          };
+          el('linkDokumen').classList.remove('hidden');
+          el('dokumenNotFound').classList.add('hidden');
+        } else {
+          el('linkDokumen').href = '#';
+          el('linkDokumen').onclick = null;
+          el('linkDokumen').classList.add('hidden');
+          el('dokumenNotFound').classList.remove('hidden');
+        }
+        // Perlengkapan
         const perlengkapanList = el('perlengkapan');
         perlengkapanList.innerHTML = '';
         if (data.perlengkapan && data.perlengkapan.length > 0) {
@@ -249,6 +372,89 @@
   document.addEventListener('DOMContentLoaded', () => showTab('pengajuan'));
 </script>
 @endpush
+
+<!-- Ensure global modal logic is always available -->
+<script>
+  window.showDetail = function(id) {
+    console.log('Global showDetail called', id);
+    // PAKSA logika download dokumen via route aman!
+    fetch(`/admin/peminjaman/${id}/detail`)
+      .then(res => res.json())
+      .then(data => {
+        const el = id => document.getElementById(id);
+        el('judulKegiatan').textContent = data.judul_kegiatan || '-';
+        el('waktuKegiatan').textContent = `${data.tgl_kegiatan} ${data.waktu_mulai} - ${data.waktu_berakhir}`;
+        el('aktivitas').textContent = data.aktivitas || '-';
+        el('organisasi').textContent = data.organisasi || '-';
+        el('penanggungJawab').textContent = data.penanggung_jawab || '-';
+        el('keterangan').textContent = data.deskripsi_kegiatan || '-';
+        el('ruangan').textContent = data.nama_ruangan || '-';
+        // DOKUMEN: gunakan route download aman
+        if (data.link_dokumen && data.id) {
+          let prefix = window.location.pathname.split('/')[1];
+          if (!['admin','mahasiswa','bem','dosen'].includes(prefix)) prefix = '';
+          let downloadUrl = prefix ? `/${prefix}/peminjaman/download-proposal/${data.id}` : `/peminjaman/download-proposal/${data.id}`;
+          el('linkDokumen').href = downloadUrl;
+          el('linkDokumen').onclick = function(e) {
+            e.preventDefault();
+            fetch(downloadUrl, {
+              method: 'GET',
+              credentials: 'same-origin',
+            })
+            .then(response => {
+              if (!response.ok) throw new Error('Gagal download dokumen');
+              return response.blob();
+            })
+            .then(blob => {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'proposal.pdf';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            })
+            .catch(() => alert('Gagal download dokumen.'));
+          };
+          el('linkDokumen').classList.remove('hidden');
+          el('dokumenNotFound').classList.add('hidden');
+        } else {
+          el('linkDokumen').href = '#';
+          el('linkDokumen').onclick = null;
+          el('linkDokumen').classList.add('hidden');
+          el('dokumenNotFound').classList.remove('hidden');
+        }
+        // Perlengkapan
+        const perlengkapanList = el('perlengkapan');
+        perlengkapanList.innerHTML = '';
+        if (data.perlengkapan && data.perlengkapan.length > 0) {
+          data.perlengkapan.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.nama} - ${item.jumlah}`;
+            perlengkapanList.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          li.className = 'italic text-gray-400';
+          li.textContent = 'Tidak ada perlengkapan';
+          perlengkapanList.appendChild(li);
+        }
+
+        el('diskusiArea').textContent = 'belum ada diskusi';
+        document.getElementById('detailModal').classList.remove('hidden');
+      })
+      .catch(err => {
+        alert('Gagal mengambil data detail.');
+        console.error(err);
+      });
+  }
+
+  window.closeModal = function() {
+    const modal = document.getElementById('detailModal');
+    if (modal) modal.classList.add('hidden');
+  }
+</script>
 </body>
 </html>
 

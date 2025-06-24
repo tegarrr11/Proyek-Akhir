@@ -17,6 +17,8 @@ use App\Http\Controllers\BemController;
 use App\Http\Controllers\BemPeminjamanController;
 use App\Http\Controllers\AdminPeminjamanController;
 use App\Http\Controllers\KalenderController;
+use App\Http\Controllers\DosenPeminjamanController;
+use App\Http\Controllers\DiskusiController;
 
 
 // ========== LANDING PAGE ==========
@@ -80,11 +82,11 @@ Route::post('/logout', function (Request $request) {
 
 // ========== NON-AUTH ROUTES (untuk popup/detail yang tidak masuk prefix auth) ==========
 Route::get('/sarpras/peminjaman/{id}/detail', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.detail');
-Route::get('/admin/peminjaman/{id}', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.show');
 Route::get('/kalender', [KalenderController::class, 'index'])->middleware('auth')->name('kalender.index');
 Route::get('/mahasiswa/peminjaman/{id}', [MahasiswaController::class, 'show']);
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
 Route::get('/bem/dashboard', [BemController::class, 'dashboard']);
+Route::get('/dosen/dashboard', [BemController::class, 'dashboard']);
 Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('mahasiswa.peminjaman');
 Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
 Route::get('/api/fasilitas-tambahan', function () {
@@ -103,10 +105,15 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/fasilitas/{id}', [FasilitasController::class, 'destroy'])->name('admin.fasilitas.destroy');
         Route::get('/peminjaman/{id}/detail', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.detail');
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('admin.peminjaman');
+        Route::get('/peminjaman/create', function() {
+            return view('pages.admin.peminjaman.create');
+        })->name('admin.peminjaman.create');
+        Route::post('/peminjaman/store', [AdminPeminjamanController::class, 'store'])->name('admin.peminjaman.store');
         Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'approve'])->name('admin.peminjaman.approve');
         Route::get('/peminjaman/{id}', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.show');
         Route::post('/peminjaman/{id}/verifikasi', [AdminPeminjamanController::class, 'verifikasi'])->name('admin.peminjaman.verifikasi');
         Route::post('/ruangan/update', [AdminController::class, 'update'])->name('admin.ruangan.update');
+        Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('admin.peminjaman.downloadProposal');
     });
 
     // === MAHASISWA ===
@@ -134,6 +141,8 @@ Route::middleware(['auth'])->group(function () {
             'title' => 'GOR',
             'breadcrumb' => 'Dashboard > Ruangan > GOR'
         ]))->name('mahasiswa.gor');
+
+        Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('mahasiswa.peminjaman.downloadProposal');
     });
 
     // === BEM ===
@@ -144,10 +153,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/peminjaman/{id}/detail', [BemPeminjamanController::class, 'show'])->name('bem.peminjaman.show');
         Route::post('/peminjaman/{id}/verifikasi', [BemPeminjamanController::class, 'verifikasi'])->name('bem.peminjaman.verifikasi');
         Route::patch('/bem/peminjaman/{id}/terima', [BEMPeminjamanController::class, 'terima'])->name('bem.peminjaman.terima');
+        Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('bem.peminjaman.downloadProposal');
     });
 
     // === DOSEN ===
-    Route::get('/dosen/dashboard', fn () => view('pages.dosen.dashboard'))->name('dosen.dashboard');
+    Route::prefix('dosen')->middleware(['auth'])->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\DosenController::class, 'dashboard'])->name('dosen.dashboard');
+        Route::get('/peminjaman', [\App\Http\Controllers\DosenPeminjamanController::class, 'index'])->name('dosen.peminjaman');
+        Route::get('/peminjaman/{id}', [\App\Http\Controllers\DosenPeminjamanController::class, 'show'])->name('dosen.peminjaman.show');
+        Route::get('/peminjaman/create', [\App\Http\Controllers\DosenPeminjamanController::class, 'create'])->name('dosen.peminjaman.create');
+        Route::post('/peminjaman/store', [\App\Http\Controllers\DosenPeminjamanController::class, 'store'])->name('dosen.peminjaman.store');
+        Route::patch('/peminjaman/{id}/ambil', [\App\Http\Controllers\DosenPeminjamanController::class, 'ambil'])->name('dosen.peminjaman.ambil');
+        Route::patch('/peminjaman/{id}/kembalikan', [\App\Http\Controllers\DosenPeminjamanController::class, 'kembalikan'])->name('dosen.peminjaman.kembalikan');
+        Route::get('/peminjaman/download-proposal/{id}', [\App\Http\Controllers\PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('dosen.peminjaman.downloadProposal');
+    });
 
     // === FORM DAN API ===
     Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
@@ -212,4 +231,12 @@ Route::middleware(['auth'])->group(function () {
             'Content-Type' => 'text/csv',
         ]);
     })->name('download.riwayat.admin');
+
+    // === OPTIONAL: fallback route for download-proposal (if needed by JS without prefix) ===
+    // Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('peminjaman.downloadProposal');
+});
+
+// Route untuk fiturr diskusi
+Route::middleware(['auth'])->group(function() {
+    Route::post('/diskusi', [DiskusiController::class, 'store'])->name('diskusi.store');
 });

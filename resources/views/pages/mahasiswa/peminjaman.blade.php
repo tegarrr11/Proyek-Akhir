@@ -87,7 +87,43 @@
           el('penanggungJawab').textContent = data.penanggung_jawab || '-';
           el('keterangan').textContent = data.deskripsi_kegiatan || '-';
           el('ruangan').textContent = data.nama_ruangan || '-';
-          el('linkDokumen').href = data.link_dokumen || '#';
+
+          // Ganti link dokumen agar download via route Laravel, bukan direct storage
+          if (data.link_dokumen && data.link_dokumen !== '#') {
+            let prefix = window.location.pathname.split('/')[1];
+            if (!['admin','mahasiswa','bem','dosen','staff'].includes(prefix)) prefix = '';
+            let downloadUrl = prefix ? `/${prefix}/peminjaman/download-proposal/${data.id}` : `/peminjaman/download-proposal/${data.id}`;
+            el('linkDokumen').href = downloadUrl;
+            el('linkDokumen').onclick = function(e) {
+              e.preventDefault();
+              fetch(downloadUrl, {
+                method: 'GET',
+                credentials: 'same-origin',
+              })
+              .then(response => {
+                if (!response.ok) throw new Error('Gagal download dokumen');
+                return response.blob();
+              })
+              .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'proposal.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+              })
+              .catch(() => alert('Gagal download dokumen.'));
+            };
+            el('linkDokumen').classList.remove('hidden');
+            el('dokumenNotFound').classList.add('hidden');
+          } else {
+            el('linkDokumen').href = '#';
+            el('linkDokumen').onclick = null;
+            el('linkDokumen').classList.add('hidden');
+            el('dokumenNotFound').classList.remove('hidden');
+          }
 
           const perlengkapanList = el('perlengkapan');
           perlengkapanList.innerHTML = '';

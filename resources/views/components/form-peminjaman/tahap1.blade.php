@@ -17,13 +17,19 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
   <div>
     <label class="block mb-1 text-sm font-medium">Ruangan *</label>
     <select class="w-full border rounded px-3 py-2" name="gedung" id="gedung-select"
-      onchange="window.location.href='?gedung=' + this.value;">
+      onchange="window.location.href='?gedung=' + this.value; document.getElementById('gedung-hidden').value = this.value;">
       <option value="">-- Pilih Ruangan --</option>
       <option value="gsg" {{ request('gedung') == 'gsg' ? 'selected' : '' }}>Main Hall GSG</option>
       <option value="gor" {{ request('gedung') == 'gor' ? 'selected' : '' }}>GOR</option>
       <option value="auditorium" {{ request('gedung') == 'auditorium' ? 'selected' : '' }}>Auditorium</option>
       <option value="r361" {{ request('gedung') == 'r361' ? 'selected' : '' }}>R. 361</option>
     </select>
+    <input type="hidden" name="gedung" id="gedung-hidden" value="{{ request('gedung') }}">
+    <script>
+      document.getElementById('gedung-select').addEventListener('change', function() {
+        document.getElementById('gedung-hidden').value = this.value;
+      });
+    </script>
   </div>
 
   {{-- Jenis Kegiatan --}}

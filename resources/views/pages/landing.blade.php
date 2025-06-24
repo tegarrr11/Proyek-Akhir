@@ -1,6 +1,6 @@
 @extends('layouts.landing')
 
-@section('title', 'Kalender Fasilitas PCR')
+@section('title', 'Sistem Informasi Manajemen Fasilitas PCR')
 
 @section('content')
 

@@ -27,6 +27,9 @@ class Peminjaman extends Model
     'undangan_pembicara',
     'status_peminjaman', 
     'status_pengembalian',
+    'verifikasi_bem', // DITAMBAHKAN
+    'verifikasi_sarpras', // DITAMBAHKAN
+    'status', // DITAMBAHKAN
     ];
 
     public function detailPeminjaman()
@@ -44,5 +47,9 @@ class Peminjaman extends Model
         return $this->belongsTo(Gedung::class);
     }
     
+    public function diskusi()
+    {
+        return $this->hasMany(Diskusi::class);
+    }
 
 }
