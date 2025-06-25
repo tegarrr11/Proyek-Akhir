@@ -154,6 +154,7 @@
   </script>
   <script src="https://unpkg.com/alpinejs" defer></script>
   <?php echo $__env->yieldPushContent('scripts'); ?>
+    <?php echo $__env->yieldContent('script'); ?>
 </body>
 </html>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/layouts/sidebar-mahasiswa.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/layouts/sidebar-mahasiswa.blade.php ENDPATH**/ ?>

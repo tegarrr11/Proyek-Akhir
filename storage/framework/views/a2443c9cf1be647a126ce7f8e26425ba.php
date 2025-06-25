@@ -80,4 +80,4 @@
     document.getElementById('calendar-detail-modal').classList.remove('hidden');
   }
 </script>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/card-detail-kalender.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/components/card-detail-kalender.blade.php ENDPATH**/ ?>

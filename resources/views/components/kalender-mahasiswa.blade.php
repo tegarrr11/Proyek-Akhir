@@ -130,7 +130,6 @@
   document.addEventListener('DOMContentLoaded', function () {
     const calendarEl = document.getElementById('calendar');
     const events = @json($events);
-    console.log('FullCalendar script loaded', events, calendarEl); // DEBUG
 
     function formatTanggal(tanggal) {
       const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];

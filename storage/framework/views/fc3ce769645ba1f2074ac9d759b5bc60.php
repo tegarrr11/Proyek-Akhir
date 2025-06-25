@@ -100,87 +100,10 @@
   </tbody>
 </table>
 
-<!-- Modal -->
-<div id="detailModal" class="fixed inset-0 z-[999] hidden flex items-center justify-center px-4">
-  <!-- Overlay, pointer-events none agar tidak menutupi konten -->
-  <div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(2px);pointer-events:none;"></div>
-  <div class="bg-white rounded-xl shadow-lg w-full max-w-5xl p-6 relative" style="pointer-events:auto;z-index:2;" onclick="event.stopPropagation()">
-
-    <!-- Tombol Close -->
-    <button onclick="closeModal()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold">&times;</button>
-
-    <!-- Judul -->
-    <h2 class="text-lg font-semibold text-gray-800 mb-4">Detail Peminjaman</h2>
-
-    <div class="flex flex-col md:flex-row gap-6">
-      <!-- Kolom Kiri -->
-      <div class="flex-1 space-y-2 text-sm text-gray-800">
-        <div class="flex justify-between gap-4">
-          <div>
-            <p class="font-semibold text-[#1e2d5e]">Judul Kegiatan</p>
-            <p id="judulKegiatan">-</p>
-          </div>
-          <div>
-            <p class="font-semibold text-[#1e2d5e]">Waktu Kegiatan</p>
-            <p><span id="tglKegiatan">-</span> &nbsp; <span id="jamKegiatan">-</span></p>
-          </div>
-        </div>
-
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Aktivitas</p>
-          <p id="aktivitas">-</p>
-        </div>
-
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Penanggungjawab Kegiatan</p>
-          <p id="penanggungJawab">-</p>
-        </div>
-
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Keterangan</p>
-          <p id="keterangan">-</p>
-        </div>
-
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Ruangan</p>
-          <p id="ruangan">-</p>
-        </div>
-
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Perlengkapan</p>
-          <ul id="perlengkapan" class="list-disc list-inside text-gray-800 space-y-0.5">
-            <li class="italic text-gray-400">Tidak ada perlengkapan</li>
-          </ul>
-        </div>
-
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Dokumen</p>
-          <a id="linkDokumen" href="#" class="text-blue-600 underline text-sm">Lihat Proposal</a>
-          <span id="dokumenNotFound" class="text-gray-400 italic hidden">Tidak ada dokumen</span>
-        </div>
-      </div>
-
-      <!-- Kolom Kanan (Diskusi) -->
-      <div class="w-full md:w-1/3 border border-gray-200 rounded-lg p-4 flex flex-col">
-        <p class="font-semibold text-[#1e2d5e] mb-1">Diskusi</p>
-        <div id="diskusiArea" class="text-sm text-gray-400 italic flex-1">belum ada diskusi</div>
-        <div class="mt-4">
-          <input class="inputDiskusi" type="text" placeholder="Ketikkan di sini" class="w-full border rounded px-3 py-2 text-sm mb-2" disabled>
-          <button class="btnKirimDiskusi bg-gray-300 text-white text-sm px-4 py-2 rounded cursor-not-allowed w-full" disabled>Kirim</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tombol Tutup di bawah -->
-    <div class="mt-6 text-right">
-      <button onclick="closeModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">Tutup</button>
-    </div>
-  </div>
-</div>
-
-
 <?php $__env->startPush('scripts'); ?>
 <script>
+  console.log('[DEBUG] Script chat loaded');
+
   function tampilkanKolomKembali(event) {
     event.preventDefault();
     const form = event.target;
@@ -191,11 +114,9 @@
 
   function showTab(tab) {
     const tabs = ['pengajuan', 'riwayat'];
-
     tabs.forEach(id => {
       const tabEl = document.getElementById(`tab${capitalize(id)}`);
       const underline = document.getElementById(`underline${capitalize(id)}`);
-
       if (id === tab) {
         tabEl.classList.remove('text-gray-500');
         tabEl.classList.add('text-[#003366]');
@@ -220,19 +141,16 @@
     showTab('pengajuan');
   });
 
-  let currentPeminjamanId = null;
+  window.currentPeminjamanId = null;
+
   function bindDiskusiHandler() {
-    // Cari modal yang sedang aktif
     const modal = document.getElementById('detailModal');
     if (!modal || modal.classList.contains('hidden')) return;
     const btn = modal.querySelector('.btnKirimDiskusi');
     const input = modal.querySelector('.inputDiskusi');
-    const btns = document.querySelectorAll('.btnKirimDiskusi');
-    const inputs = document.querySelectorAll('.inputDiskusi');
-    console.log('[DEBUG] bindDiskusiHandler dipanggil', btn, input, 'Jumlah btn:', btns.length, 'Jumlah input:', inputs.length);
-    if (!btn) return;
-    btn.onclick = function() {
-      console.log('[DEBUG] Tombol Kirim diklik');
+    if (!btn || !input) return;
+
+    btn.onclick = function () {
       const pesan = input.value.trim();
       if (!pesan || !currentPeminjamanId) return;
       btn.setAttribute('disabled', true);
@@ -249,37 +167,31 @@
         },
         body: JSON.stringify({ peminjaman_id: currentPeminjamanId, pesan })
       })
-      .then(res => res.json())
-      .then(resp => {
-        if (resp.success) {
-          showDetail(currentPeminjamanId); // refresh chat
-        } else {
-          alert(resp.error || 'Gagal mengirim pesan.');
-        }
-      })
-      .catch(() => alert('Gagal mengirim pesan.'));
+        .then(res => res.json())
+        .then(resp => {
+          if (resp.success) {
+            showDetail(currentPeminjamanId); // refresh chat
+          } else {
+            alert(resp.error || 'Gagal mengirim pesan.');
+          }
+        })
+        .catch(() => alert('Gagal mengirim pesan.'));
     };
   }
 
   function showDetail(id) {
-    console.log('[DEBUG] showDetail dipanggil dengan id:', id);
     currentPeminjamanId = id;
     fetch(`/admin/peminjaman/${id}`)
       .then(res => res.json())
       .then(data => {
         const el = id => document.getElementById(id);
 
-        // Format Tanggal Indonesia
-        const formatTanggal = (tgl) => {
-          const date = new Date(tgl);
-          return date.toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-          });
-        };
+        const formatTanggal = (tgl) => new Date(tgl).toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric'
+        });
 
-        // Format Jam tanpa detik
         const formatJam = (jamStr) => jamStr ? jamStr.slice(0, 5) : '-';
 
         el('judulKegiatan').textContent = data.judul_kegiatan || '-';
@@ -308,30 +220,30 @@
         // Dokumen
         if (data.link_dokumen === 'ada') {
           let prefix = window.location.pathname.split('/')[1];
-          if (!['admin','mahasiswa','bem','dosen','staff'].includes(prefix)) prefix = '';
+          if (!['admin', 'mahasiswa', 'bem', 'dosen', 'staff'].includes(prefix)) prefix = '';
           let downloadUrl = prefix ? `/${prefix}/peminjaman/download-proposal/${data.id}` : `/peminjaman/download-proposal/${data.id}`;
           el('linkDokumen').href = downloadUrl;
-          el('linkDokumen').onclick = function(e) {
+          el('linkDokumen').onclick = function (e) {
             e.preventDefault();
             fetch(downloadUrl, {
               method: 'GET',
               credentials: 'same-origin',
             })
-            .then(response => {
-              if (!response.ok) throw new Error('Gagal download dokumen');
-              return response.blob();
-            })
-            .then(blob => {
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'proposal.pdf';
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-              window.URL.revokeObjectURL(url);
-            })
-            .catch(() => alert('Gagal download dokumen.'));
+              .then(response => {
+                if (!response.ok) throw new Error('Gagal download dokumen');
+                return response.blob();
+              })
+              .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'proposal.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+              })
+              .catch(() => alert('Gagal download dokumen.'));
           };
           el('linkDokumen').classList.remove('hidden');
           el('dokumenNotFound').classList.add('hidden');
@@ -349,12 +261,11 @@
           diskusiHtml = '';
           data.diskusi.forEach(d => {
             diskusiHtml += `<div class='mb-1'><span class='font-semibold text-xs text-blue-700'>${d.role}:</span> <span>${d.pesan}</span></div>`;
-            // Perbaiki pengecekan role, pastikan lowercase
-            if (["admin","bem"].includes((d.role||'').toLowerCase())) adaChatAdminBem = true;
+            if (["admin", "bem"].includes((d.role || '').toLowerCase())) adaChatAdminBem = true;
           });
         }
         document.getElementById('diskusiArea').innerHTML = diskusiHtml;
-        // Aktifkan input hanya jika role bukan dosen, dan jika mahasiswa: hanya jika ada chat admin/bem
+
         const userRole = "<?php echo e(auth()->user()->role); ?>";
         let enableDiskusi = false;
         if (userRole !== 'dosen') {
@@ -364,8 +275,7 @@
             enableDiskusi = true;
           }
         }
-        // Debugging
-        console.log('DISKUSI:', data.diskusi, 'adaChatAdminBem:', adaChatAdminBem, 'userRole:', userRole, 'enableDiskusi:', enableDiskusi);
+
         const inputDiskusi = document.getElementById('inputDiskusi');
         const btnKirimDiskusi = document.getElementById('btnKirimDiskusi');
         if (enableDiskusi) {
@@ -379,36 +289,10 @@
           btnKirimDiskusi.classList.add('bg-gray-300', 'cursor-not-allowed');
           btnKirimDiskusi.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
         }
-        // Paksa input dan tombol chat selalu aktif untuk debug
-        const modal = document.getElementById('detailModal');
-        const inputDiskusi = modal.querySelector('.inputDiskusi');
-        const btnKirimDiskusi = modal.querySelector('.btnKirimDiskusi');
-        inputDiskusi.removeAttribute('disabled');
-        btnKirimDiskusi.removeAttribute('disabled');
-        btnKirimDiskusi.classList.remove('bg-gray-300', 'cursor-not-allowed');
-        btnKirimDiskusi.classList.add('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
+
         inputDiskusi.value = '';
         document.getElementById('detailModal').classList.remove('hidden');
-        // Tambahkan style pada modal agar selalu di atas dan pointer-events aktif
-        const modal = document.getElementById('detailModal');
-        if (modal) {
-          modal.style.zIndex = '99999';
-          modal.style.pointerEvents = 'auto';
-          modal.style.background = 'rgba(0,0,0,0.2)';
-          modal.style.opacity = '1';
-          console.log('[DEBUG] Modal detailModal visible:', !modal.classList.contains('hidden'), modal);
-        }
-        // Paksa style tombol dan input agar selalu bisa diklik
-        inputDiskusi.style.pointerEvents = 'auto';
-        inputDiskusi.style.zIndex = '9999';
-        inputDiskusi.style.opacity = '1';
-        btnKirimDiskusi.style.pointerEvents = 'auto';
-        btnKirimDiskusi.style.zIndex = '9999';
-        btnKirimDiskusi.style.opacity = '1';
-        // Tambah log debug pada event mousedown dan click
-        btnKirimDiskusi.onmousedown = function() { console.log('[DEBUG] Tombol Kirim mousedown'); };
-        btnKirimDiskusi.onclick = function() { console.log('[DEBUG] Tombol Kirim click'); };
-        bindDiskusiHandler(); // <--- re-bind setiap modal dibuka
+        bindDiskusiHandler();
       })
       .catch(err => {
         console.error('Gagal fetch detail:', err);
@@ -421,4 +305,4 @@
   }
 </script>
 <?php $__env->stopPush(); ?>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/table-pengajuan-mahasiswa.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/components/pengajuan/table-pengajuan-mahasiswa.blade.php ENDPATH**/ ?>

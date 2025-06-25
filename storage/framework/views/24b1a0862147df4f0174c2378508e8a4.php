@@ -1,4 +1,4 @@
-<?php $__env->startSection('title', 'Dashboard Admin'); ?>
+<?php $__env->startSection('title', 'Dashboard Mahasiswa'); ?>
 
 <?php $__env->startSection('content'); ?>
   
@@ -31,4 +31,4 @@
   ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.sidebar-admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/pages/admin/dashboard.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.sidebar-mahasiswa', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/pages/mahasiswa/dashboard.blade.php ENDPATH**/ ?>

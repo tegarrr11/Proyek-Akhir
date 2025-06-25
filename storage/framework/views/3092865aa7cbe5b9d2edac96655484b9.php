@@ -125,13 +125,12 @@
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
 <?php $__env->stopPush(); ?>
 
-<?php if (! $__env->hasRenderedOnce('96799dfa-debf-4b7f-8532-27b80fea3b2f')): $__env->markAsRenderedOnce('96799dfa-debf-4b7f-8532-27b80fea3b2f'); ?>
+<?php if (! $__env->hasRenderedOnce('d84b4dd7-9374-49fe-b6dc-2477b04515f2')): $__env->markAsRenderedOnce('d84b4dd7-9374-49fe-b6dc-2477b04515f2'); ?>
 <?php $__env->startPush('scripts'); ?>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const calendarEl = document.getElementById('calendar');
     const events = <?php echo json_encode($events, 15, 512) ?>;
-    console.log('FullCalendar script loaded', events, calendarEl); // DEBUG
 
     function formatTanggal(tanggal) {
       const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -206,4 +205,4 @@
 </script>
 <?php $__env->stopPush(); ?>
 <?php endif; ?>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/kalender-mahasiswa.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/components/kalender-mahasiswa.blade.php ENDPATH**/ ?>

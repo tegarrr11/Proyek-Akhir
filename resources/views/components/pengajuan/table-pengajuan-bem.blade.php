@@ -1,92 +1,99 @@
-@extends('layouts.sidebar-bem')
+<table class="w-full text-sm text-left text-gray-700">
+  <thead class="bg-gray-100 text-black border-b">
+    <tr class="text-sm font-semibold">
+      <th class="px-4 py-2">No.</th>
+      <th class="px-4 py-2">Pengajuan</th>
+      <th class="px-4 py-2">Tanggal Pengajuan</th>
+      <th class="px-4 py-2">Verifikasi BEM</th>
+      <th class="px-4 py-2">Verifikasi Sarpras</th>
+      <th class="px-4 py-2">Organisasi</th>
+      <th class="px-4 py-2 text-center">Aksi</th>
+    </tr>
+  </thead>
+  <tbody>
+    @forelse($items as $i => $pengajuan)
+      <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
+        <td class="px-4 py-2">{{ $i + 1 }}</td>
+        <td class="px-4 py-2">{{ $pengajuan->judul_kegiatan }}</td>
+        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($pengajuan->created_at)->format('d/m/Y') }}</td>
 
-@section('title', 'Peminjaman')
+        <td class="px-4 py-2">
+          <span class="px-3 py-1 text-xs rounded {{ $pengajuan->verifikasi_bem === 'diterima' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600' }}">
+            {{ ucfirst($pengajuan->verifikasi_bem) }}
+          </span>
+        </td>
 
-@section('content')
-  <x-header title="Peminjaman" breadcrumb="Peminjaman > Pengajuan" />
+        <td class="px-4 py-2 text-gray-500 text-xs">-</td>
+        <td class="px-4 py-2">{{ $pengajuan->organisasi }}</td>
 
-  @if(session('success'))
-    <div class="mb-4 bg-green-100 text-green-700 px-4 py-2 rounded">
-      {{ session('success') }}
-    </div>
-  @endif
+        <td class="px-4 py-2">
+          <div class="flex items-center gap-2 justify-center">
+            <form method="POST" action="{{ route('bem.peminjaman.verifikasi', $pengajuan->id) }}">
+              @csrf
+              <input type="hidden" name="verifikasi_bem" value="diterima">
+              <button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded">
+                Terima
+              </button>
+            </form>
 
-  <div class="bg-white rounded-md shadow flex-1 p-6">
-    {{-- Tabs --}}
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex gap-6 relative">
-        <button onclick="showTab('pengajuan')" id="tabPengajuan"
-          class="pb-2 relative text-sm font-semibold text-[#003366]">
-          <span>Pengajuan</span>
-          <span class="absolute left-0 -bottom-0.5 w-full h-[2px] bg-[#003366] scale-x-100 origin-left transition-transform duration-300" id="underlinePengajuan"></span>
-        </button>
+            <button onclick="showDetail({{ $pengajuan->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    @empty
+      <tr>
+        <td colspan="7" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
+      </tr>
+    @endforelse
+  </tbody>
+</table>
 
-        <button onclick="showTab('riwayat')" id="tabRiwayat"
-          class="pb-2 relative text-sm font-semibold text-gray-500">
-          <span>Riwayat</span>
-          <span class="absolute left-0 -bottom-0.5 w-full h-[2px] bg-[#003366] scale-x-0 origin-left transition-transform duration-300" id="underlineRiwayat"></span>
-        </button>
-      </div>
+{{-- Reusable Modal --}}
+<x-modal-detail-peminjaman />
 
-      <div class="flex gap-2">
-        <input type="text" placeholder="Cari........"
-          class="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-[#003366]">
-        <button class="border px-3 py-1 rounded text-sm text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white flex items-center gap-1">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2H3V4zM3 9h18v2H3V9zm0 5h18v2H3v-2zm0 5h18v2H3v-2z" />
-          </svg>
-          Filter
-        </button>
-      </div>
-    </div>
+@push('scripts')
+<script>
+  window.currentPeminjamanId = null;
 
-    {{-- Tab Pengajuan --}}
-    <div id="pengajuanTab">
-        @include('components.pengajuan.table-pengajuan-bem', ['items' => $pengajuans])
-    </div>
+  function bindDiskusiHandler() {
+    const modal = document.getElementById('detailModal');
+    if (!modal || modal.classList.contains('hidden')) return;
+    const btn = modal.querySelector('#btnKirimDiskusi');
+    const input = modal.querySelector('#inputDiskusi');
+    if (!btn || !input) return;
 
-    {{-- Tab Riwayat --}}
-    <div id="riwayatTab" class="hidden">
-        @include('components.riwayat.table-riwayat-bem', ['items' => $riwayats])
-    </div>
-  </div>
+    btn.onclick = function () {
+      const pesan = input.value.trim();
+      if (!pesan || !currentPeminjamanId) return;
+      btn.setAttribute('disabled', true);
+      let csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      if (!csrf) {
+        const tokenInput = document.querySelector('input[name=_token]');
+        if (tokenInput) csrf = tokenInput.value;
+      }
 
-  <x-modal-detail-peminjaman />
+      fetch('/diskusi', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrf,
+        },
+        body: JSON.stringify({ peminjaman_id: currentPeminjamanId, pesan })
+      })
+        .then(res => res.json())
+        .then(resp => {
+          if (resp.success) showDetail(currentPeminjamanId);
+          else alert(resp.error || 'Gagal mengirim pesan.');
+        })
+        .catch(() => alert('Gagal mengirim pesan.'));
+    };
+  }
 
-  {{-- Script Tabs dan Detail --}}
-  <script>
-    function showTab(tab) {
-      const tabs = ['pengajuan', 'riwayat'];
-      
-      tabs.forEach(id => {
-        const tabEl = document.getElementById(`tab${capitalize(id)}`);
-        const underline = document.getElementById(`underline${capitalize(id)}`);
-
-        if (id === tab) {
-          tabEl.classList.remove('text-gray-500');
-          tabEl.classList.add('text-[#003366]');
-          underline.classList.add('scale-x-100');
-          underline.classList.remove('scale-x-0');
-          document.getElementById(`${id}Tab`).classList.remove('hidden');
-        } else {
-          tabEl.classList.add('text-gray-500');
-          tabEl.classList.remove('text-[#003366]');
-          underline.classList.add('scale-x-0');
-          underline.classList.remove('scale-x-100');
-          document.getElementById(`${id}Tab`).classList.add('hidden');
-        }
-      });
-    }
-    function capitalize(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-      showTab('pengajuan');
-    });
-
-    function showDetail(id) {
-    console.log('✅ showDetail dipanggil dengan ID:', id);
+  function showDetail(id) {
     currentPeminjamanId = id;
     fetch(`/admin/peminjaman/${id}`)
       .then(res => res.json())
@@ -211,4 +218,4 @@
     document.getElementById('detailModal')?.classList.add('hidden');
   }
   </script>
-@endsection
+@endpush

@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Peminjaman</title>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="font-poppins bg-[#fffff] min-h-screen flex items-center justify-center px-4">
 

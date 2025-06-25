@@ -11,32 +11,54 @@
     </tr>
   </thead>
   <tbody>
-    @forelse($items as $i => $pengajuan)
+    @forelse($items as $i => $item)
       <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
         <td class="px-4 py-2">{{ $i + 1 }}</td>
-        <td class="px-4 py-2">{{ $pengajuan->judul_kegiatan }}</td>
-        <td class="px-4 py-2">{{ $pengajuan->tgl_kegiatan }}</td>
-
+        <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
+        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->tgl_kegiatan)->format('d/m/Y') }}</td>
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded {{ $pengajuan->verifikasi_bem === 'diterima' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600' }}">
-            {{ ucfirst($pengajuan->verifikasi_bem) }}
+          <span class="px-3 py-1 text-xs rounded
+            @if($item->verifikasi_bem === 'diterima')
+              bg-green-500 text-white
+            @elseif($item->verifikasi_bem === 'ditolak')
+              bg-red-100 text-red-600
+            @else
+              bg-yellow-500 text-white
+            @endif">
+            {{ ucfirst($item->verifikasi_bem) }}
           </span>
         </td>
-
-        <td class="px-4 py-2 text-gray-500 text-xs">-</td>
-        <td class="px-4 py-2">{{ $pengajuan->organisasi }}</td>
-
         <td class="px-4 py-2">
+          <span class="px-3 py-1 text-xs rounded
+            @if($item->verifikasi_sarpras === 'diterima')
+              bg-green-500 text-white
+            @elseif($item->verifikasi_sarpras === 'ditolak')
+              bg-red-100 text-red-600
+            @else
+              bg-yellow-500 text-white
+            @endif">
+            {{ ucfirst($item->verifikasi_sarpras) }}
+          </span>
+        </td>
+        <td class="px-4 py-2">{{ $item->organisasi }}</td>
+        <td class="px-4 py-2 text-center">
           <div class="flex items-center gap-2 justify-center">
-            <form method="POST" action="{{ route('bem.peminjaman.verifikasi', $pengajuan->id) }}">
+            {{-- Tombol Terima --}}
+            <form method="POST" action="{{ route('admin.peminjaman.verifikasi', $item->id) }}">
               @csrf
-              <input type="hidden" name="verifikasi_bem" value="diterima">
-              <button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded">
-                Terima
-              </button>
+              <input type="hidden" name="verifikasi_sarpras" value="diterima">
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded"> Terima</button>
             </form>
 
-            <button onclick="showDetail({{ $pengajuan->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
+            {{-- Tombol Tangguhkan --}}
+            <form method="POST" action="{{ route('admin.peminjaman.verifikasi', $item->id) }}">
+              @csrf
+              <input type="hidden" name="verifikasi_sarpras" value="ditangguhkan">
+              <button type="submit" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded">Tangguhkan</button>
+            </form>
+
+            {{-- Tombol Detail --}}
+            <button onclick="showDetail({{ $item->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -70,33 +92,29 @@
             <p id="waktuKegiatan">-</p>
           </div>
         </div>
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Aktivitas</p>
-          <p id="aktivitas">-</p>
-        </div>
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Penanggungjawab</p>
-          <p id="penanggungJawab">-</p>
-        </div>
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Keterangan</p>
-          <p id="keterangan">-</p>
-        </div>
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Ruangan</p>
-          <p id="ruangan">-</p>
-        </div>
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Perlengkapan</p>
-          <ul id="perlengkapan" class="list-disc list-inside text-gray-800 space-y-0.5">
-            <li class="italic text-gray-400">Tidak ada perlengkapan</li>
-          </ul>
-        </div>
-        <div>
-          <p class="font-semibold text-[#1e2d5e]">Dokumen</p>
-          <a id="linkDokumen" href="#" class="text-blue-600 underline text-sm">Lihat Proposal</a>
-          <span id="dokumenNotFound" class="text-gray-400 italic hidden">Tidak ada dokumen</span>
-        </div>
+        <p class="font-semibold text-[#1e2d5e]">Aktivitas</p>
+        <p id="aktivitas">-</p>
+
+        <p class="font-semibold text-[#1e2d5e]">Organisasi</p>
+        <p id="organisasi">-</p>
+
+        <p class="font-semibold text-[#1e2d5e]">Penanggungjawab</p>
+        <p id="penanggungJawab">-</p>
+
+        <p class="font-semibold text-[#1e2d5e]">Keterangan</p>
+        <p id="keterangan">-</p>
+
+        <p class="font-semibold text-[#1e2d5e]">Ruangan</p>
+        <p id="ruangan">-</p>
+
+        <p class="font-semibold text-[#1e2d5e]">Perlengkapan</p>
+        <ul id="perlengkapan" class="list-disc list-inside text-gray-800 space-y-0.5">
+          <li class="italic text-gray-400">Tidak ada perlengkapan</li>
+        </ul>
+
+        <p class="font-semibold text-[#1e2d5e]">Dokumen</p>
+        <a id="linkDokumen" href="#" class="text-blue-600 underline text-sm">Lihat Proposal</a>
+        <span id="dokumenNotFound" class="text-gray-400 italic hidden">Tidak ada dokumen</span>
       </div>
 
       <div class="w-full md:w-1/3 border border-gray-200 rounded-lg p-4 flex flex-col">
@@ -109,15 +127,12 @@
       </div>
     </div>
 
-    <div class="mt-6 text-right">
-      <button onclick="closeModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">Tutup</button>
-    </div>
   </div>
 </div>
 
 @push('scripts')
 <script>
-  let currentPeminjamanId = null;
+  window.currentPeminjamanId = null;
 
   function bindDiskusiHandler() {
     const btn = document.getElementById('btnKirimDiskusi');
@@ -158,46 +173,23 @@
       .then(data => {
         const el = id => document.getElementById(id);
 
-        // Format tanggal Indonesia
-        const formatTanggal = (tanggalStr) => {
-          const date = new Date(tanggalStr);
-          return date.toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-          });
+        const formatTanggal = (tgl) => {
+          const d = new Date(tgl);
+          const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+          return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
         };
 
-        // Format jam HH:mm
-        const formatJam = (waktuStr) => {
-          return waktuStr ? waktuStr.slice(0, 5) : '-';
-        };
+        const formatJam = (jam) => jam?.substring(0,5) || '-';
 
-        // Set isi modal
         el('judulKegiatan').textContent = data.judul_kegiatan || '-';
         el('waktuKegiatan').textContent = `${formatTanggal(data.tgl_kegiatan)} ${formatJam(data.waktu_mulai)} - ${formatJam(data.waktu_berakhir)}`;
         el('aktivitas').textContent = data.aktivitas || '-';
+        el('organisasi').textContent = data.organisasi || '-';
         el('penanggungJawab').textContent = data.penanggung_jawab || '-';
         el('keterangan').textContent = data.deskripsi_kegiatan || '-';
         el('ruangan').textContent = data.nama_ruangan || '-';
 
-        // Perlengkapan
-        const perlengkapanList = el('perlengkapan');
-        perlengkapanList.innerHTML = '';
-        if (Array.isArray(data.perlengkapan) && data.perlengkapan.length > 0) {
-          data.perlengkapan.forEach(item => {
-            const li = document.createElement('li');
-            li.textContent = `${item.nama} - ${item.jumlah}`;
-            perlengkapanList.appendChild(li);
-          });
-        } else {
-          const li = document.createElement('li');
-          li.className = 'italic text-gray-400';
-          li.textContent = 'Tidak ada perlengkapan';
-          perlengkapanList.appendChild(li);
-        }
-
-        // Dokumen
+        // Update dokumen link to use secure download route if dokumen exists
         if (data.link_dokumen === 'ada') {
           let prefix = window.location.pathname.split('/')[1];
           if (!['admin','mahasiswa','bem','dosen','staff'].includes(prefix)) prefix = '';
@@ -232,6 +224,21 @@
           el('linkDokumen').onclick = null;
           el('linkDokumen').classList.add('pointer-events-none', 'text-gray-400');
           el('dokumenNotFound').classList.remove('hidden');
+        }
+
+        const perlengkapanList = el('perlengkapan');
+        perlengkapanList.innerHTML = '';
+        if (data.perlengkapan?.length > 0) {
+          data.perlengkapan.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.nama} - ${item.jumlah}`;
+            perlengkapanList.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          li.className = 'italic text-gray-400';
+          li.textContent = 'Tidak ada perlengkapan';
+          perlengkapanList.appendChild(li);
         }
 
         // Diskusi

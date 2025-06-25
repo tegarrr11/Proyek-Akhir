@@ -1,12 +1,29 @@
-@extends('layouts.sidebar-mahasiswa')
+<?php $__env->startSection('title', 'Peminjaman'); ?>
 
-@section('title', 'Peminjaman')
-
-@section('content')
-  <x-header title="Peminjaman" breadcrumb="Peminjaman > Pengajuan" />
+<?php $__env->startSection('content'); ?>
+  <?php if (isset($component)) { $__componentOriginalfd1f218809a441e923395fcbf03e4272 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalfd1f218809a441e923395fcbf03e4272 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.header','data' => ['title' => 'Peminjaman','breadcrumb' => 'Peminjaman > Pengajuan']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('header'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => 'Peminjaman','breadcrumb' => 'Peminjaman > Pengajuan']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalfd1f218809a441e923395fcbf03e4272)): ?>
+<?php $attributes = $__attributesOriginalfd1f218809a441e923395fcbf03e4272; ?>
+<?php unset($__attributesOriginalfd1f218809a441e923395fcbf03e4272); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalfd1f218809a441e923395fcbf03e4272)): ?>
+<?php $component = $__componentOriginalfd1f218809a441e923395fcbf03e4272; ?>
+<?php unset($__componentOriginalfd1f218809a441e923395fcbf03e4272); ?>
+<?php endif; ?>
 
   <div class="bg-white rounded-md shadow flex-1 p-6">
-    {{-- Tabs --}}
+    
     <div class="flex items-center justify-between mb-4">
       <div class="flex gap-6 relative">
         <button onclick="showTab('pengajuan')" id="tabPengajuan"
@@ -31,23 +48,42 @@
       </div>
     </div>
 
-    {{-- Tab Pengajuan --}}
+    
     <div id="pengajuanTab">
-        @include('components.pengajuan.table-pengajuan-mahasiswa', ['items' => $pengajuans])
+        <?php echo $__env->make('components.pengajuan.table-pengajuan-mahasiswa', ['items' => $pengajuans], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
 
-    {{-- Tab Riwayat --}}
+    
     <div id="riwayatTab" class="hidden">
-        @include('components.riwayat.table-riwayat-mahasiswa', ['items' => $riwayats])
+        <?php echo $__env->make('components.riwayat.table-riwayat-mahasiswa', ['items' => $riwayats], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
   </div>
 
-  {{-- Modal Detail Peminjaman --}}
-  <x-modal-detail-peminjaman />
-@endsection
+  
+  <?php if (isset($component)) { $__componentOriginal7a9d86cd1f97d28e5afda3793042d89d = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-detail-peminjaman','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('modal-detail-peminjaman'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d)): ?>
+<?php $attributes = $__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d; ?>
+<?php unset($__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal7a9d86cd1f97d28e5afda3793042d89d)): ?>
+<?php $component = $__componentOriginal7a9d86cd1f97d28e5afda3793042d89d; ?>
+<?php unset($__componentOriginal7a9d86cd1f97d28e5afda3793042d89d); ?>
+<?php endif; ?>
+<?php $__env->stopSection(); ?>
 
-@section('script')
-@push('scripts')
+<?php $__env->startSection('script'); ?>
+<?php $__env->startPush('scripts'); ?>
 <script>
   function tampilkanKolomKembali(event) {
     event.preventDefault();
@@ -225,7 +261,7 @@
         }
         if (el('diskusiArea')) el('diskusiArea').innerHTML = diskusiHtml;
 
-        const userRole = "{{ auth()->user()->role }}";
+        const userRole = "<?php echo e(auth()->user()->role); ?>";
         let enableDiskusi = false;
         if (userRole !== 'dosen') {
           if (userRole === 'mahasiswa' && adaChatAdminBem) {
@@ -268,5 +304,7 @@
     document.getElementById('detailModal')?.classList.add('hidden');
   }
 </script>
-@endpush
-@endsection
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.sidebar-mahasiswa', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/pages/mahasiswa/peminjaman.blade.php ENDPATH**/ ?>

@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Peminjaman</title>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="font-poppins bg-[#fffff] min-h-screen flex items-center justify-center px-4">
 
@@ -35,4 +34,4 @@
 
 </body>
 </html>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/auth/login.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/auth/login.blade.php ENDPATH**/ ?>

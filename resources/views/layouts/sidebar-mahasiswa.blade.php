@@ -154,5 +154,6 @@
   </script>
   <script src="https://unpkg.com/alpinejs" defer></script>
   @stack('scripts')
+    @yield('script')
 </body>
 </html>

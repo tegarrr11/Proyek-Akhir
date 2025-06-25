@@ -1,11 +1,24 @@
+// resources/js/bootstrap.js
+
 import axios from 'axios';
 window.axios = axios;
 
+// Set default header untuk semua request axios
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-//Laravel Echo dan Pusher
+/**
+ * Laravel Echo dan Pusher
+ * Komponen ini DIKOMENTARI agar tidak menimbulkan error jika belum setup .env
+ * 
+ * Untuk mengaktifkan kembali:
+ * - Buka komentar `import Echo`, `Pusher`, dan konfigurasi Echo
+ * - Pastikan .env sudah terisi VITE_PUSHER_APP_KEY dan lainnya
+ */
+
+/*
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+
 window.Pusher = Pusher;
 
 window.Echo = new Echo({
@@ -14,11 +27,13 @@ window.Echo = new Echo({
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     forceTLS: true
 });
+*/
 
-// Auto inject listener berdasarkan user ID
 document.addEventListener('DOMContentLoaded', function () {
     const userMeta = document.head.querySelector('meta[name="user-id"]');
-    if (userMeta) {
+
+    // Cek hanya jika window.Echo tersedia (tidak undefined)
+    if (userMeta && typeof window.Echo !== 'undefined') {
         const userId = userMeta.content;
 
         window.Echo.private(`notifikasi.${userId}`)
@@ -26,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log("🔔 Notifikasi Masuk:", e);
                 alert("🔔 " + e.judul + "\n" + e.pesan);
 
-                // Optional: inject ke UI jika ada #notifDropdown
                 const list = document.getElementById('notifDropdown');
                 if (list) {
                     const item = document.createElement('div');

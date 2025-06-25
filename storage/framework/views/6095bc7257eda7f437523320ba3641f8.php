@@ -18,3 +18,4 @@
   }
 
 </script>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/layouts/partials/head.blade.php ENDPATH**/ ?>
