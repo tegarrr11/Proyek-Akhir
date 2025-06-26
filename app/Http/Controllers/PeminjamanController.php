@@ -135,27 +135,33 @@ public function create(Request $request)
     /**
      * Menampilkan daftar pengajuan dan riwayat peminjaman mahasiswa.
      */
-    public function index()
+    public function index(Request $request)
     {
         $userId = Auth::id();
 
-        $pengajuans = Peminjaman::with('detailPeminjaman.fasilitas')
+        $queryPengajuan = Peminjaman::with('detailPeminjaman.fasilitas')
             ->where('user_id', $userId)
             ->where(function ($query) {
                 $query->whereNull('status_pengembalian')
                       ->orWhere('status_pengembalian', '!=', 'selesai');
-            })
-            ->latest()
-            ->get();
+            });
 
-        $riwayats = Peminjaman::with('detailPeminjaman.fasilitas')
+        $queryRiwayat = Peminjaman::with('detailPeminjaman.fasilitas')
             ->where('user_id', $userId)
-            ->where('status_pengembalian', 'selesai')
-            ->latest()
-            ->get();
+            ->where('status_pengembalian', 'selesai');
+
+        if ($request->filled('filter')) {
+            $tanggal = Carbon::parse($request->filter);
+            $queryPengajuan->whereDate('tgl_kegiatan', $tanggal);
+            $queryRiwayat->whereDate('tgl_kegiatan', $tanggal);
+        }
+
+        $pengajuans = $queryPengajuan->latest()->get();
+        $riwayats = $queryRiwayat->latest()->get();
 
         return view('pages.mahasiswa.peminjaman', compact('pengajuans', 'riwayats'));
     }
+
 
     /**
      * Mendapatkan daftar fasilitas berdasarkan slug gedung.
@@ -310,4 +316,6 @@ public function create(Request $request)
         \Log::info('DOWNLOAD_PROPOSAL_SUCCESS', ['user_id' => $user->id, 'role' => $user->role, 'file' => $path]);
         return response()->download($path);
     }
+
+    
 }

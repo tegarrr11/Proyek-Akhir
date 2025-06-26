@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>@yield('title')</title>
+  <title><?php echo $__env->yieldContent('title'); ?></title>
 
-  @include('layouts.partials.head')
-  @stack('head')
+  <?php echo $__env->make('layouts.partials.head', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+  <?php echo $__env->yieldPushContent('head'); ?>
 
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-  @if(Auth::check())
-    <meta name="user-id" content="{{ Auth::id() }}">
-  @endif
+  <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+  <?php if(Auth::check()): ?>
+    <meta name="user-id" content="<?php echo e(Auth::id()); ?>">
+  <?php endif; ?>
 
-  @vite(['resources/css/app.css', 'resources/js/app.js'])
+  <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
 </head>
 
 <body class="font-sans bg-gray-50 h-screen flex flex-col md:flex-row">
@@ -27,7 +27,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-      <img src="{{ asset('images/sarpras-logo.png') }}" alt="Logo" class="h-8">
+      <img src="<?php echo e(asset('images/sarpras-logo.png')); ?>" alt="Logo" class="h-8">
     </div>
     <!-- Notifikasi -->
     <div class="relative" x-data="notifDropdown()">
@@ -51,22 +51,22 @@
   <aside id="sidebar" class="w-64 bg-white border-r flex flex-col justify-between md:static fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40">
     <div class="p-6">
       <div class="text-center mt-4 mb-6 md:mt-12 md:mb-8 block">
-        <img src="{{ asset('images/sarpras-logo.png') }}" alt="Logo" class="w-32 md:w-40 mx-auto mb-2">
+        <img src="<?php echo e(asset('images/sarpras-logo.png')); ?>" alt="Logo" class="w-32 md:w-40 mx-auto mb-2">
       </div>
 
       <nav class="space-y-2">
-        <a href="{{ route('admin.dashboard') }}"
-           class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('admin.dashboard') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100' }}">
+        <a href="<?php echo e(route('admin.dashboard')); ?>"
+           class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium <?php echo e(request()->routeIs('admin.dashboard') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100'); ?>">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
           Dashboard
         </a>
-        <a href="{{ route('admin.fasilitas') }}"
-           class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('admin.fasilitas') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100' }}">
+        <a href="<?php echo e(route('admin.fasilitas')); ?>"
+           class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium <?php echo e(request()->routeIs('admin.fasilitas') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100'); ?>">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list-icon lucide-clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
           Fasilitas
         </a>
-        <a href="{{ route('admin.peminjaman') }}"
-           class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('admin.peminjaman') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100' }}">
+        <a href="<?php echo e(route('admin.peminjaman')); ?>"
+           class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium <?php echo e(request()->routeIs('admin.peminjaman') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100'); ?>">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history-icon lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
           Persetujuan & Riwayat
         </a>
@@ -75,8 +75,8 @@
 
     <!-- Logout -->
     <div class="p-6">
-      <form method="POST" action="{{ route('logout') }}">
-        @csrf
+      <form method="POST" action="<?php echo e(route('logout')); ?>">
+        <?php echo csrf_field(); ?>
         <button type="submit" class="logout flex items-center gap-2 text-[#003366] text-sm font-medium hover:underline">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
@@ -89,11 +89,11 @@
 
   <!-- Main Content -->
   <main class="flex-1 p-6 overflow-auto">
-    @yield('content')
+    <?php echo $__env->yieldContent('content'); ?>
   </main>
 
   <!-- Modal Detail Peminjaman -->
-  @include('components.card-detail-peminjaman')
+  <?php echo $__env->make('components.card-detail-peminjaman', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
   <script>
     window.currentPeminjamanId = null;
@@ -237,6 +237,7 @@
   </script>
 
   <script src="https://unpkg.com/alpinejs" defer></script>
-  @stack('scripts')
+  <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
+<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/layouts/sidebar-admin.blade.php ENDPATH**/ ?>
