@@ -210,4 +210,4 @@
 </script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.landing', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/pages/landing.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.landing', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/pages/landing.blade.php ENDPATH**/ ?>

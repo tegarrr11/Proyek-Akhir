@@ -34,4 +34,4 @@
 
 </body>
 </html>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/auth/login.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/auth/login.blade.php ENDPATH**/ ?>

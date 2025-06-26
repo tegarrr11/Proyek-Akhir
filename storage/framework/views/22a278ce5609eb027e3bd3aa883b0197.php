@@ -179,4 +179,4 @@
   }
 </script>
 <?php $__env->stopPush(); ?>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/modal-detail-peminjaman.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/components/modal-detail-peminjaman.blade.php ENDPATH**/ ?>

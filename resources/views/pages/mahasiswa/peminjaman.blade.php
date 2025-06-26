@@ -45,19 +45,11 @@
   {{-- Modal Detail Peminjaman --}}
   <x-modal-detail-peminjaman />
 
-  <button onclick="testModal()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded">TEST MODAL</button>
-
 @endsection
 
 @section('script')
 @push('scripts')
 <script>
-
-  function testModal() {
-    const modal = document.getElementById('detailModal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
   
   function tampilkanKolomKembali(event) {
     event.preventDefault();

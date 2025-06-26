@@ -50,12 +50,12 @@
 
     
     <div id="pengajuanTab">
-        <?php echo $__env->make('components.pengajuan.table-pengajuan-mahasiswa', ['items' => $pengajuans], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('components.pengajuan.table-pengajuan-bem', ['items' => $pengajuans], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
 
     
     <div id="riwayatTab" class="hidden">
-        <?php echo $__env->make('components.riwayat.table-riwayat-mahasiswa', ['items' => $riwayats], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('components.riwayat.table-riwayat-bem', ['items' => $riwayats], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
   </div>
 
@@ -80,11 +80,13 @@
 <?php $component = $__componentOriginal7a9d86cd1f97d28e5afda3793042d89d; ?>
 <?php unset($__componentOriginal7a9d86cd1f97d28e5afda3793042d89d); ?>
 <?php endif; ?>
+
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('script'); ?>
 <?php $__env->startPush('scripts'); ?>
 <script>
+  
   function tampilkanKolomKembali(event) {
     event.preventDefault();
     const form = event.target;
@@ -307,4 +309,4 @@
 <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.sidebar-mahasiswa', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/pages/mahasiswa/peminjaman.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.sidebar-bem', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/pages/bem/peminjaman.blade.php ENDPATH**/ ?>

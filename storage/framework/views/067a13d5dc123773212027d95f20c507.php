@@ -30,7 +30,7 @@
         </td>
         <td class="px-4 py-2"><?php echo e($item->organisasi); ?></td>
         <td class="px-4 py-2">
-          <button onclick="showDetail(<?php echo e($item->id); ?>)" class="text-blue-600 hover:text-blue-800 text-sm">
+          <button onclick="showDetail(<?php echo e($item->id); ?>,'riwayat')" class="text-blue-600 hover:text-blue-800 text-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -45,4 +45,5 @@
 
 
 
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/riwayat/table-riwayat-mahasiswa.blade.php ENDPATH**/ ?>
+
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/components/riwayat/table-riwayat-bem.blade.php ENDPATH**/ ?>

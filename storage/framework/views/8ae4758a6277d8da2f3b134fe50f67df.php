@@ -54,27 +54,6 @@
 </table>
 
 
-<?php if (isset($component)) { $__componentOriginal7a9d86cd1f97d28e5afda3793042d89d = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-detail-peminjaman','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('modal-detail-peminjaman'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes([]); ?>
-<?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d)): ?>
-<?php $attributes = $__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d; ?>
-<?php unset($__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal7a9d86cd1f97d28e5afda3793042d89d)): ?>
-<?php $component = $__componentOriginal7a9d86cd1f97d28e5afda3793042d89d; ?>
-<?php unset($__componentOriginal7a9d86cd1f97d28e5afda3793042d89d); ?>
-<?php endif; ?>
-
 <?php $__env->startPush('scripts'); ?>
 <script>
   window.currentPeminjamanId = null;
@@ -239,4 +218,4 @@
   }
   </script>
 <?php $__env->stopPush(); ?>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/pengajuan/table-pengajuan-bem.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/components/pengajuan/table-pengajuan-bem.blade.php ENDPATH**/ ?>

@@ -74,9 +74,6 @@
   </tbody>
 </table>
 
-{{-- Reusable Modal --}}
-<x-modal-detail-peminjaman />
-
 @push('scripts')
 <script>
   window.currentPeminjamanId = null;

@@ -25,4 +25,4 @@
   <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/layouts/landing.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/layouts/landing.blade.php ENDPATH**/ ?>

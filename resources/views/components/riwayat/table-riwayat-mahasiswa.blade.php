@@ -42,6 +42,3 @@
     @endforelse
   </tbody>
 </table>
-
-
-

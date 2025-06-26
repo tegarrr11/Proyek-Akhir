@@ -18,4 +18,4 @@
   }
 
 </script>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/layouts/partials/head.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\Kuliah\Proyek Akhir\peminjaman-fasilitas\resources\views/layouts/partials/head.blade.php ENDPATH**/ ?>

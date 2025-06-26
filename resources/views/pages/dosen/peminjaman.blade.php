@@ -33,12 +33,12 @@
 
     {{-- Tab Pengajuan --}}
     <div id="pengajuanTab">
-      <x-table-pengajuan-mahasiswa :items="$pengajuans" />
+        @include('components.pengajuan.table-pengajuan-dosen', ['items' => $pengajuans])
     </div>
 
     {{-- Tab Riwayat --}}
     <div id="riwayatTab" class="hidden">
-      <x-table-riwayat :items="$riwayats" />
+        @include('components.riwayat.table-riwayat-dosen', ['items' => $riwayats])
     </div>
   </div>
 

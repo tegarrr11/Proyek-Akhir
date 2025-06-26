@@ -53,7 +53,7 @@
           Download Riwayat
         </a>
       </div>
-      <x-riwayat.table-riwayat-admin :items="$riwayats" />
+        @include('components.riwayat.table-riwayat-admin', ['items' => $riwayats])
     </div>
   </div>
 
