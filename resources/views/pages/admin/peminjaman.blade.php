@@ -5,14 +5,12 @@
 @section('content')
   <x-header title="Peminjaman" breadcrumb="Peminjaman > Pengajuan" />
 
-  {{-- Notifikasi sukses --}}
   @if(session('success'))
     <div class="mb-4 bg-green-100 text-green-700 px-4 py-2 rounded">
       {{ session('success') }}
     </div>
   @endif
 
-  {{-- Card utama --}}
   <div class="bg-white rounded-lg shadow p-6">
     {{-- Tabs --}}
     <div class="flex items-center justify-between mb-6">
@@ -33,7 +31,7 @@
 
     {{-- Tab Pengajuan --}}
     <div id="pengajuanTab">
-      <x-table-pengajuan-admin :items="$pengajuans" />
+      <x-pengajuan.table-pengajuan-admin :items="$pengajuans" />
     </div>
 
     {{-- Tab Riwayat --}}
@@ -55,9 +53,12 @@
           Download Riwayat
         </a>
       </div>
-      <x-table-riwayat-admin :items="$riwayats" />
+      <x-riwayat.table-riwayat-admin :items="$riwayats" />
     </div>
   </div>
+
+  {{-- MODAL DETAIL GLOBAL --}}
+  <x-modal-detail-peminjaman />
 @endsection
 
 @push('scripts')
@@ -67,28 +68,14 @@
   }
 
   function showTab(tab) {
-    const tabs = ['pengajuan', 'riwayat'];
-    tabs.forEach(id => {
-      const tabEl = document.getElementById(`tab${capitalize(id)}`);
-      const underline = document.getElementById(`underline${capitalize(id)}`);
-      const tabDiv = document.getElementById(`${id}Tab`);
-      if (id === tab) {
-        tabEl.classList.remove('text-gray-500');
-        tabEl.classList.add('text-[#003366]');
-        underline.classList.add('scale-x-100');
-        underline.classList.remove('scale-x-0');
-        tabDiv.classList.remove('hidden');
-      } else {
-        tabEl.classList.add('text-gray-500');
-        tabEl.classList.remove('text-[#003366]');
-        underline.classList.add('scale-x-0');
-        underline.classList.remove('scale-x-100');
-        tabDiv.classList.add('hidden');
-      }
+    ['pengajuan', 'riwayat'].forEach(id => {
+      document.getElementById(`tab${capitalize(id)}`)?.classList.toggle('text-[#003366]', id === tab);
+      document.getElementById(`tab${capitalize(id)}`)?.classList.toggle('text-gray-500', id !== tab);
+      document.getElementById(`underline${capitalize(id)}`)?.classList.toggle('scale-x-100', id === tab);
+      document.getElementById(`underline${capitalize(id)}`)?.classList.toggle('scale-x-0', id !== tab);
+      document.getElementById(`${id}Tab`)?.classList.toggle('hidden', id !== tab);
     });
-    // Sembunyikan modal detail setiap kali pindah tab
-    const modal = document.getElementById('detailModal');
-    if (modal) modal.classList.add('hidden');
+    closeModal(); // Tutup modal saat ganti tab
   }
 
   function capitalize(str) {
@@ -96,9 +83,73 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tab = urlParams.get('tab') || 'pengajuan';
+    const tab = new URLSearchParams(window.location.search).get('tab') || 'pengajuan';
     showTab(tab);
   });
+
+  // Fungsi GLOBAL
+  window.showDetail = function(id) {
+    console.log('[DEBUG] Global showDetail called with id:', id);
+    fetch(`/admin/peminjaman/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        const el = id => document.getElementById(id);
+        el('judulKegiatan').innerText = data.judul_kegiatan || '-';
+        el('waktuKegiatan').innerText = data.tgl_kegiatan + ' (' + data.waktu_mulai?.slice(0,5) + ' - ' + data.waktu_berakhir?.slice(0,5) + ')';
+        el('aktivitas').innerText = data.aktivitas || '-';
+        el('organisasi').innerText = data.organisasi || '-';
+        el('penanggungJawab').innerText = data.penanggung_jawab || '-';
+        el('keterangan').innerText = data.deskripsi_kegiatan || '-';
+        el('ruangan').innerText = data.nama_ruangan || '-';
+
+        const perlengkapanList = el('perlengkapan');
+        perlengkapanList.innerHTML = '';
+        if (Array.isArray(data.perlengkapan) && data.perlengkapan.length > 0) {
+          data.perlengkapan.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.nama} - ${item.jumlah}`;
+            perlengkapanList.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          li.className = 'text-gray-400 italic';
+          li.textContent = 'Tidak ada perlengkapan';
+          perlengkapanList.appendChild(li);
+        }
+
+        const link = el('linkDokumen');
+        const notfound = el('dokumenNotFound');
+        if (data.link_dokumen === 'ada') {
+          const downloadUrl = `/admin/peminjaman/download-proposal/${data.id}`;
+          link.href = downloadUrl;
+          link.classList.remove('hidden');
+          notfound.classList.add('hidden');
+        } else {
+          link.href = '#';
+          link.classList.add('hidden');
+          notfound.classList.remove('hidden');
+        }
+
+        const diskusiArea = el('diskusiArea');
+        if (Array.isArray(data.diskusi)) {
+          let html = '';
+          data.diskusi.forEach(d => {
+            html += `<div class='mb-1'><span class='font-semibold text-xs text-blue-700'>${d.role}:</span> <span>${d.pesan}</span></div>`;
+          });
+          diskusiArea.innerHTML = html || '<p class="text-gray-400 italic">Belum ada diskusi</p>';
+        }
+
+        document.getElementById('detailModal').classList.remove('hidden');
+        window.currentPeminjamanId = data.id;
+      })
+      .catch(err => {
+        console.error('Gagal memuat detail:', err);
+        alert('Gagal memuat detail peminjaman.');
+      });
+  };
+
+  window.closeModal = function() {
+    document.getElementById('detailModal')?.classList.add('hidden');
+  };
 </script>
 @endpush

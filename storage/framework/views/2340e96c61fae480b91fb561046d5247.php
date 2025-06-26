@@ -118,3 +118,4 @@ function showDetail(id) {
     .catch(err => console.error('Gagal ambil data detail:', err));
 }
 </script>
+<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/card-detail-peminjaman.blade.php ENDPATH**/ ?>
