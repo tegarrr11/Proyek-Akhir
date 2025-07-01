@@ -28,13 +28,13 @@
 </style>
 
 <form>
-  {{-- Judul Kegiatan --}}
+  
   <div>
     <label class="block text-sm font-medium mb-1">Judul Kegiatan *</label>
     <input type="text" name="judul_kegiatan" class="w-full border border-gray-500 rounded px-3 py-2" required>
   </div>
 
-  {{-- Waktu Kegiatan --}}
+  
   <div>
     <label class="block text-sm font-medium mb-1">Waktu Kegiatan *</label>
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 items-center">
@@ -45,13 +45,13 @@
     </div>
   </div>
 
-  {{-- Aktivitas --}}
+  
   <div>
     <label class="block text-sm font-medium mb-1">Aktivitas *</label>
     <input type="text" name="aktivitas" class="w-full border border-gray-500 rounded px-3 py-2" required>
   </div>
 
-  {{-- Organisasi --}}
+  
   <div>
     <label class="block text-sm font-medium mb-1">Organisasi *</label>
     <select id="organisasiSelect" name="organisasi" class="w-full select2" required>
@@ -59,7 +59,7 @@
     </select>
   </div>
 
-  {{-- Penanggung Jawab --}}
+  
   <div>
     <label class="block text-sm font-medium mb-1">Penanggung Jawab *</label>
     <select id="penanggungSelect" name="penanggung_jawab" class="w-full select2" required>
@@ -67,19 +67,19 @@
     </select>
   </div>
 
-  {{-- Keterangan --}}
+  
   <div>
     <label class="block text-sm font-medium mb-1">Keterangan *</label>
     <textarea name="deskripsi_kegiatan" class="w-full border border-gray-500 rounded px-3 py-2" rows="3" placeholder="Penjelasan singkat kegiatan" required></textarea>
   </div>
 
-  {{-- Upload Proposal --}}
+  
   <div>
     <label class="block text-sm font-medium mb-1">Lampirkan Proposal (PDF) *</label>
     <input type="file" name="proposal" class="w-full border border-gray-500 rounded px-3 py-2" accept="application/pdf" required>
   </div>
 
-  {{-- Upload Surat Undangan Pembicara (Jika eksternal) --}}
+  
   <div id="undangan-wrapper" class="hidden">
     <label class="block text-sm font-medium mb-1">Surat Undangan Pembicara (PDF)</label>
     <input type="file" name="undangan_pembicara" class="w-full border border-gray-500 rounded px-3 py-2" accept="application/pdf">
@@ -165,4 +165,4 @@
       dropdownAutoWidth: true
     });
   });
-</script>
+</script><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/form-peminjaman/tahap2.blade.php ENDPATH**/ ?>

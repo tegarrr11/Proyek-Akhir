@@ -9,6 +9,7 @@ use App\Models\Notifikasi;
 use App\Mail\NotifikasiEmail;
 use App\Events\NotifikasiEvent;
 use App\Helpers\NotifikasiHelper;
+use App\Notifications\PengajuanDisetujuiBem;
 
 class BemPeminjamanController extends Controller
 {
@@ -51,8 +52,13 @@ class BemPeminjamanController extends Controller
         // Kirim notifikasi ke Admin
         $judul = 'Pengajuan Menunggu Persetujuan Admin';
         $pesan = 'Pengajuan oleh ' . $peminjaman->user->name . ' telah disetujui BEM dan menunggu verifikasi admin.';
-
         NotifikasiHelper::kirimKeRole('admin', $judul, $pesan);
+
+        // Kirim notifikasi email ke Mahasiswa
+        $mahasiswa = $peminjaman->user;
+        if ($mahasiswa && $mahasiswa->email) {
+            $mahasiswa->notify(new PengajuanDisetujuiBem($peminjaman));
+        }
 
         return redirect()->back()->with('success', 'Pengajuan berhasil disetujui oleh BEM.');
     }

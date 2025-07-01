@@ -40,7 +40,7 @@
       </div>
 
       <div class="flex gap-2">
-        <input type="text" id="searchInput" placeholder="Cari berdasarkan tanggal atau kata kunci..."
+        <input type="text" id="searchInput" placeholder="Cari berdasarkan tanggal/bulan..."
           class="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-[#003366]">
       </div>
     </div>

@@ -1,17 +1,18 @@
-<table class="w-full text-sm">
-  <thead class="bg-gray-100">
-    <tr class="font-semibold">
-      <th class="px-4 py-2 text-left">No.</th>
-      <th class="px-4 py-2">Judul Kegiatan</th>
-      <th class="px-4 py-2">Tanggal Pengajuan</th>
-      <th class="px-4 py-2">Verifikasi BEM</th>
-      <th class="px-4 py-2">Verifikasi Sarpras</th>
-      <th class="px-4 py-2">Organisasi</th>
-      <th class="px-4 py-2">Detail</th>
-    </tr>
-  </thead>
-  <tbody>
-    @forelse($items as $i => $item)
+<x-table-wrapper>
+  <table class="w-full text-sm">
+    <thead class="bg-gray-100">
+      <tr class="font-semibold">
+        <th class="px-4 py-2 text-left">No.</th>
+        <th class="px-4 py-2">Judul Kegiatan</th>
+        <th class="px-4 py-2">Tanggal Pengajuan</th>
+        <th class="px-4 py-2">Verifikasi BEM</th>
+        <th class="px-4 py-2">Verifikasi Sarpras</th>
+        <th class="px-4 py-2">Organisasi</th>
+        <th class="px-4 py-2">Detail</th>
+      </tr>
+    </thead>
+    <tbody>
+      @forelse($items as $i => $item)
       <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
         <td class="px-4 py-2">{{ $i + 1 }}</td>
         <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
@@ -21,11 +22,11 @@
         </td>
         <td class="px-4 py-2">
           @if ($item->verifikasi_sarpras === 'diterima')
-            <span class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">Diterima</span>
+          <span class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">Diterima</span>
           @elseif ($item->verifikasi_sarpras === 'ditolak')
-            <span class="bg-green-100 text-red-800 text-xs font-semibold px-3 py-1 rounded hover:bg-red-200 transition">Ditolak</span>
+          <span class="bg-green-100 text-red-800 text-xs font-semibold px-3 py-1 rounded hover:bg-red-200 transition">Ditolak</span>
           @else
-            <span class="bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yello-600">Proses</span>
+          <span class="bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yello-600">Proses</span>
           @endif
         </td>
         <td class="px-4 py-2">{{ $item->organisasi }}</td>
@@ -37,8 +38,11 @@
           </button>
         </td>
       </tr>
-    @empty
-      <tr><td colspan="7" class="text-center py-4 text-gray-500">Belum ada riwayat.</td></tr>
-    @endforelse
-  </tbody>
-</table>
+      @empty
+      <tr>
+        <td colspan="7" class="text-center py-4 text-gray-500">Belum ada riwayat.</td>
+      </tr>
+      @endforelse
+    </tbody>
+  </table>
+</x-table-wrapper>

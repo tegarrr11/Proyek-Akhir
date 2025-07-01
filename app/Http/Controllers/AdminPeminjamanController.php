@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Peminjaman;
 use App\Helpers\NotifikasiHelper;
+use App\Notifications\PengajuanDiterimaSarpras;
 
 class AdminPeminjamanController extends Controller
 {
@@ -52,11 +53,16 @@ class AdminPeminjamanController extends Controller
         $peminjaman->verifikasi_sarpras = 'diterima';
         $peminjaman->save();
 
-        // Notifikasi ke mahasiswa
+        // Notifikasi ke mahasiswa di sistem
         $mahasiswa = $peminjaman->user;
         $judul = 'Pengajuan Disetujui';
         $pesan = 'Pengajuan "' . $peminjaman->judul_kegiatan . '" telah disetujui oleh Admin.';
         NotifikasiHelper::kirimKeUser($mahasiswa, $judul, $pesan);
+
+        //  Notifikasi email ke mahasiswa
+        if ($mahasiswa && $mahasiswa->email) {
+            $mahasiswa->notify(new PengajuanDiterimaSarpras($peminjaman));
+        }
 
         return redirect()->back()->with('success', 'Pengajuan berhasil disetujui oleh Sarpras.');
     }

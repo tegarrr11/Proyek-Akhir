@@ -19,7 +19,8 @@ use App\Http\Controllers\AdminPeminjamanController;
 use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\DosenPeminjamanController;
 use App\Http\Controllers\DiskusiController;
-
+use App\Http\Controllers\SocialiteController;
+use App\Models\Fasilitas;
 
 // ========== LANDING PAGE ==========
 Route::get('/', function () {
@@ -50,7 +51,12 @@ Route::get('/', function () {
     return view('pages.landing', compact('gedungs', 'selectedGedungId', 'events'));
 })->name('landing');
 
-Route::get('/login', fn () => view('auth.login'))->name('login');
+Route::get('/login', fn() => view('auth.login'))->name('login');
+
+
+Route::get('/auth/redirect', [SocialiteController::class, 'redirect']);
+Route::get('/auth/google/callback', [SocialiteController::class, 'callback']);
+Route::post('/logout', [SocialiteController::class, 'logout'])->name('logout');
 
 Route::get('/quick-login/{role}', function ($role) {
     $user = User::firstOrCreate(
@@ -105,7 +111,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/fasilitas/{id}', [FasilitasController::class, 'destroy'])->name('admin.fasilitas.destroy');
         Route::get('/peminjaman/{id}/detail', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.detail');
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('admin.peminjaman');
-        Route::get('/peminjaman/create', function() {
+        Route::get('/peminjaman/create', function () {
             return view('pages.admin.peminjaman.create');
         })->name('admin.peminjaman.create');
         Route::post('/peminjaman/store', [AdminPeminjamanController::class, 'store'])->name('admin.peminjaman.store');
@@ -119,7 +125,7 @@ Route::middleware(['auth'])->group(function () {
     // === MAHASISWA ===
     Route::prefix('mahasiswa')->group(function () {
         Route::get('/dashboard', [MahasiswaController::class, 'dashboard'])->name('mahasiswa.dashboard');
-        Route::get('/fasilitas', fn () => view('pages.mahasiswa.fasilitas'))->name('mahasiswa.fasilitas');
+        Route::get('/fasilitas', fn() => view('pages.mahasiswa.fasilitas'))->name('mahasiswa.fasilitas');
 
         Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('mahasiswa.peminjaman');
         Route::post('/peminjaman/store', [PeminjamanController::class, 'store'])->name('mahasiswa.peminjaman.store');
@@ -127,17 +133,17 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/peminjaman/{id}/kembalikan', [PeminjamanController::class, 'kembalikan'])->name('mahasiswa.peminjaman.kembalikan');
         Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('mahasiswa.peminjaman.show');
 
-        Route::get('/auditorium', fn () => view('pages.mahasiswa.kalender', [
+        Route::get('/auditorium', fn() => view('pages.mahasiswa.kalender', [
             'title' => 'Auditorium',
             'breadcrumb' => 'Dashboard > Ruangan > Auditorium'
         ]))->name('mahasiswa.auditorium');
 
-        Route::get('/gsg', fn () => view('pages.mahasiswa.kalender', [
+        Route::get('/gsg', fn() => view('pages.mahasiswa.kalender', [
             'title' => 'Main Hall GSG',
             'breadcrumb' => 'Dashboard > Ruangan > Main Hall GSG'
         ]))->name('mahasiswa.gsg');
 
-        Route::get('/gor', fn () => view('pages.mahasiswa.kalender', [
+        Route::get('/gor', fn() => view('pages.mahasiswa.kalender', [
             'title' => 'GOR',
             'breadcrumb' => 'Dashboard > Ruangan > GOR'
         ]))->name('mahasiswa.gor');
@@ -171,9 +177,10 @@ Route::middleware(['auth'])->group(function () {
     // === FORM DAN API ===
     Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
     Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show']);
-    Route::get('/fasilitas/ajukan', fn () => view('pages.mahasiswa.peminjaman.create'))->name('peminjaman.create');
+    Route::get('/fasilitas/ajukan', fn() => view('pages.mahasiswa.peminjaman.create'))->name('peminjaman.create');
     Route::get('/api/barang', [PeminjamanController::class, 'getBarangByRuangan']);
     Route::get('/api/ruangan/{slug}', [AdminController::class, 'getGedung']);
+
 
     // === NOTIFIKASI ===
     Route::get('/notif/list', function () {
@@ -187,7 +194,9 @@ Route::middleware(['auth'])->group(function () {
 
         $filename = "riwayat_peminjaman_" . now()->format('Ymd_His') . ".csv";
         return response()->streamDownload(function () use ($data) {
-            ob_clean(); flush(); $file = fopen('php://output', 'w');
+            ob_clean();
+            flush();
+            $file = fopen('php://output', 'w');
             fwrite($file, "\xEF\xBB\xBF");
             fputcsv($file, array_keys((array) $data[0]), ';');
             foreach ($data as $row) fputcsv($file, (array) $row, ';');
@@ -205,7 +214,9 @@ Route::middleware(['auth'])->group(function () {
             ->where('verifikasi_bem', 'diterima')->get();
 
         return response()->streamDownload(function () use ($data) {
-            ob_clean(); flush(); $file = fopen('php://output', 'w');
+            ob_clean();
+            flush();
+            $file = fopen('php://output', 'w');
             fwrite($file, "\xEF\xBB\xBF");
             fputcsv($file, array_keys((array) $data[0]), ';');
             foreach ($data as $row) fputcsv($file, (array) $row, ';');
@@ -222,7 +233,9 @@ Route::middleware(['auth'])->group(function () {
             ->where('verifikasi_sarpras', 'diterima')->get();
 
         return response()->streamDownload(function () use ($data) {
-            ob_clean(); flush(); $file = fopen('php://output', 'w');
+            ob_clean();
+            flush();
+            $file = fopen('php://output', 'w');
             fwrite($file, "\xEF\xBB\xBF");
             fputcsv($file, array_keys((array) $data[0]), ';');
             foreach ($data as $row) fputcsv($file, (array) $row, ';');
@@ -237,6 +250,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Route untuk fiturr diskusi
-Route::middleware(['auth'])->group(function() {
+Route::middleware(['auth'])->group(function () {
     Route::post('/diskusi', [DiskusiController::class, 'store'])->name('diskusi.store');
 });

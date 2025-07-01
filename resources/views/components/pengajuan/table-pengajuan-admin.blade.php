@@ -1,17 +1,18 @@
-<table class="w-full text-sm text-left text-gray-700">
-  <thead class="bg-gray-100 text-black border-b">
-    <tr class="text-sm font-semibold">
-      <th class="px-4 py-2">No.</th>
-      <th class="px-4 py-2">Pengajuan</th>
-      <th class="px-4 py-2">Tanggal Pengajuan</th>
-      <th class="px-4 py-2">Verifikasi BEM</th>
-      <th class="px-4 py-2">Verifikasi Sarpras</th>
-      <th class="px-4 py-2">Organisasi</th>
-      <th class="px-4 py-2 text-center">Aksi</th>
-    </tr>
-  </thead>
-  <tbody>
-    @forelse($items as $i => $item)
+<x-table-wrapper>
+  <table class="w-full text-sm text-left text-gray-700">
+    <thead class="bg-gray-100 text-black border-b">
+      <tr class="text-sm font-semibold">
+        <th class="px-4 py-2">No.</th>
+        <th class="px-4 py-2">Pengajuan</th>
+        <th class="px-4 py-2">Tanggal Pengajuan</th>
+        <th class="px-4 py-2">Verifikasi BEM</th>
+        <th class="px-4 py-2">Verifikasi Sarpras</th>
+        <th class="px-4 py-2">Organisasi</th>
+        <th class="px-4 py-2 text-center">Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      @forelse($items as $i => $item)
       <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
         <td class="px-4 py-2">{{ $i + 1 }}</td>
         <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
@@ -66,13 +67,14 @@
           </div>
         </td>
       </tr>
-    @empty
+      @empty
       <tr>
         <td colspan="7" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
       </tr>
-    @endforelse
-  </tbody>
-</table>
+      @endforelse
+    </tbody>
+  </table>
+</x-table-wrapper>
 
 @push('scripts')
 <script>
@@ -85,7 +87,7 @@
     const input = modal.querySelector('#inputDiskusi');
     if (!btn || !input) return;
 
-    btn.onclick = function () {
+    btn.onclick = function() {
       const pesan = input.value.trim();
       if (!pesan || !currentPeminjamanId) return;
       btn.setAttribute('disabled', true);
@@ -96,13 +98,16 @@
       }
 
       fetch('/diskusi', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': csrf,
-        },
-        body: JSON.stringify({ peminjaman_id: currentPeminjamanId, pesan })
-      })
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrf,
+          },
+          body: JSON.stringify({
+            peminjaman_id: currentPeminjamanId,
+            pesan
+          })
+        })
         .then(res => res.json())
         .then(resp => {
           if (resp.success) showDetail(currentPeminjamanId);
@@ -121,11 +126,11 @@
 
         const formatTanggal = (tgl) => {
           const d = new Date(tgl);
-          const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+          const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
           return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
         };
 
-        const formatJam = (jam) => jam?.substring(0,5) || '-';
+        const formatJam = (jam) => jam?.substring(0, 5) || '-';
 
         el('judulKegiatan').textContent = data.judul_kegiatan || '-';
         el('waktuKegiatan').textContent = `${formatTanggal(data.tgl_kegiatan)} ${formatJam(data.waktu_mulai)} - ${formatJam(data.waktu_berakhir)}`;
@@ -138,30 +143,30 @@
         // Update dokumen link to use secure download route if dokumen exists
         if (data.link_dokumen === 'ada') {
           let prefix = window.location.pathname.split('/')[1];
-          if (!['admin','mahasiswa','bem','dosen','staff'].includes(prefix)) prefix = '';
+          if (!['admin', 'mahasiswa', 'bem', 'dosen', 'staff'].includes(prefix)) prefix = '';
           let downloadUrl = prefix ? `/${prefix}/peminjaman/download-proposal/${data.id}` : `/peminjaman/download-proposal/${data.id}`;
           el('linkDokumen').href = downloadUrl;
           el('linkDokumen').onclick = function(e) {
             e.preventDefault();
             fetch(downloadUrl, {
-              method: 'GET',
-              credentials: 'same-origin',
-            })
-            .then(response => {
-              if (!response.ok) throw new Error('Gagal download dokumen');
-              return response.blob();
-            })
-            .then(blob => {
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'proposal.pdf';
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-              window.URL.revokeObjectURL(url);
-            })
-            .catch(() => alert('Gagal download dokumen.'));
+                method: 'GET',
+                credentials: 'same-origin',
+              })
+              .then(response => {
+                if (!response.ok) throw new Error('Gagal download dokumen');
+                return response.blob();
+              })
+              .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'proposal.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+              })
+              .catch(() => alert('Gagal download dokumen.'));
           };
           el('linkDokumen').classList.remove('pointer-events-none', 'text-gray-400');
           el('dokumenNotFound').classList.add('hidden');

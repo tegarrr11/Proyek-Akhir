@@ -1,22 +1,32 @@
-<table class="w-full text-sm">
-  <thead class="bg-gray-100">
-    <tr>
-      <th class="px-4 py-2">No.</th>
-      <th class="px-4 py-2">Pengajuan</th>
-      <th class="px-4 py-2">Tanggal Pengajuan</th>
-      <th class="px-4 py-2">Verifikasi BEM</th>
-      <th class="px-4 py-2">Verifikasi Sarpras</th>
-      <th class="px-4 py-2">Organisasi</th>
-      <th class="px-4 py-2">Status Peminjaman</th>
-      <th class="px-4 py-2">Status Pengembalian</th>
-      <th class="px-4 py-2 hidden status-kembali-col">Status Pengembalian</th>
-      <th class="px-4 py-2"></th>
-    </tr>
-  </thead>
-  <tbody>
-    <?php $__empty_1 = true; $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+<?php if (isset($component)) { $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table-wrapper','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('table-wrapper'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+  <table class="w-full text-sm">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2">No.</th>
+        <th class="px-4 py-2">Pengajuan</th>
+        <th class="px-4 py-2">Tanggal Pengajuan</th>
+        <th class="px-4 py-2">Verifikasi BEM</th>
+        <th class="px-4 py-2">Verifikasi Sarpras</th>
+        <th class="px-4 py-2">Organisasi</th>
+        <th class="px-4 py-2">Status Peminjaman</th>
+        <th class="px-4 py-2">Status Pengembalian</th>
+        <th class="px-4 py-2 hidden status-kembali-col">Status Pengembalian</th>
+        <th class="px-4 py-2"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php $__empty_1 = true; $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
       <?php if($item->status_pengembalian === 'selesai'): ?>
-        <?php continue; ?>
+      <?php continue; ?>
       <?php endif; ?>
 
       <tr class="<?php echo e($i % 2 == 0 ? 'bg-white' : 'bg-gray-50'); ?>">
@@ -48,36 +58,36 @@
         <td class="px-4 py-2"><?php echo e($item->organisasi); ?></td>
         <td class="px-4 py-2">
           <?php if($item->verifikasi_sarpras === 'diterima'): ?>
-            <?php if($item->status_peminjaman === 'kembalikan' && $item->status_pengembalian === 'proses'): ?>
-              <form method="POST" action="<?php echo e(route('mahasiswa.peminjaman.kembalikan', $item->id)); ?>" onsubmit="return confirm('Yakin ingin mengembalikan barang ini?')">
-                <?php echo csrf_field(); ?>
-                <?php echo method_field('PATCH'); ?>
-                <button class="bg-yellow-500 text-white px-3 py-1 text-xs rounded hover:bg-yellow-600 flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Kembalikan
-                </form>
-            <?php elseif(is_null($item->status_peminjaman)): ?>
-              <form method="POST" action="<?php echo e(route('mahasiswa.peminjaman.ambil', $item->id)); ?>">
-                <?php echo csrf_field(); ?>
-                <?php echo method_field('PATCH'); ?>
-                <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Ambil</button>
-              </form>
-            <?php else: ?>
-              <?php echo e(ucfirst($item->status_peminjaman)); ?>
-
-            <?php endif; ?>
+          <?php if($item->status_peminjaman === 'kembalikan' && $item->status_pengembalian === 'proses'): ?>
+          <form method="POST" action="<?php echo e(route('mahasiswa.peminjaman.kembalikan', $item->id)); ?>" onsubmit="return confirm('Yakin ingin mengembalikan barang ini?')">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PATCH'); ?>
+            <button class="bg-yellow-500 text-white px-3 py-1 text-xs rounded hover:bg-yellow-600 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              Kembalikan
+          </form>
+          <?php elseif(is_null($item->status_peminjaman)): ?>
+          <form method="POST" action="<?php echo e(route('mahasiswa.peminjaman.ambil', $item->id)); ?>">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PATCH'); ?>
+            <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Ambil</button>
+          </form>
           <?php else: ?>
-            <span class="text-gray-400 text-xs italic">-</span>
+          <?php echo e(ucfirst($item->status_peminjaman)); ?>
+
+          <?php endif; ?>
+          <?php else: ?>
+          <span class="text-gray-400 text-xs italic">-</span>
           <?php endif; ?>
         </td>
 
         <td class="px-4 py-2">
           <?php if($item->status_peminjaman === 'kembalikan'): ?>
-            <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full">Belum</span>
+          <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full">Belum</span>
           <?php else: ?>
-            <span class="text-gray-400 text-xs italic">-</span>
+          <span class="text-gray-400 text-xs italic">-</span>
           <?php endif; ?>
         </td>
         <td class="px-4 py-2 hidden status-kembali-col"><?php echo e(ucfirst($item->status_pengembalian ?? '-')); ?></td>
@@ -92,13 +102,23 @@
           </div>
         </td>
       </tr>
-    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
       <tr>
         <td colspan="9" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
       </tr>
-    <?php endif; ?>
-  </tbody>
-</table>
+      <?php endif; ?>
+    </tbody>
+  </table>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997)): ?>
+<?php $attributes = $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997; ?>
+<?php unset($__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997)): ?>
+<?php $component = $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997; ?>
+<?php unset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997); ?>
+<?php endif; ?>
 
 <?php $__env->startPush('scripts'); ?>
 <script>
@@ -137,7 +157,7 @@
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     showTab('pengajuan');
   });
 
@@ -150,7 +170,7 @@
     const input = modal.querySelector('.inputDiskusi');
     if (!btn || !input) return;
 
-    btn.onclick = function () {
+    btn.onclick = function() {
       const pesan = input.value.trim();
       if (!pesan || !currentPeminjamanId) return;
       btn.setAttribute('disabled', true);
@@ -160,13 +180,16 @@
         if (tokenInput) csrf = tokenInput.value;
       }
       fetch('/diskusi', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': csrf,
-        },
-        body: JSON.stringify({ peminjaman_id: currentPeminjamanId, pesan })
-      })
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrf,
+          },
+          body: JSON.stringify({
+            peminjaman_id: currentPeminjamanId,
+            pesan
+          })
+        })
         .then(res => res.json())
         .then(resp => {
           if (resp.success) {
@@ -223,12 +246,12 @@
           if (!['admin', 'mahasiswa', 'bem', 'dosen', 'staff'].includes(prefix)) prefix = '';
           let downloadUrl = prefix ? `/${prefix}/peminjaman/download-proposal/${data.id}` : `/peminjaman/download-proposal/${data.id}`;
           el('linkDokumen').href = downloadUrl;
-          el('linkDokumen').onclick = function (e) {
+          el('linkDokumen').onclick = function(e) {
             e.preventDefault();
             fetch(downloadUrl, {
-              method: 'GET',
-              credentials: 'same-origin',
-            })
+                method: 'GET',
+                credentials: 'same-origin',
+              })
               .then(response => {
                 if (!response.ok) throw new Error('Gagal download dokumen');
                 return response.blob();
@@ -304,5 +327,4 @@
     document.getElementById('detailModal')?.classList.add('hidden');
   }
 </script>
-<?php $__env->stopPush(); ?>
-<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/pengajuan/table-pengajuan-mahasiswa.blade.php ENDPATH**/ ?>
+<?php $__env->stopPush(); ?><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/pengajuan/table-pengajuan-mahasiswa.blade.php ENDPATH**/ ?>

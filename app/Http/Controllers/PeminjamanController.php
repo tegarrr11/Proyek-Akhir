@@ -10,10 +10,13 @@ use App\Models\Notifikasi;
 use App\Mail\NotifikasiEmail;
 use App\Events\NotifikasiEvent;
 use App\Helpers\NotifikasiHelper;
+use App\Notifications\PengajuanMasuk;
+use App\Notifications\PengajuanBaru;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
+    
 
 class PeminjamanController extends Controller
 {
@@ -127,11 +130,27 @@ public function create(Request $request)
                 }
             }
         }
-        /*Mentrigger notifikasi ke masing masing role */
-        NotifikasiHelper::kirimKeRoles(['bem', 'admin'], 'Pengajuan Baru', 'Pengajuan oleh ' . Auth::user()->name);
+        // 🔔 Kirim notifikasi ke mahasiswa (pengaju)
+        $mahasiswa = Auth::user();
+        $mahasiswa->notify(new PengajuanMasuk($peminjaman));
+
+        // 🔔 Kirim notifikasi ke semua user BEM dan Admin
+        $bemUsers = User::where('role', 'bem')->get();
+        $adminUsers = User::where('role', 'admin')->get();
+
+        foreach ($bemUsers as $bem) {
+            $bem->notify(new PengajuanBaru($peminjaman));
+        }
+        foreach ($adminUsers as $admin) {
+            $admin->notify(new PengajuanBaru($peminjaman));
+        }
+
+        // 🔔 Trigger notifikasi realtime internal
+        NotifikasiHelper::kirimKeRoles(['bem', 'admin'], 'Pengajuan Baru', 'Pengajuan oleh ' . $mahasiswa->name);
 
         return redirect()->route('mahasiswa.peminjaman')->with('success', 'Peminjaman berhasil diajukan.');
     }
+    
     /**
      * Menampilkan daftar pengajuan dan riwayat peminjaman mahasiswa.
      */

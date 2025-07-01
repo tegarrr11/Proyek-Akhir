@@ -1,8 +1,36 @@
-{{-- resources/views/components/peminjaman/tahap1.blade.php --}}
 
-@props(['fasilitasLainnya' => []])
 
-@php
+<?php $attributes ??= new \Illuminate\View\ComponentAttributeBag;
+
+$__newAttributes = [];
+$__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames((['fasilitasLainnya' => []]));
+
+foreach ($attributes->all() as $__key => $__value) {
+    if (in_array($__key, $__propNames)) {
+        $$__key = $$__key ?? $__value;
+    } else {
+        $__newAttributes[$__key] = $__value;
+    }
+}
+
+$attributes = new \Illuminate\View\ComponentAttributeBag($__newAttributes);
+
+unset($__propNames);
+unset($__newAttributes);
+
+foreach (array_filter((['fasilitasLainnya' => []]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
+    $$__key = $$__key ?? $__value;
+}
+
+$__defined_vars = get_defined_vars();
+
+foreach ($attributes->all() as $__key => $__value) {
+    if (array_key_exists($__key, $__defined_vars)) unset($$__key);
+}
+
+unset($__defined_vars); ?>
+
+<?php
 use App\Models\Gedung;
 use App\Models\Fasilitas;
 
@@ -10,21 +38,21 @@ $gedungSlug = strtolower(request('gedung', ''));
 $gedung = Gedung::where('slug', $gedungSlug)->first();
 $fasilitasLainnya = Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
 $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('stok', '>', 0)->get() : [];
-@endphp
+?>
 
 <div id="step1" class="bg-white border-t p-4 space-y-4 active-step">
-  {{-- Pilih Gedung --}}
+  
   <div>
     <label class="block mb-1 text-sm font-medium">Ruangan *</label>
     <select class="w-full border rounded px-3 py-2" name="gedung" id="gedung-select"
       onchange="window.location.href='?gedung=' + this.value; document.getElementById('gedung-hidden').value = this.value;">
       <option value="">-- Pilih Ruangan --</option>
-      <option value="gsg" {{ request('gedung') == 'gsg' ? 'selected' : '' }}>Main Hall GSG</option>
-      <option value="gor" {{ request('gedung') == 'gor' ? 'selected' : '' }}>GOR</option>
-      <option value="auditorium" {{ request('gedung') == 'auditorium' ? 'selected' : '' }}>Auditorium</option>
-      <option value="r361" {{ request('gedung') == 'r361' ? 'selected' : '' }}>R. 361</option>
+      <option value="gsg" <?php echo e(request('gedung') == 'gsg' ? 'selected' : ''); ?>>Main Hall GSG</option>
+      <option value="gor" <?php echo e(request('gedung') == 'gor' ? 'selected' : ''); ?>>GOR</option>
+      <option value="auditorium" <?php echo e(request('gedung') == 'auditorium' ? 'selected' : ''); ?>>Auditorium</option>
+      <option value="r361" <?php echo e(request('gedung') == 'r361' ? 'selected' : ''); ?>>R. 361</option>
     </select>
-    <input type="hidden" name="gedung" id="gedung-hidden" value="{{ request('gedung') }}">
+    <input type="hidden" name="gedung" id="gedung-hidden" value="<?php echo e(request('gedung')); ?>">
     <script>
       document.getElementById('gedung-select').addEventListener('change', function () {
         document.getElementById('gedung-hidden').value = this.value;
@@ -32,14 +60,14 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
     </script>
   </div>
 
-  {{-- Jenis Kegiatan --}}
+  
   <div id="jenis-kegiatan-wrapper" class="hidden">
     <label class="block text-sm font-medium mb-1">Jenis Kegiatan *</label>
     <div id="jenis-kegiatan-radio" class="flex gap-4 text-sm"></div>
   </div>
 
-  {{-- Fasilitas --}}
-  @if (!empty($fasilitasList))
+  
+  <?php if(!empty($fasilitasList)): ?>
     <div id="fasilitas-section">
       <label class="block mb-1 text-sm font-medium">Barang dan Perlengkapan Default *</label>
       <table class="w-full border text-sm mb-6">
@@ -52,17 +80,18 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
           </tr>
         </thead>
         <tbody id="fasilitas-body">
-          @foreach ($fasilitasList as $index => $item)
-            <tr data-index="{{ $index }}">
-              <td class="border px-2 text-center">{{ $index + 1 }}</td>
+          <?php $__currentLoopData = $fasilitasList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <tr data-index="<?php echo e($index); ?>">
+              <td class="border px-2 text-center"><?php echo e($index + 1); ?></td>
               <td class="border px-2">
-                {{ $item->nama_barang }}
-                <input type="hidden" name="barang[{{ $index }}][id]" value="{{ $item->id }}">
+                <?php echo e($item->nama_barang); ?>
+
+                <input type="hidden" name="barang[<?php echo e($index); ?>][id]" value="<?php echo e($item->id); ?>">
               </td>
               <td class="border px-2 text-center">
-                <input type="number" name="barang[{{ $index }}][jumlah]" class="jumlah-barang border rounded w-20 text-center"
-                       max="{{ $item->stok }}" value="{{ $item->stok }}" min="0">
-                <small class="text-gray-400 block">Max: {{ $item->stok }}</small>
+                <input type="number" name="barang[<?php echo e($index); ?>][jumlah]" class="jumlah-barang border rounded w-20 text-center"
+                       max="<?php echo e($item->stok); ?>" value="<?php echo e($item->stok); ?>" min="0">
+                <small class="text-gray-400 block">Max: <?php echo e($item->stok); ?></small>
               </td>
               <td class="border px-2 text-center">
                 <button type="button" onclick="hapusBaris(this)" class="text-red-500 hover:text-red-700">
@@ -72,13 +101,13 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
                 </button>
               </td>
             </tr>
-          @endforeach
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </tbody>
       </table>
     </div>
-  @endif
+  <?php endif; ?>
 
-  {{-- Fasilitas Tambahan --}}
+  
   <div id="fasilitas-tambahan-section" class="mt-4 hidden">
     <label class="block mb-1 text-sm font-medium">Barang dan Perlengkapan Tambahan</label>
     <table class="w-full border text-sm">
@@ -95,7 +124,7 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
     </table>
   </div>
 
-  {{-- Tombol --}}
+  
   <div class="flex justify-end items-center gap-4 mt-4">
     <div id="peringatan" class="text-red-600 text-sm hidden">
       ⚠️ Jumlah barang melebihi batas maksimal stok!
@@ -113,18 +142,18 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
         </button>
         <h3 class="text-lg font-semibold mb-4">Fasilitas Tambahan</h3>
         <div id="fasilitasList" class="space-y-3 max-h-[300px] overflow-y-auto text-sm text-gray-800">
-          @foreach ($fasilitasLainnya as $item)
-            <div class="flex justify-between items-center border-b py-2" id="modal-item-{{ $item->id }}">
+          <?php $__currentLoopData = $fasilitasLainnya; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <div class="flex justify-between items-center border-b py-2" id="modal-item-<?php echo e($item->id); ?>">
               <div>
-                <div class="font-semibold">{{ $item->nama_barang }}</div>
-                <div class="text-xs text-gray-500">Stok: {{ $item->stok }}</div>
+                <div class="font-semibold"><?php echo e($item->nama_barang); ?></div>
+                <div class="text-xs text-gray-500">Stok: <?php echo e($item->stok); ?></div>
               </div>
               <button type="button" class="text-blue-600 hover:underline text-xs"
-                      onclick="tambahKeFasilitas({{ $item->id }}, '{{ $item->nama_barang }}', {{ $item->stok }})">
+                      onclick="tambahKeFasilitas(<?php echo e($item->id); ?>, '<?php echo e($item->nama_barang); ?>', <?php echo e($item->stok); ?>)">
                 Tambah
               </button>
             </div>
-          @endforeach
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
       </div>
     </div>
@@ -296,3 +325,4 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
     toggleStep(1);
   });
 </script>
+<?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/form-peminjaman/tahap1.blade.php ENDPATH**/ ?>

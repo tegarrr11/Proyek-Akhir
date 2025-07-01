@@ -21,6 +21,13 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->longText('google_id')->nullable();
+            $table->longText('google_token')->nullable();
+            $table->longText('google_refresh_token')->nullable();
+            $table->longText('avatar')->nullable();
+            $table->string('nim')->nullable();
+            $table->string('prodi')->nullable();
+            $table->string('inisial')->nullable();
         });
 
         // Token reset password
