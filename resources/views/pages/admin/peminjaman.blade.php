@@ -36,16 +36,37 @@
 
   {{-- Tab Riwayat --}}
   <div id="riwayatTab" class="hidden">
-    <div class="mb-4 flex items-center justify-between gap-2">
-      <form method="GET" action="" class="flex gap-2 mb-0" onsubmit="setRiwayatTabFlag()">
-        <select name="gedung_id" class="border rounded px-2 py-1 text-sm" onchange="setRiwayatTabFlag(); this.form.submit();">
+    <div class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <form method="GET" action="" class="flex gap-2 items-center w-full md:w-auto" onsubmit="setRiwayatTabFlag()">
+        <!-- Tombol Search (hanya mobile) -->
+        <button id="searchIcon" onclick="toggleSearchInput()" type="button" class="md:hidden text-gray-600">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path fill="#777" d="M9.5 16q-2.725 0-4.612-1.888T3 9.5t1.888-4.612T9.5 3t4.613 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l5.6 5.6q.275.275.275.7t-.275.7t-.7.275t-.7-.275l-5.6-5.6q-.75.6-1.725.95T9.5 16m0-2q1.875 0 3.188-1.312T14 9.5t-1.312-3.187T9.5 5T6.313 6.313T5 9.5t1.313 3.188T9.5 14"/>
+          </svg>
+        </button>
+
+        <!-- Input Search -->
+        <input
+          type="text"
+          id="searchInput"
+          name="search"
+          placeholder="Cari kegiatan..."
+          value="{{ request('search') }}"
+          class="hidden md:block border border-gray-300 rounded px-3 py-1 text-sm bg-white shadow z-20 w-40 md:w-52 focus:outline-none focus:ring-0 focus:border-gray-300 transition-all"
+        />
+
+        <!-- Dropdown -->
+        <select name="gedung_id" class="border rounded px-2 py-1 text-sm w-40" onchange="setRiwayatTabFlag(); this.form.submit();">
           <option value="">Semua Ruangan</option>
           @foreach(App\Models\Gedung::all() as $gedung)
           <option value="{{ $gedung->id }}" {{ request('gedung_id') == $gedung->id ? 'selected' : '' }}>{{ $gedung->nama }}</option>
           @endforeach
         </select>
+
         <input type="hidden" name="tab" id="tabInput" value="riwayat">
       </form>
+
+      <!-- Tombol Download -->
       <a href="{{ route('download.riwayat.admin') }}"
         class="inline-flex items-center gap-2 border rounded px-2 py-1 text-sm bg-blue-900 hover:bg-blue-950 text-white font-regular shadow transition duration-200">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -55,6 +76,7 @@
         Download Riwayat
       </a>
     </div>
+
     @include('components.riwayat.table-riwayat-admin', ['items' => $riwayats])
   </div>
 </div>
@@ -77,7 +99,7 @@
       document.getElementById(`underline${capitalize(id)}`)?.classList.toggle('scale-x-0', id !== tab);
       document.getElementById(`${id}Tab`)?.classList.toggle('hidden', id !== tab);
     });
-    closeModal(); // Tutup modal saat ganti tab
+    closeModal();
   }
 
   function capitalize(str) {
@@ -89,7 +111,6 @@
     showTab(tab);
   });
 
-  // Fungsi GLOBAL
   window.showDetail = function(id) {
     console.log('[DEBUG] Global showDetail called with id:', id);
     fetch(`/admin/peminjaman/${id}`)
@@ -122,8 +143,7 @@
         const link = el('linkDokumen');
         const notfound = el('dokumenNotFound');
         if (data.link_dokumen === 'ada') {
-          const downloadUrl = `/admin/peminjaman/download-proposal/${data.id}`;
-          link.href = downloadUrl;
+          link.href = `/admin/peminjaman/download-proposal/${data.id}`;
           link.classList.remove('hidden');
           notfound.classList.add('hidden');
         } else {
@@ -153,5 +173,28 @@
   window.closeModal = function() {
     document.getElementById('detailModal')?.classList.add('hidden');
   };
+
+  function toggleSearchInput() {
+    const input = document.getElementById('searchInput');
+    const icon = document.getElementById('searchIcon');
+
+    input.classList.toggle('hidden');
+    if (!input.classList.contains('hidden')) {
+      input.focus();
+      icon.classList.add('hidden');
+    } else {
+      icon.classList.remove('hidden');
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    const input = document.getElementById('searchInput');
+    const icon = document.getElementById('searchIcon');
+
+    if (!input.contains(e.target) && !icon.contains(e.target)) {
+      input.classList.add('hidden');
+      icon.classList.remove('hidden');
+    }
+  });
 </script>
 @endpush

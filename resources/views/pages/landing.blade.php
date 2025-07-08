@@ -105,9 +105,46 @@
   .p-6 {
     padding: 1rem !important;
   }
+
+  .fc .fc-day-today {
+  background-color: transparent !important;
+  position: relative;
+}
+.fc .fc-day-today {
+  background-color: transparent !important;
+}
+
+/* Atur struktur frame agar isi (termasuk angka tanggal) bisa diatur vertikal */
+.fc .fc-daygrid-day-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* posisi atas */
+  padding-top: 6px; /* beri sedikit jarak dari atas */
+}
+
+/* Angka tanggal di tengah horizontal dan atas */
+.fc .fc-daygrid-day-number {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #1f2937;
+  width: 28px;
+  height: 28px;
+}
+
+/* Khusus hari ini: angka dalam lingkaran biru */
+.fc .fc-day-today .fc-daygrid-day-number {
+  background-color: #0d6efd;
+  color: white !important;
+  font-weight: 600;
+  border-radius: 9999px;
+}
+
 </style>
 
-<div class="font-poppins w-full max-w-full bg-white rounded-xl shadow px-4 sm:px-6 md:px-8 lg:px-12 py-6 pb-18">
+<div class="font-sans w-full max-w-full bg-white rounded-xl shadow px-4 sm:px-6 md:px-8 lg:px-12 py-6 pb-18">
   <!-- Header -->
   <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-2">
     <h2 class="text-2xl font-bold text-gray-800">Kalender</h2>
@@ -117,7 +154,7 @@
         <select
           name="gedung_id"
           onchange="this.form.submit()"
-          class="text-[#003366] border border-[#003366] text-xs pl-4 pr-10 py-2 h-8 w-40 rounded-md shadow-sm appearance-none bg-white font-medium">
+          class="text-[#003366] border border-[#003366] text-sm px-4 pr-10 h-9 w-48 rounded-md shadow-sm appearance-none bg-white font-semibold leading-tight ">
           @foreach($gedungs as $gedung)
             <option value="{{ $gedung->id }}" {{ $gedung->id == $selectedGedungId ? 'selected' : '' }}>
               {{ $gedung->nama }}
@@ -139,16 +176,11 @@
   <!-- Legenda -->
   <div class="flex items-center gap-8 text-sm text-gray-600 mb-4">
     <div class="flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#28839D]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21.42 10.92a1 1 0 0 0-.02-1.84L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0zM22 10v6M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
-      </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#23839d" d="M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"/></svg>
       <span>Mahasiswa</span>
     </div>
     <div class="flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#f87171]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16M2 6h20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
-      </svg>
-      <span>Staff</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#E33C45" d="M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"/></svg>      <span>Staff</span>
     </div>
   </div>
 
@@ -194,8 +226,9 @@
         const startTime = event.start.substring(11, 16);
         const endTime = event.end.substring(11, 16);
         const role = event.title.split('(').pop()?.replace(')', '').trim().toLowerCase();
-        const isMahasiswa = ['mahasiswa', 'bem', 'blm', 'ukm','hima','km'].includes(role);
-        const labelColor = isMahasiswa ? '#28839D' : '#f87171';
+        const isMahasiswa = ['AET', 'ITSA', 'HIMASISTIFO', 'HIMATRIK', 'HMM', 'HIMAKSI', 'HIMATEL', 'HIMIKA', 'HIMAKOM', 'HIMATRON',
+        'UKM Basket', 'UKM Futsal', 'UKM Volly', 'UKM Badminton', 'PCR-Rohil', 'PCR-Sumbar'].includes(role);
+        const labelColor = isMahasiswa ? '#E33C45' : '#28839D';
         return {
           id: event.id,
           title: `${startTime} - ${endTime} (${role.toUpperCase()})`,

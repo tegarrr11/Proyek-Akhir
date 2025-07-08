@@ -29,7 +29,6 @@
     </svg>
   </button>
   <div id="step1" class="bg-white border-t active-step">
-    {{-- Copy dari tahap1, tanpa perubahan --}}
     <x-form-peminjaman.tahap1 />
   </div>
 
@@ -42,32 +41,62 @@
     </svg>
   </button>
   <div id="step2" class="bg-white border-t p-4 space-y-4">
-    {{-- Tahap2 custom untuk admin --}}
     <div>
       <label class="block text-sm font-medium mb-1">Judul Kegiatan *</label>
-      <input type="text" name="judul_kegiatan" class="w-full border rounded px-3 py-2" required>
+      <input type="text" name="judul_kegiatan"
+        value="{{ old('judul_kegiatan') }}"
+        class="w-full border rounded px-3 py-2 @error('judul_kegiatan') border-red-500 @enderror" required>
+      @error('judul_kegiatan')
+        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+      @enderror
     </div>
+
     <div>
       <label class="block text-sm font-medium mb-1">Waktu Kegiatan *</label>
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 items-center">
-        <input type="date" class="border rounded px-2 py-1 w-full" name="tgl_kegiatan" required>
-        <input type="time" class="border rounded px-2 py-1 w-full" name="waktu_mulai" required>
+        <input type="date" name="tgl_kegiatan" value="{{ old('tgl_kegiatan') }}"
+          class="border rounded px-2 py-1 w-full @error('tgl_kegiatan') border-red-500 @enderror" required>
+        <input type="time" name="waktu_mulai" value="{{ old('waktu_mulai') }}"
+          class="border rounded px-2 py-1 w-full @error('waktu_mulai') border-red-500 @enderror" required>
         <span class="text-sm text-center">s/d</span>
-        <input type="time" class="border rounded px-2 py-1 w-full" name="waktu_berakhir" required>
+        <input type="time" name="waktu_berakhir" value="{{ old('waktu_berakhir') }}"
+          class="border rounded px-2 py-1 w-full @error('waktu_berakhir') border-red-500 @enderror" required>
       </div>
+      @error('tgl_kegiatan')
+        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+      @enderror
+      @error('waktu_mulai')
+        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+      @enderror
+      @error('waktu_berakhir')
+        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+      @enderror
     </div>
+
     <div>
       <label class="block text-sm font-medium mb-1">Aktivitas *</label>
-      <input type="text" name="aktivitas" class="w-full border rounded px-3 py-2" required>
+      <input type="text" name="aktivitas"
+        value="{{ old('aktivitas') }}"
+        class="w-full border rounded px-3 py-2 @error('aktivitas') border-red-500 @enderror" required>
+      @error('aktivitas')
+        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+      @enderror
     </div>
+
     <div>
       <label class="block text-sm font-medium mb-1">Keterangan *</label>
-      <textarea name="deskripsi_kegiatan" class="w-full border rounded px-3 py-2" rows="3" placeholder="Penjelasan singkat kegiatan" required></textarea>
+      <textarea name="deskripsi_kegiatan" class="w-full border rounded px-3 py-2 @error('deskripsi_kegiatan') border-red-500 @enderror"
+        rows="3" required>{{ old('deskripsi_kegiatan') }}</textarea>
+      @error('deskripsi_kegiatan')
+        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+      @enderror
     </div>
+
     <div>
       <label class="block text-sm font-medium mb-1">Organisasi *</label>
       <input type="text" name="organisasi" class="w-full border rounded px-3 py-2 bg-gray-100" value="Staff" readonly>
     </div>
+
     <div class="flex justify-end mt-4">
       <button id="btn-simpan" type="submit"
         class="bg-green-500 hover:bg-green-600 text-white font-medium px-5 py-2 rounded disabled:opacity-60 disabled:cursor-not-allowed">
@@ -76,6 +105,19 @@
     </div>
   </div>
 </form>
+
+@php
+  $errorStep2 = $errors->has('judul_kegiatan') || $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
+                $errors->has('waktu_berakhir') || $errors->has('aktivitas') || $errors->has('deskripsi_kegiatan');
+@endphp
+
+@if ($errorStep2)
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      toggleStep(2);
+    });
+  </script>
+@endif
 
 <script>
   function toggleStep(step) {
@@ -93,6 +135,7 @@
       btn2.classList.add('bg-green-100', 'font-semibold');
     }
   }
+
   function validateAndSubmit(event) {
     const form = document.getElementById('peminjamanForm');
     const requiredFields = form.querySelectorAll('[required]');
@@ -115,6 +158,7 @@
     }
     return true;
   }
+
   document.addEventListener('DOMContentLoaded', () => {
     toggleStep(1);
     document.getElementById('btn1')?.addEventListener('click', () => toggleStep(1));

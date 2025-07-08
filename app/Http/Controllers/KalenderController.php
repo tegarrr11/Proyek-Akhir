@@ -28,6 +28,7 @@ class KalenderController extends Controller
 
         $events = $query->get()->map(function ($item) {
             return [
+                'id'    => $item->id,
                 'title' => $item->judul_kegiatan . ' (' . $item->organisasi . ')',
                 'start' => $item->tgl_kegiatan . 'T' . $item->waktu_mulai,
                 'end'   => $item->tgl_kegiatan . 'T' . $item->waktu_berakhir,

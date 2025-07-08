@@ -17,7 +17,7 @@ class BemPeminjamanController extends Controller
     {
         $pengajuans = Peminjaman::with('user')
             ->whereRaw("LOWER(verifikasi_bem) = 'diajukan'")
-            ->whereHas('user', function($q) {
+            ->whereHas('user', function ($q) {
                 $q->where('role', '!=', 'admin'); // Hanya non-admin
             })
             ->latest()
@@ -65,6 +65,9 @@ class BemPeminjamanController extends Controller
 
     public function show($id)
     {
+        $peminjaman = Peminjaman::with('user')->findOrFail($id);
+        return response()->json($peminjaman);
+
         $peminjaman = Peminjaman::with(['detailPeminjaman.fasilitas', 'gedung', 'user'])->findOrFail($id);
 
         return response()->json([

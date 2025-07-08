@@ -98,6 +98,8 @@ Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('pem
 Route::get('/api/fasilitas-tambahan', function () {
     return Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
 });
+Route::post('/admin/fasilitas/import', [AdminController::class, 'importFasilitas'])->name('admin.fasilitas.import');
+
 
 // ========== AUTH GROUP ==========
 Route::middleware(['auth'])->group(function () {
@@ -155,6 +157,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('bem')->group(function () {
         Route::get('/dashboard', [BemController::class, 'dashboard'])->name('bem.dashboard');
         Route::get('/peminjaman', [BemPeminjamanController::class, 'index'])->name('bem.peminjaman');
+        Route::get('/bem/peminjaman/{id}', [BemPeminjamanController::class, 'show']);
         Route::post('/peminjaman/{id}/approve', [BemPeminjamanController::class, 'approve'])->name('bem.peminjaman.approve');
         Route::get('/peminjaman/{id}/detail', [BemPeminjamanController::class, 'show'])->name('bem.peminjaman.show');
         Route::post('/peminjaman/{id}/verifikasi', [BemPeminjamanController::class, 'verifikasi'])->name('bem.peminjaman.verifikasi');

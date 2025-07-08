@@ -1,12 +1,12 @@
 @php use Illuminate\Support\Facades\Request; @endphp
 
 <style>
+<style>
   .fc .fc-toolbar-title {
-    font-size: 1rem;
-    font-weight: 500;
-    text-align: center;
-    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 600;
   }
+
   .fc .fc-button {
     background-color: transparent !important;
     border: none;
@@ -14,20 +14,50 @@
     font-size: 1.1rem;
     box-shadow: none;
   }
-  .fc .fc-button:focus {
-    outline: none;
+
+  .fc .fc-prev-button,
+  .fc .fc-next-button {
+    background-color: transparent !important;
+    border: none;
+    font-size: 1.1rem;
+    color: #003366;
     box-shadow: none;
   }
-  .fc .fc-button:hover {
-    background-color: transparent;
-    color: #1f2937;
+
+  .fc .fc-prev-button:hover,
+  .fc .fc-next-button:hover {
+    color: #001d3d;
   }
-  .fc-toolbar.fc-header-toolbar {
-    display: flex;
+
+  .fc .fc-prev-button:focus,
+  .fc .fc-next-button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .fc .fc-header-toolbar {
+    display: flex !important;
     justify-content: center;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
   }
+
+  .fc .fc-header-toolbar .fc-toolbar-chunk {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .fc .fc-scrollgrid {
+    min-height: 100% !important;
+  }
+
+  .fc-daygrid-day {
+    min-height: 80px !important;
+  }
+
   .fc-event {
     border: none !important;
     padding: 4px 8px;
@@ -38,80 +68,124 @@
     display: inline-block;
     margin-bottom: 4px;
     white-space: nowrap;
-    cursor: pointer; 
+    cursor: pointer;
   }
+
   .fc-event:hover {
     opacity: 0.9;
   }
+
+  .p-6 {
+    padding: 1rem !important;
+  }
+
+  .fc .fc-day-today {
+  background-color: transparent !important;
+  position: relative;
+}
+.fc .fc-day-today {
+  background-color: transparent !important;
+}
+
+.fc .fc-daygrid-day-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; 
+  padding-top: 6px; 
+}
+
+.fc .fc-daygrid-day-number {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #1f2937;
+  width: 28px;
+  height: 28px;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  background-color: #0d6efd;
+  color: white !important;
+  font-weight: 600;
+  border-radius: 9999px;
+}
+
+.fc .fc-col-header-cell-cushion {
+  font-weight: 600 !important;
+}
+
+
 </style>
 
 <div class="bg-white rounded-xl shadow px-4 sm:px-6 md:px-8 lg:px-12 py-6 pb-18">
   <!-- Header -->
   <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4 border-b pb-4">
     <h2 class="text-xl font-bold text-gray-800">Kalender</h2>
-      <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-        <div class="h-[2px] bg-gray-200 mb-4"></div>
+    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      <div class="h-[2px] bg-gray-200 mb-4"></div>
       <!-- Dropdown -->
       <form method="GET" action="{{ Request::url() }}">
         <select name="gedung_id"
-        onchange="this.form.submit()"
-        class="border border-grey-500 text-sm px-4 py-2 h-10 rounded w-52"> 
-        @foreach($gedungs as $gedung)
-            <option value="{{ $gedung->id }}" {{ $gedung->id == $selectedGedungId ? 'selected' : '' }}>
+          onchange="this.form.submit()"
+          class="border border-grey-500 text-sm px-4 py-2 h-10 rounded w-52">
+          @foreach($gedungs as $gedung)
+          <option value="{{ $gedung->id }}" {{ $gedung->id == $selectedGedungId ? 'selected' : '' }}>
             {{ $gedung->nama }}
-            </option>
-        @endforeach
+          </option>
+          @endforeach
         </select>
       </form>
 
       <!-- Tombol Ajukan -->
       @php $user = auth()->user(); @endphp
       @if($user && $user->role === 'admin')
-        <a href="{{ route('admin.peminjaman.create') }}"
-          class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-          </svg>
-          Ajukan Peminjaman
-        </a>
+      <a href="{{ route('admin.peminjaman.create') }}"
+        class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+        </svg>
+        Ajukan Peminjaman
+      </a>
       @elseif($user && $user->role === 'dosen')
-        <a href="{{ route('dosen.peminjaman.create') }}"
-          class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-          </svg>
-          Ajukan Peminjaman
-        </a>
+      <a href="{{ route('dosen.peminjaman.create') }}"
+        class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+        </svg>
+        Ajukan Peminjaman
+      </a>
       @elseif($user && $user->role === 'mahasiswa')
-        <a href="{{ route('peminjaman.create') }}"
-          class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-          </svg>
-          Ajukan Peminjaman
-        </a>
+      <a href="{{ route('peminjaman.create') }}"
+        class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+        </svg>
+        Ajukan Peminjaman
+      </a>
       @else
-        {{-- Agar struktur if-elseif-else tetap valid, else kosong --}}
+      {{-- Agar struktur if-elseif-else tetap valid, else kosong --}}
       @endif
     </div>
   </div>
-<!-- Legend Status -->
-<div class="flex items-center gap-6 text-sm text-gray-600 mb-4">
-  {{-- Mahasiswa --}}
-  <div class="flex items-center gap-2">
-    {{-- Icon Mahasiswa --}}
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#01425d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-graduation-cap-icon lucide-graduation-cap"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
-    Mahasiswa
-  </div>
+  <!-- Legend Status -->
+  <div class="flex items-center gap-6 text-sm text-gray-600 mb-4">
+    {{-- Mahasiswa --}}
+    <div class="flex items-center gap-2">
+      {{-- Icon Mahasiswa --}}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#23839d" d="M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"/></svg>
+      Mahasiswa
+    </div>
 
-  {{-- Staff / Dosen / Admin --}}
-  <div class="flex items-center gap-2">
-    {{-- Icon Briefcase --}}
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#01425d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-briefcase-icon lucide-briefcase"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
-    Staff
-  </div>
+    {{-- Staff / Dosen / Admin --}}
+    <div class="flex items-center gap-2">
+      {{-- Icon Briefcase --}}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#E33C45" d="M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"/></svg>
+      Staff
+    </div>
 
-</div>
+  </div>
 
   <!-- Kalender -->
   <div id="calendar"></div>
@@ -119,21 +193,21 @@
 </div>
 
 @push('head')
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
 @endpush
 
 @once
 @push('scripts')
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('calendar');
     const events = @json($events);
 
     function formatTanggal(tanggal) {
-      const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-      const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+      const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
       const d = new Date(tanggal);
       return `${hari[d.getDay()]}, ${String(d.getDate()).padStart(2, '0')} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
     }
@@ -150,27 +224,19 @@
       eventDisplay: 'block',
       displayEventTime: false,
       eventClick: function(info) {
-        // Tentukan endpoint detail berdasarkan role, fallback ke mahasiswa jika tidak ada user
-        let detailUrl = '';
-        @php $user = auth()->user(); @endphp
-        @if($user && $user->role === 'dosen')
-          detailUrl = `/dosen/peminjaman/${info.event.id}`;
-        @elseif($user && $user->role === 'admin')
-          detailUrl = `/admin/peminjaman/${info.event.id}`;
-        @elseif($user && $user->role === 'bem')
-          detailUrl = `/bem/peminjaman/${info.event.id}`;
-        @else
-          detailUrl = `/mahasiswa/peminjaman/${info.event.id}`;
-        @endif
+        const role = document.querySelector('meta[name="user-role"]')?.content || 'mahasiswa';
+        const detailUrl = `/${role}/peminjaman/${info.event.id}`;
+
         fetch(detailUrl)
           .then(res => res.json())
           .then(data => {
+            console.log(data);
             showDetailModal({
               organisasi: data.organisasi || '-',
               tanggal: data.tgl_kegiatan ? formatTanggal(data.tgl_kegiatan) : '-',
               kegiatan: data.judul_kegiatan || '-',
               jam: (data.waktu_mulai && data.waktu_berakhir) ? `${data.waktu_mulai} - ${data.waktu_berakhir}` : '-',
-              jenis: data.keterangan ?? data.jenis ?? '-'
+              penanggung_jawab: data.penanggung_jawab || '-'
             });
           })
           .catch(() => {
@@ -179,17 +245,18 @@
               tanggal: '-',
               kegiatan: '-',
               jam: '-',
-              jenis: '-'
+              penanggung_jawab: '-'
             });
           });
       },
+
       events: events.map(event => {
         const startTime = event.start.substring(11, 16);
         const endTime = event.end.substring(11, 16);
         const role = event.title.split('(').pop()?.replace(')', '').trim().toLowerCase();
-        const isMahasiswa = ['mahasiswa', 'bem', 'blm', 'ukm','hima','km'].includes(role);
-        const isStaff = ['staff', 'admin'].includes(role);
-        const labelColor = isMahasiswa ? '#28839D' : (isStaff ? '#facc15' : '#facc15');
+        const isMahasiswa = ['AET', 'ITSA', 'HIMASISTIFO', 'HIMATRIK', 'HMM', 'HIMAKSI', 'HIMATEL', 'HIMIKA', 'HIMAKOM', 'HIMATRON',
+        'UKM Basket', 'UKM Futsal', 'UKM Volly', 'UKM Badminton', 'PCR-Rohil', 'PCR-Sumbar'].includes(role);
+        const labelColor = isMahasiswa ? '#E33C45' : '#28839D';
         return {
           id: event.id,
           title: `${startTime} - ${endTime} (${role.toUpperCase()})`,

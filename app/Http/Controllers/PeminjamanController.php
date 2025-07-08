@@ -16,26 +16,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
-    
+
 
 class PeminjamanController extends Controller
 {
 
-public function create(Request $request)
-{
-    $gedungs = Gedung::all();
-    $selectedGedung = Gedung::where('slug', $request->gedung)->first();
+    public function create(Request $request)
+    {
+        $gedungs = Gedung::all();
+        $selectedGedung = Gedung::where('slug', $request->gedung)->first();
 
-    $fasilitasUtama = $selectedGedung
-        ? Fasilitas::where('gedung_id', $selectedGedung->id)->where('stok', '>', 0)->get()
-        : collect();
+        $fasilitasUtama = $selectedGedung
+            ? Fasilitas::where('gedung_id', $selectedGedung->id)->where('stok', '>', 0)->get()
+            : collect();
 
-    $fasilitasLainnya = Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
+        $fasilitasLainnya = Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
 
-    return view('pages.mahasiswa.peminjaman.create', compact(
-        'gedungs', 'selectedGedung', 'fasilitasUtama', 'fasilitasLainnya'
-    ));
-}
+        return view('pages.mahasiswa.peminjaman.create', compact(
+            'gedungs',
+            'selectedGedung',
+            'fasilitasUtama',
+            'fasilitasLainnya'
+        ));
+    }
 
     /**
      * Menyimpan data pengajuan peminjaman ke database.
@@ -45,8 +48,8 @@ public function create(Request $request)
         $request->validate([
             'judul_kegiatan' => 'required|string|max:255',
             'tgl_kegiatan' => 'required|date',
-            'waktu_mulai' => 'required',
-            'waktu_berakhir' => 'required',
+            'waktu_mulai' => 'required|date_format:H:i',
+            'waktu_berakhir' => 'required|date_format:H:i|after:waktu_mulai',
             'aktivitas' => 'required|string|max:255',
             'organisasi' => 'required|string|max:255',
             'penanggung_jawab' => 'required|string|max:255',
@@ -62,6 +65,29 @@ public function create(Request $request)
             'fasilitas_tambahan.*.jumlah' => 'integer|min:1',
         ]);
 
+        // ✅ Ambil gedung dari slug
+        $gedung = Gedung::where('slug', $request->gedung)->first();
+        if (!$gedung) {
+            return back()->with('error', 'Gedung tidak ditemukan.');
+        }
+
+        // ✅ Pengecekan bentrok waktu
+        $bentrok = Peminjaman::where('tgl_kegiatan', $request->tgl_kegiatan)
+            ->where('gedung_id', $gedung->id)
+            ->whereIn('status', ['menunggu', 'disetujui'])
+            ->where(function ($query) use ($request) {
+                $query->where('waktu_mulai', '<', $request->waktu_berakhir)
+                    ->where('waktu_berakhir', '>', $request->waktu_mulai);
+            })
+            ->exists();
+
+        if ($bentrok) {
+            return back()->withErrors([
+                'waktu_mulai' => 'Waktu kegiatan bentrok dengan pengajuan lain.',
+            ])->withInput();
+        }
+
+        // ✅ Upload file jika ada
         $fileProposal = $request->hasFile('proposal')
             ? $request->file('proposal')->store('proposal', 'public')
             : null;
@@ -70,11 +96,7 @@ public function create(Request $request)
             ? $request->file('undangan_pembicara')->store('undangan', 'public')
             : null;
 
-        $gedung = Gedung::where('slug', $request->gedung)->first();
-        if (!$gedung) {
-            return back()->with('error', 'Gedung tidak ditemukan.');
-        }
-
+        // ✅ Simpan data peminjaman utama
         $peminjaman = Peminjaman::create([
             'judul_kegiatan' => $request->judul_kegiatan,
             'tgl_kegiatan' => $request->tgl_kegiatan,
@@ -87,17 +109,16 @@ public function create(Request $request)
             'status' => 'menunggu',
             'gedung_id' => $gedung->id,
             'user_id' => Auth::id(),
-            'jenis_kegiatan' => $request->jenis_kegiatan ?? null, // pastikan terisi jika ada
+            'jenis_kegiatan' => $request->jenis_kegiatan ?? null,
             'proposal' => $fileProposal,
             'undangan_pembicara' => $fileUndangan,
-            // Tambahan untuk mahasiswa agar workflow berjalan benar
             'verifikasi_bem' => 'diajukan',
             'verifikasi_sarpras' => 'diajukan',
             'status_peminjaman' => null,
             'status_pengembalian' => null,
         ]);
 
-        // Simpan fasilitas utama
+        // ✅ Simpan fasilitas utama
         foreach ($request->barang as $item) {
             $fasilitas = Fasilitas::find($item['id']);
             if ($fasilitas && $item['jumlah'] <= $fasilitas->stok) {
@@ -113,7 +134,7 @@ public function create(Request $request)
             }
         }
 
-        // Simpan fasilitas tambahan
+        // ✅ Simpan fasilitas tambahan jika ada
         if ($request->has('fasilitas_tambahan')) {
             foreach ($request->fasilitas_tambahan as $item) {
                 $fasilitas = Fasilitas::find($item['id']);
@@ -130,27 +151,29 @@ public function create(Request $request)
                 }
             }
         }
-        // 🔔 Kirim notifikasi ke mahasiswa (pengaju)
-        $mahasiswa = Auth::user();
-        $mahasiswa->notify(new PengajuanMasuk($peminjaman));
 
-        // 🔔 Kirim notifikasi ke semua user BEM dan Admin
-        $bemUsers = User::where('role', 'bem')->get();
-        $adminUsers = User::where('role', 'admin')->get();
+        // ✅ Notifikasi realtime
+        $mahasiswa = Auth::user();
+        $mahasiswa->notify(new \App\Notifications\PengajuanMasuk($peminjaman));
+
+        $bemUsers = \App\Models\User::where('role', 'bem')->get();
+        $adminUsers = \App\Models\User::where('role', 'admin')->get();
 
         foreach ($bemUsers as $bem) {
-            $bem->notify(new PengajuanBaru($peminjaman));
-        }
-        foreach ($adminUsers as $admin) {
-            $admin->notify(new PengajuanBaru($peminjaman));
+            $bem->notify(new \App\Notifications\PengajuanBaru($peminjaman));
         }
 
-        // 🔔 Trigger notifikasi realtime internal
-        NotifikasiHelper::kirimKeRoles(['bem', 'admin'], 'Pengajuan Baru', 'Pengajuan oleh ' . $mahasiswa->name);
+        foreach ($adminUsers as $admin) {
+            $admin->notify(new \App\Notifications\PengajuanBaru($peminjaman));
+        }
+
+        \App\Helpers\NotifikasiHelper::kirimKeRoles(['bem', 'admin'], 'Pengajuan Baru', 'Pengajuan oleh ' . $mahasiswa->name);
 
         return redirect()->route('mahasiswa.peminjaman')->with('success', 'Peminjaman berhasil diajukan.');
     }
-    
+
+
+
     /**
      * Menampilkan daftar pengajuan dan riwayat peminjaman mahasiswa.
      */
@@ -162,7 +185,7 @@ public function create(Request $request)
             ->where('user_id', $userId)
             ->where(function ($query) {
                 $query->whereNull('status_pengembalian')
-                      ->orWhere('status_pengembalian', '!=', 'selesai');
+                    ->orWhere('status_pengembalian', '!=', 'selesai');
             });
 
         $queryRiwayat = Peminjaman::with('detailPeminjaman.fasilitas')
@@ -261,9 +284,9 @@ public function create(Request $request)
         ])->findOrFail($id);
 
         // Validasi: mahasiswa hanya bisa akses miliknya
-        if (auth()->user()->role === 'mahasiswa' && $peminjaman->user_id !== auth()->id()) {
-            abort(403, 'Tidak diizinkan mengakses data ini.');
-        }
+        // if (auth()->user()->role === 'mahasiswa' && $peminjaman->user_id !== auth()->id()) {
+        //     abort(403, 'Tidak diizinkan mengakses data ini.');
+        // }
 
         return response()->json([
             'id' => $peminjaman->id,
@@ -283,7 +306,7 @@ public function create(Request $request)
                     'jumlah' => $detail->jumlah ?? 0,
                 ];
             }),
-            'diskusi' => $peminjaman->diskusi->map(function($d) {
+            'diskusi' => $peminjaman->diskusi->map(function ($d) {
                 return [
                     'id' => $d->id,
                     'role' => $d->role,
@@ -298,7 +321,16 @@ public function create(Request $request)
     public function showDetail($id)
     {
         $peminjaman = Peminjaman::with('detailPeminjaman.fasilitas')->findOrFail($id);
-        return response()->json($peminjaman);
+        return response()->json([
+            'id' => $peminjaman->id,
+            'judul_kegiatan' => $peminjaman->judul_kegiatan,
+            'penanggung_jawab' => $peminjaman->penanggung_jawab,
+            'tgl_kegiatan' => $peminjaman->tgl_kegiatan,
+            'waktu_mulai' => $peminjaman->waktu_mulai,
+            'waktu_berakhir' => $peminjaman->waktu_berakhir,
+            'organisasi' => $peminjaman->organisasi,
+            'aktivitas' => $peminjaman->aktivitas,
+        ]);
     }
 
 
@@ -335,6 +367,4 @@ public function create(Request $request)
         \Log::info('DOWNLOAD_PROPOSAL_SUCCESS', ['user_id' => $user->id, 'role' => $user->role, 'file' => $path]);
         return response()->download($path);
     }
-
-    
 }

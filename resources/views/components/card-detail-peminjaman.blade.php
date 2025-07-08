@@ -1,4 +1,4 @@
-<!-- resources/views/components/card-detail-peminjaman.blade.php -->
+
 <!-- resources/views/components/card-detail-peminjaman.blade.php -->
 <div id="detailModal" class="fixed inset-0 bg-black/50 z-50 items-center justify-center hidden flex">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl p-6 relative overflow-y-auto max-h-[90vh]">
@@ -59,6 +59,7 @@ function closeModal() {
 }
 
 function showDetail(id) {
+  
   fetch(`/admin/peminjaman/${id}`)
     .then(res => res.json())
     .then(data => {

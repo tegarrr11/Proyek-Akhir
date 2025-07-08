@@ -4,10 +4,16 @@
 
 @section('content')
 
+@php
+$adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') || $errors->has('waktu_berakhir');
+@endphp
+
 <style>
-  #step1, #step2 {
+  #step1,
+  #step2 {
     display: none;
   }
+
   .active-step {
     display: block !important;
   }
@@ -47,8 +53,27 @@
 
   <div id="step2" class="bg-white border-t p-4 space-y-4">
     <x-form-peminjaman.tahap2 />
+
+    {{-- Error validasi waktu --}}
+    @if ($errors->has('tgl_kegiatan'))
+    <p class="text-red-600 text-sm mt-1">{{ $errors->first('tgl_kegiatan') }}</p>
+    @endif
+    @if ($errors->has('waktu_mulai'))
+    <p class="text-red-600 text-sm mt-1">{{ $errors->first('waktu_mulai') }}</p>
+    @endif
+    @if ($errors->has('waktu_berakhir'))
+    <p class="text-red-600 text-sm mt-1">{{ $errors->first('waktu_berakhir') }}</p>
+    @endif
+
+    <!-- {{-- Error umum lain --}}
+    @foreach ($errors->getMessages() as $field => $messages)
+    @if (!in_array($field, ['tgl_kegiatan', 'waktu_mulai', 'waktu_berakhir']))
+    @foreach ($messages as $message)
+    <div class="text-red-600 text-sm mt-1">- {{ $message }}</div>
+    @endforeach
+    @endif
+    @endforeach -->
   </div>
-  
 </form>
 
 <script>
@@ -88,22 +113,29 @@
       const parent = firstInvalid.closest('#step1') || firstInvalid.closest('#step2');
       if (parent?.id === 'step1') toggleStep(1);
       if (parent?.id === 'step2') toggleStep(2);
-      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      firstInvalid.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
       firstInvalid.focus();
       return false;
     }
 
-    // Jika semua valid, biarkan form disubmit dengan cara normal agar HTML5 "required" bekerja
     return true;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    // Tetap di Tahap 2 jika error waktu
+    @if($adaErrorTahap2)
+    toggleStep(2);
+    @else
     toggleStep(1);
+    @endif
 
     document.getElementById('btn1')?.addEventListener('click', () => toggleStep(1));
     document.getElementById('btn2')?.addEventListener('click', () => toggleStep(2));
 
-    // Eksternal check
+    // Jenis kegiatan eksternal check
     const jenisKegiatanRadios = document.querySelectorAll('input[name="jenis_kegiatan"]');
     const undanganSection = document.getElementById('undangan-wrapper');
     const updateUndanganVisibility = () => {

@@ -16,7 +16,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
   </head>
 
-  <body class="font-sans bg-gray-50 h-screen flex flex-col md:flex-row">
+  <body class="bg-gray-50 h-screen flex flex-col md:flex-row">
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-30 hidden md:hidden"></div>
 
     <!-- Mobile Header -->
@@ -93,12 +93,13 @@
     </main>
 
     <!-- Modal Detail Peminjaman -->
-    @include('components.card-detail-peminjaman')
+    <x-modal-detail-peminjaman />
 
     <script>
       window.currentPeminjamanId = null;
 
       window.showDetail = function(id) {
+
         const el = id => document.getElementById(id);
         const modal = document.getElementById('detailModal');
         modal.classList.remove('hidden');
