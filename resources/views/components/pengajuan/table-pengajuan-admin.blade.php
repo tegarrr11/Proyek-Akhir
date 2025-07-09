@@ -8,6 +8,7 @@
         <th class="px-4 py-2">Verifikasi BEM</th>
         <th class="px-4 py-2">Verifikasi Sarpras</th>
         <th class="px-4 py-2">Organisasi</th>
+        <th class="px-4 py-2">Status Pengembalian</th>
         <th class="px-4 py-2 text-center">Aksi</th>
       </tr>
     </thead>
@@ -42,23 +43,34 @@
           </span>
         </td>
         <td class="px-4 py-2">{{ $item->organisasi }}</td>
+        <td class="px-4 py-2">
+          @if($item->status_peminjaman === 'diambil' && $item->status_pengembalian === 'proses')
+            <form method="POST" action="{{ route('admin.peminjaman.kembalikan', $item->id) }}" onsubmit="return confirm('Yakin ingin menandai sebagai dikembalikan?')">
+              @csrf
+              @method('PATCH')
+              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">Selesai</button>
+            </form>
+          @elseif($item->status_pengembalian === 'selesai')
+            <span class="text-xs text-gray-600 italic">Selesai</span>
+          @else
+            <span class="text-xs text-gray-500 italic">-</span>
+          @endif
+        </td>
         <td class="px-4 py-2 text-center">
           <div class="flex items-center gap-2 justify-center">
-            {{-- Tombol Terima --}}
-            <form method="POST" action="{{ route('admin.peminjaman.verifikasi', $item->id) }}">
-              @csrf
-              <input type="hidden" name="verifikasi_sarpras" value="diterima">
-              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded"> Terima</button>
-            </form>
+            @if ($item->verifikasi_sarpras !== 'diterima')
+              <form method="POST" action="{{ route('admin.peminjaman.verifikasi', $item->id) }}">
+                @csrf
+                <input type="hidden" name="verifikasi_sarpras" value="diterima">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded">Terima</button>
+              </form>
+            @endif
 
-            {{-- Tombol Tangguhkan --}}
-            <form method="POST" action="{{ route('admin.peminjaman.verifikasi', $item->id) }}">
-              @csrf
-              <input type="hidden" name="verifikasi_sarpras" value="ditangguhkan">
-              <button type="submit" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded">Tangguhkan</button>
-            </form>
+            <button onclick="showTangguhkanPopup({{ $item->id }})"
+              class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded">
+              Tangguhkan
+            </button>
 
-            {{-- Tombol Detail --}}
             <button onclick="showDetail({{ $item->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -69,7 +81,7 @@
       </tr>
       @empty
       <tr>
-        <td colspan="7" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
+        <td colspan="8" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
       </tr>
       @endforelse
     </tbody>
@@ -218,5 +230,61 @@
   function closeModal() {
     document.getElementById('detailModal')?.classList.add('hidden');
   }
+
+  let tangguhPeminjamanId = null;
+
+  function showTangguhkanPopup(id) {
+    tangguhPeminjamanId = id;
+    document.getElementById('alasanTangguh').value = '';
+    document.getElementById('tangguhkanModal').classList.remove('hidden');
+  }
+
+  function closeTangguhkan() {
+    document.getElementById('tangguhkanModal').classList.add('hidden');
+  }
+
+  function submitTangguhkan() {
+    const alasan = document.getElementById('alasanTangguh').value.trim();
+    if (!alasan || !tangguhPeminjamanId) return alert('Alasan tidak boleh kosong.');
+
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    fetch('/diskusi', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrf
+      },
+      body: JSON.stringify({
+        peminjaman_id: tangguhPeminjamanId,
+        pesan: `<span class="text-red-600 font-semibold">DITANGGUHKAN:</span> ${alasan}`
+      })
+    })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.success) {
+        closeTangguhkan();
+        showDetail(tangguhPeminjamanId); // refresh diskusi
+      } else {
+        alert(resp.error || 'Gagal mengirim alasan.');
+      }
+    })
+    .catch(() => alert('Terjadi kesalahan saat mengirim alasan.'));
+  }
+
 </script>
 @endpush
+
+<!-- Modal Popup Tangguhkan -->
+<div id="tangguhkanModal" class="fixed inset-0 z-[999] hidden bg-black/40 px-4 flex items-center justify-center">
+  <div class="bg-white rounded-lg p-6 w-full max-w-md shadow" onclick="event.stopPropagation()">
+    <h2 class="text-md font-semibold mb-3 text-gray-800">Berikan alasan menangguhkan peminjaman</h2>
+    <textarea id="alasanTangguh" class="w-full border border-gray-300 rounded px-3 py-2 text-sm mb-4" rows="3" placeholder="Tulis alasan Anda..."></textarea>
+    <div class="flex justify-end gap-2">
+      <button onclick="closeTangguhkan()" class="text-gray-500 hover:underline text-sm">Batal</button>
+      <button onclick="submitTangguhkan()" class="bg-green-600 hover:bg-green-800 text-white px-4 py-1 text-sm rounded">Kirim</button>
+    </div>
+  </div>
+</div>
+
+

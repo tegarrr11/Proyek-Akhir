@@ -164,7 +164,7 @@
 
       <!-- Tombol Login -->
       <a href="<?php echo e(route('login')); ?>"
-        class="inline-flex items-center justify-center bg-[#003366] hover:bg-[#002244] text-white w-32 text-xs font-medium h-8 px-4 rounded-md shadow">
+        class="inline-flex items-center justify-center bg-[#003366] hover:bg-[#002244] text-white w-32 text-xs font-medium h-9 px-4 rounded-md shadow">
         Login
       </a>
     </div>
@@ -225,9 +225,16 @@
         const startTime = event.start.substring(11, 16);
         const endTime = event.end.substring(11, 16);
         const role = event.title.split('(').pop()?.replace(')', '').trim().toLowerCase();
-        const isMahasiswa = ['AET', 'ITSA', 'HIMASISTIFO', 'HIMATRIK', 'HMM', 'HIMAKSI', 'HIMATEL', 'HIMIKA', 'HIMAKOM', 'HIMATRON',
-        'UKM Basket', 'UKM Futsal', 'UKM Volly', 'UKM Badminton', 'PCR-Rohil', 'PCR-Sumbar'].includes(role);
-        const labelColor = isMahasiswa ? '#E33C45' : '#28839D';
+
+        const isMahasiswa = [
+          'aet', 'itsa', 'himasistifo', 'himatrik', 'hmm', 'himaksi', 'himatel',
+          'himika', 'himakom', 'himatron',
+          'ukm basket', 'ukm futsal', 'ukm volly', 'ukm badminton',
+          'pcr-rohil', 'pcr-sumbar'
+        ].includes(role);
+
+        const labelColor = isMahasiswa ? '#28839D' : '#E33C45';
+
         return {
           id: event.id,
           title: `${startTime} - ${endTime} (${role.toUpperCase()})`,

@@ -69,11 +69,17 @@
               Kembalikan
           </form>
           <?php elseif(is_null($item->status_peminjaman)): ?>
-          <form method="POST" action="<?php echo e(route('mahasiswa.peminjaman.ambil', $item->id)); ?>">
-            <?php echo csrf_field(); ?>
-            <?php echo method_field('PATCH'); ?>
-            <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Ambil</button>
-          </form>
+
+          <?php if($item->status_peminjaman === 'diambil'): ?>
+            <button class="bg-gray-300 text-gray-600 px-3 py-1 text-xs rounded cursor-not-allowed" disabled>Ambil</button>
+          <?php else: ?>
+            <form method="POST" action="<?php echo e(route('mahasiswa.peminjaman.ambil', $item->id)); ?>">
+              <?php echo csrf_field(); ?>
+              <?php echo method_field('PATCH'); ?>
+              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Ambil</button>
+            </form>
+          <?php endif; ?>
+
           <?php else: ?>
           <?php echo e(ucfirst($item->status_peminjaman)); ?>
 
@@ -84,10 +90,10 @@
         </td>
 
         <td class="px-4 py-2">
-          <?php if($item->status_peminjaman === 'kembalikan'): ?>
-          <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full">Belum</span>
+          <?php if(in_array($item->status_pengembalian, ['proses', 'belum'])): ?>
+            <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full">Belum</span>
           <?php else: ?>
-          <span class="text-gray-400 text-xs italic">-</span>
+            <span class="text-gray-400 text-xs italic">-</span>
           <?php endif; ?>
         </td>
         <td class="px-4 py-2 hidden status-kembali-col"><?php echo e(ucfirst($item->status_pengembalian ?? '-')); ?></td>

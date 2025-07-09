@@ -38,7 +38,12 @@ $gedungSlug = strtolower(request('gedung', ''));
 $gedung = Gedung::where('slug', $gedungSlug)->first();
 $fasilitasLainnya = Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
 $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('stok', '>', 0)->get() : [];
+
+$isMahasiswa = auth()->user()->role === 'mahasiswa';
 ?>
+
+
+
 
 <div id="step1" class="bg-white border-t p-4 space-y-4 active-step">
   
@@ -67,7 +72,7 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
   </div>
 
   
-  <?php if(!empty($fasilitasList)): ?>
+  <?php if($isMahasiswa && !empty($fasilitasList)): ?>
     <div id="fasilitas-section">
       <label class="block mb-1 text-sm font-medium">Barang dan Perlengkapan Default *</label>
       <table class="w-full border text-sm mb-6">
@@ -90,8 +95,8 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
               </td>
               <td class="border px-2 text-center">
                 <input type="number" name="barang[<?php echo e($index); ?>][jumlah]" class="jumlah-barang border rounded w-20 text-center"
-                       max="<?php echo e($item->stok); ?>" value="<?php echo e($item->stok); ?>" min="0">
-                <small class="text-gray-400 block">Max: <?php echo e($item->stok); ?></small>
+                      max="<?php echo e($item->stok); ?>" value="<?php echo e($item->stok); ?>" min="0">
+                  <small class="text-gray-400 block">Max: <?php echo e($item->stok); ?></small>
               </td>
               <td class="border px-2 text-center">
                 <button type="button" onclick="hapusBaris(this)" class="text-red-500 hover:text-red-700">
@@ -105,7 +110,7 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
         </tbody>
       </table>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
 
   
   <div id="fasilitas-tambahan-section" class="mt-4 hidden">

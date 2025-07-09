@@ -9,38 +9,52 @@ use App\Notifications\PengajuanDiterimaSarpras;
 
 class AdminPeminjamanController extends Controller
 {
-    public function index(Request $request)
-    {
-        $gedungId = $request->get('gedung_id');
-        $pengajuans = Peminjaman::with('user')
-            ->where('verifikasi_sarpras', 'diajukan')
-            ->where('verifikasi_bem', 'diterima')
-            ->whereHas('user', function($q) {
-                $q->where('role', '!=', 'admin'); // Hanya non-admin
-            })
-            ->latest();
+        public function index(Request $request)
+        {
+            $gedungId = $request->get('gedung_id');
 
-        $riwayats = Peminjaman::with('user', 'gedung')
-            ->where(function($query) use ($gedungId) {
-                $query->where('verifikasi_sarpras', 'diterima')
-                      ->orWhere(function($q) {
-                          $q->where('verifikasi_sarpras', 'diajukan')
-                            ->whereHas('user', function($q2) {
-                                $q2->where('role', 'admin');
-                            });
-                      });
-                if ($gedungId) {
-                    $query->where('gedung_id', $gedungId);
-                }
-            });
-        if ($gedungId) {
-            $riwayats = $riwayats->where('gedung_id', $gedungId);
+            // DATA PENGAJUAN (yang belum selesai dikembalikan)
+            $pengajuans = Peminjaman::with('user')
+                ->where(function ($query) {
+                    $query->where('verifikasi_sarpras', 'diajukan')
+                        ->orWhere(function ($q) {
+                            $q->where('verifikasi_sarpras', 'diterima')
+                                ->where('status_pengembalian', '!=', 'selesai');
+                        });
+                })
+                ->where('verifikasi_bem', 'diterima')
+                ->whereHas('user', function ($q) {
+                    $q->where('role', '!=', 'admin'); // Hanya non-admin
+                })
+                ->latest();
+
+            // DATA RIWAYAT (yang sudah selesai)
+            $riwayats = Peminjaman::with('user', 'gedung')
+                ->where(function($query) use ($gedungId) {
+                    $query->where('verifikasi_sarpras', 'diterima')
+                        ->where('status_pengembalian', 'selesai')
+                        ->orWhere(function($q) {
+                            $q->where('verifikasi_sarpras', 'diajukan')
+                                ->whereHas('user', function($q2) {
+                                    $q2->where('role', 'admin'); // Riwayat admin
+                                });
+                        });
+
+                    if ($gedungId) {
+                        $query->where('gedung_id', $gedungId);
+                    }
+                });
+
+            if ($gedungId) {
+                $pengajuans = $pengajuans->where('gedung_id', $gedungId);
+                $riwayats = $riwayats->where('gedung_id', $gedungId);
+            }
+
+            $pengajuans = $pengajuans->get();
+            $riwayats = $riwayats->latest()->get();
+
+            return view('pages.admin.peminjaman', compact('pengajuans', 'riwayats'));
         }
-        $pengajuans = $pengajuans->get();
-        $riwayats = $riwayats->latest()->get();
-
-        return view('pages.admin.peminjaman', compact('pengajuans', 'riwayats'));
-    }
 
     public function approve($id)
     {
@@ -121,6 +135,8 @@ class AdminPeminjamanController extends Controller
             'aktivitas' => 'required|string|max:255',
             'deskripsi_kegiatan' => 'nullable|string',
             'gedung' => 'required|string',
+            'penanggung_jawab'   => 'required|string|max:255',
+
             // Untuk admin, barang tidak wajib
         ]);
 
@@ -145,6 +161,10 @@ class AdminPeminjamanController extends Controller
             'penanggung_jawab' => $request->penanggung_jawab ?? '-',
             'status_peminjaman' => 'ambil', // status_peminjaman juga langsung aktif
             'status_pengembalian' => 'proses', // status_pengembalian default proses
+            'status_verifikasi_bem' => 'disetujui',
+            'status_verifikasi_sarpras' => 'disetujui',
+            'status_peminjaman' => 'diambil',
+            'status_pengembalian' => 'selesai',
         ]);
 
         // Jika ada barang, simpan detail peminjaman

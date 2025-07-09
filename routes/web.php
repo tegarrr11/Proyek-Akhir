@@ -93,6 +93,7 @@ Route::get('/mahasiswa/peminjaman/{id}', [MahasiswaController::class, 'show']);
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
 Route::get('/bem/dashboard', [BemController::class, 'dashboard']);
 Route::get('/dosen/dashboard', [BemController::class, 'dashboard']);
+Route::get('/dosen/peminjaman/create', [DosenPeminjamanController::class, 'create']);
 Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('mahasiswa.peminjaman');
 Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
 Route::get('/api/fasilitas-tambahan', function () {
@@ -122,6 +123,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/peminjaman/{id}/verifikasi', [AdminPeminjamanController::class, 'verifikasi'])->name('admin.peminjaman.verifikasi');
         Route::post('/ruangan/update', [AdminController::class, 'update'])->name('admin.ruangan.update');
         Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('admin.peminjaman.downloadProposal');
+        Route::patch('/admin/peminjaman/kembalikan/{id}', [PeminjamanController::class, 'adminKembalikan'])->name('admin.peminjaman.kembalikan');
+
     });
 
     // === MAHASISWA ===
@@ -134,7 +137,7 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/peminjaman/{id}/ambil', [PeminjamanController::class, 'ambil'])->name('mahasiswa.peminjaman.ambil');
         Route::patch('/peminjaman/{id}/kembalikan', [PeminjamanController::class, 'kembalikan'])->name('mahasiswa.peminjaman.kembalikan');
         Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('mahasiswa.peminjaman.show');
-
+        Route::patch('/mahasiswa/peminjaman/ambil/{id}', [PeminjamanController::class, 'ambil'])->name('mahasiswa.peminjaman.ambil');
         Route::get('/auditorium', fn() => view('pages.mahasiswa.kalender', [
             'title' => 'Auditorium',
             'breadcrumb' => 'Dashboard > Ruangan > Auditorium'

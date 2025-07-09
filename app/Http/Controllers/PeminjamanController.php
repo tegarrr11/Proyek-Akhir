@@ -118,19 +118,21 @@ class PeminjamanController extends Controller
             'status_pengembalian' => null,
         ]);
 
-        // ✅ Simpan fasilitas utama
-        foreach ($request->barang as $item) {
-            $fasilitas = Fasilitas::find($item['id']);
-            if ($fasilitas && $item['jumlah'] <= $fasilitas->stok) {
-                DetailPeminjaman::create([
-                    'peminjaman_id' => $peminjaman->id,
-                    'fasilitas_id' => $fasilitas->id,
-                    'jumlah' => $item['jumlah'],
-                ]);
+        // ✅ Simpan fasilitas utama hanya jika role mahasiswa
+        if (auth()->user()->role === 'mahasiswa') {
+            foreach ($request->barang as $item) {
+                $fasilitas = Fasilitas::find($item['id']);
+                if ($fasilitas && $item['jumlah'] <= $fasilitas->stok) {
+                    DetailPeminjaman::create([
+                        'peminjaman_id' => $peminjaman->id,
+                        'fasilitas_id' => $fasilitas->id,
+                        'jumlah' => $item['jumlah'],
+                    ]);
 
-                $fasilitas->decrement('stok', $item['jumlah']);
-                $fasilitas->is_available = $fasilitas->stok > 0;
-                $fasilitas->save();
+                    $fasilitas->decrement('stok', $item['jumlah']);
+                    $fasilitas->is_available = $fasilitas->stok > 0;
+                    $fasilitas->save();
+                }
             }
         }
 
@@ -230,15 +232,35 @@ class PeminjamanController extends Controller
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        if ($peminjaman->verifikasi_sarpras === 'diterima' && $peminjaman->status_peminjaman === null) {
+        // Validasi: hanya bisa ambil jika disetujui dan belum diambil
+        if ($peminjaman->verifikasi_sarpras === 'diterima' && is_null($peminjaman->status_peminjaman)) {
             $peminjaman->update([
-                'status_peminjaman' => 'kembalikan',
+                'status_peminjaman' => 'diambil',
                 'status_pengembalian' => 'proses',
             ]);
         }
 
-        return back()->with('success', 'Barang telah diambil.');
+        return back()->with('success', 'Barang berhasil diambil.');
     }
+
+    public function adminKembalikan($id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        if (
+            $peminjaman->verifikasi_sarpras === 'diterima' &&
+            $peminjaman->status_peminjaman === 'diambil' &&
+            $peminjaman->status_pengembalian === 'proses'
+        ) {
+            $peminjaman->update([
+                'status_pengembalian' => 'selesai',
+            ]);
+        }
+
+        return back()->with('success', 'Peminjaman ditandai sudah dikembalikan.');
+    }
+
+
 
     /**
      * Mahasiswa mengembalikan barang setelah dipinjam.

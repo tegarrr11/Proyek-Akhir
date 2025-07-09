@@ -58,11 +58,17 @@
               Kembalikan
           </form>
           @elseif (is_null($item->status_peminjaman))
-          <form method="POST" action="{{ route('mahasiswa.peminjaman.ambil', $item->id) }}">
-            @csrf
-            @method('PATCH')
-            <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Ambil</button>
-          </form>
+
+          @if ($item->status_peminjaman === 'diambil')
+            <button class="bg-gray-300 text-gray-600 px-3 py-1 text-xs rounded cursor-not-allowed" disabled>Ambil</button>
+          @else
+            <form method="POST" action="{{ route('mahasiswa.peminjaman.ambil', $item->id) }}">
+              @csrf
+              @method('PATCH')
+              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Ambil</button>
+            </form>
+          @endif
+
           @else
           {{ ucfirst($item->status_peminjaman) }}
           @endif
@@ -72,10 +78,10 @@
         </td>
 
         <td class="px-4 py-2">
-          @if ($item->status_peminjaman === 'kembalikan')
-          <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full">Belum</span>
+          @if (in_array($item->status_pengembalian, ['proses', 'belum']))
+            <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full">Belum</span>
           @else
-          <span class="text-gray-400 text-xs italic">-</span>
+            <span class="text-gray-400 text-xs italic">-</span>
           @endif
         </td>
         <td class="px-4 py-2 hidden status-kembali-col">{{ ucfirst($item->status_pengembalian ?? '-') }}</td>

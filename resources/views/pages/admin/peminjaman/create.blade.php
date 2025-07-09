@@ -97,6 +97,16 @@
       <input type="text" name="organisasi" class="w-full border rounded px-3 py-2 bg-gray-100" value="Staff" readonly>
     </div>
 
+    <div>
+      <label class="block text-sm font-medium mb-1">Penanggung Jawab *</label>
+      <input type="text" name="penanggung_jawab"
+        value="{{ old('penanggung_jawab') }}"
+        class="w-full border rounded px-3 py-2 @error('penanggung_jawab') border-red-500 @enderror" required>
+      @error('penanggung_jawab')
+        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+      @enderror
+    </div>
+
     <div class="flex justify-end mt-4">
       <button id="btn-simpan" type="submit"
         class="bg-green-500 hover:bg-green-600 text-white font-medium px-5 py-2 rounded disabled:opacity-60 disabled:cursor-not-allowed">
@@ -108,8 +118,10 @@
 
 @php
   $errorStep2 = $errors->has('judul_kegiatan') || $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
-                $errors->has('waktu_berakhir') || $errors->has('aktivitas') || $errors->has('deskripsi_kegiatan');
+                $errors->has('waktu_berakhir') || $errors->has('aktivitas') || $errors->has('deskripsi_kegiatan') ||
+                $errors->has('penanggung_jawab');
 @endphp
+
 
 @if ($errorStep2)
   <script>
