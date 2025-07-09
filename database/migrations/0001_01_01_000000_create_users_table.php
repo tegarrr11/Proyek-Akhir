@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('nim')->nullable();
             $table->string('prodi')->nullable();
             $table->string('inisial')->nullable();
+            $table->string('posisi')->nullable();
         });
 
         // Token reset password

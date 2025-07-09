@@ -59,6 +59,8 @@ class SocialiteController extends Controller
                 $role = 'mahasiswa';
             }
 
+            // dd($check);
+
 
             $user = User::create([
                 'name' => ucwords(strtolower($check?->name ?? $socialUser->name,)),
@@ -78,7 +80,7 @@ class SocialiteController extends Controller
         }
 
         Cookie::queue('user_session', Auth::user()->id, 120);
-        return redirect()->intended('/dashboard');
+        return redirect()->intended('mahasiswa/dashboard');
     }
 
     public function checkEmailDosen(string $email)
@@ -156,14 +158,17 @@ class SocialiteController extends Controller
             $angkatan = null;
             $prodi = null;
         }
+        // dd($angkatan, $prodi);
 
         $url = "https://v2.api.pcr.ac.id/api/akademik-mahasiswa?angkatan=20{$angkatan}&prodi={$prodi}&collection=angkatan-prodi";
 
         $response = Http::withHeaders([
-            'apikey' => env('API_KEY_PCR'),
+            'apikey' => "Ovk9PikyPmncW649C0vzEMmRWoOz20Ng",
         ])->post($url);
 
+
         $data = $response->json();
+        // dd($data);
         $check = array_filter($data['items'], function ($item) use ($email) {
             return $item['email'] === $email;
         });
