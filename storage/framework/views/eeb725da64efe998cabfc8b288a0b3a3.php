@@ -56,11 +56,6 @@ unset($__defined_vars); ?>
 
             </div>
             <span class="text-sm font-medium text-gray-700"><?php echo e(auth()->user()->name); ?></span>
-            <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.584l3.71-4.354a.75.75 0 011.14.976l-4.25 5a.75.75 0 01-1.14 0l-4.25-5a.75.75 0 01.02-1.06z"
-                      clip-rule="evenodd"/>
-            </svg>
         </div>
     </div>
 </div>

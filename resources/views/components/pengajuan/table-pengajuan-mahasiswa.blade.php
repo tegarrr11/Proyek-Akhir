@@ -26,19 +26,19 @@
         <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-500 text-white text-xs px-3 py-1 rounded' : 'bg-gray-200 text-gray-600' }}">
+          <span class="px-3 py-1 text-xs rounded-full {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium' : 'bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium' }}">
             {{ ucfirst($item->verifikasi_bem) }}
           </span>
         </td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded
+          <span class="px-3 py-1 text-xs rounded-full
             @if($item->verifikasi_sarpras === 'diterima')
-              bg-green-500 text-white text-xs px-3 py-1 rounded
+              bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium
             @elseif($item->verifikasi_sarpras === 'proses')
-              bg-yellow-100 text-yellow-800
+              bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-medium
             @else
-              bg-gray-200 text-gray-600
+              bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium
             @endif">
             {{ ucfirst($item->verifikasi_sarpras) }}
           </span>
@@ -51,7 +51,7 @@
           <form method="POST" action="{{ route('mahasiswa.peminjaman.kembalikan', $item->id) }}" onsubmit="return confirm('Yakin ingin mengembalikan barang ini?')">
             @csrf
             @method('PATCH')
-            <button class="bg-yellow-500 text-white px-3 py-1 text-xs rounded hover:bg-yellow-600 flex items-center gap-1">
+            <button class="bg-yellow-500 text-white px-3 py-1 text-xs rounded-full hover:bg-yellow-600 flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
@@ -60,12 +60,12 @@
           @elseif (is_null($item->status_peminjaman))
 
           @if ($item->status_peminjaman === 'diambil')
-            <button class="bg-gray-300 text-gray-600 px-3 py-1 text-xs rounded cursor-not-allowed" disabled>Ambil</button>
+            <button class="bg-gray-300 text-gray-600 px-3 py-1 text-xs rounded-full cursor-not-allowed" disabled>Ambil</button>
           @else
             <form method="POST" action="{{ route('mahasiswa.peminjaman.ambil', $item->id) }}">
               @csrf
               @method('PATCH')
-              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Ambil</button>
+              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded-full hover:bg-blue-700">Ambil</button>
             </form>
           @endif
 
@@ -79,7 +79,7 @@
 
         <td class="px-4 py-2">
           @if (in_array($item->status_pengembalian, ['proses', 'belum']))
-            <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full">Belum</span>
+            <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full font-medium">Belum</span>
           @else
             <span class="text-gray-400 text-xs italic">-</span>
           @endif

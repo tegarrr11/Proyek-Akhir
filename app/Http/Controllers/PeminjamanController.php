@@ -30,7 +30,7 @@ class PeminjamanController extends Controller
             ? Fasilitas::where('gedung_id', $selectedGedung->id)->where('stok', '>', 0)->get()
             : collect();
 
-        $fasilitasLainnya = Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
+        $fasilitasLainnya = Fasilitas::where('gedung_id', 8)->where('stok', '>', 0)->get();
 
         return view('pages.mahasiswa.peminjaman.create', compact(
             'gedungs',

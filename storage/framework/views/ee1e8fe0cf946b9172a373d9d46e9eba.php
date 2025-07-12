@@ -35,20 +35,20 @@
         <td class="px-4 py-2"><?php echo e(\Carbon\Carbon::parse($item->created_at)->format('d/m/Y')); ?></td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded <?php echo e($item->verifikasi_bem === 'diterima' ? 'bg-green-500 text-white text-xs px-3 py-1 rounded' : 'bg-gray-200 text-gray-600'); ?>">
+          <span class="px-3 py-1 text-xs rounded-full <?php echo e($item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium' : 'bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium'); ?>">
             <?php echo e(ucfirst($item->verifikasi_bem)); ?>
 
           </span>
         </td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded
+          <span class="px-3 py-1 text-xs rounded-full
             <?php if($item->verifikasi_sarpras === 'diterima'): ?>
-              bg-green-500 text-white text-xs px-3 py-1 rounded
+              bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium
             <?php elseif($item->verifikasi_sarpras === 'proses'): ?>
-              bg-yellow-100 text-yellow-800
+              bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-medium
             <?php else: ?>
-              bg-gray-200 text-gray-600
+              bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium
             <?php endif; ?>">
             <?php echo e(ucfirst($item->verifikasi_sarpras)); ?>
 
@@ -62,7 +62,7 @@
           <form method="POST" action="<?php echo e(route('mahasiswa.peminjaman.kembalikan', $item->id)); ?>" onsubmit="return confirm('Yakin ingin mengembalikan barang ini?')">
             <?php echo csrf_field(); ?>
             <?php echo method_field('PATCH'); ?>
-            <button class="bg-yellow-500 text-white px-3 py-1 text-xs rounded hover:bg-yellow-600 flex items-center gap-1">
+            <button class="bg-yellow-500 text-white px-3 py-1 text-xs rounded-full hover:bg-yellow-600 flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
@@ -71,12 +71,12 @@
           <?php elseif(is_null($item->status_peminjaman)): ?>
 
           <?php if($item->status_peminjaman === 'diambil'): ?>
-            <button class="bg-gray-300 text-gray-600 px-3 py-1 text-xs rounded cursor-not-allowed" disabled>Ambil</button>
+            <button class="bg-gray-300 text-gray-600 px-3 py-1 text-xs rounded-full cursor-not-allowed" disabled>Ambil</button>
           <?php else: ?>
             <form method="POST" action="<?php echo e(route('mahasiswa.peminjaman.ambil', $item->id)); ?>">
               <?php echo csrf_field(); ?>
               <?php echo method_field('PATCH'); ?>
-              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Ambil</button>
+              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded-full hover:bg-blue-700">Ambil</button>
             </form>
           <?php endif; ?>
 
@@ -91,7 +91,7 @@
 
         <td class="px-4 py-2">
           <?php if(in_array($item->status_pengembalian, ['proses', 'belum'])): ?>
-            <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full">Belum</span>
+            <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full font-medium">Belum</span>
           <?php else: ?>
             <span class="text-gray-400 text-xs italic">-</span>
           <?php endif; ?>

@@ -56,16 +56,20 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
   </button>
 
   <div id="step1" class="bg-white border-t active-step">
+    <?php
+      $fasilitasData = $fasilitasLainnya ?? collect();
+    ?>
+
     <?php if (isset($component)) { $__componentOriginal7258606b4ba94c28952e37259d97a7b6 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal7258606b4ba94c28952e37259d97a7b6 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.form-peminjaman.tahap1','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.form-peminjaman.tahap1','data' => ['fasilitasLainnya' => $fasilitasData]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('form-peminjaman.tahap1'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>
+<?php $component->withAttributes(['fasilitasLainnya' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($fasilitasData)]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal7258606b4ba94c28952e37259d97a7b6)): ?>
@@ -76,6 +80,7 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
 <?php $component = $__componentOriginal7258606b4ba94c28952e37259d97a7b6; ?>
 <?php unset($__componentOriginal7258606b4ba94c28952e37259d97a7b6); ?>
 <?php endif; ?>
+
   </div>
 
   

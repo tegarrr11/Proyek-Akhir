@@ -39,7 +39,12 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
   </button>
 
   <div id="step1" class="bg-white border-t active-step">
-    <x-form-peminjaman.tahap1 />
+    @php
+      $fasilitasData = $fasilitasLainnya ?? collect();
+    @endphp
+
+    <x-form-peminjaman.tahap1 :fasilitasLainnya="$fasilitasData" />
+
   </div>
 
   {{-- === Tahap 2 === --}}
