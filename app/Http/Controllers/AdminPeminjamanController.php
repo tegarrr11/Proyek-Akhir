@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Peminjaman;
 use App\Helpers\NotifikasiHelper;
 use App\Notifications\PengajuanDiterimaSarpras;
+use App\Models\User;
 
 class AdminPeminjamanController extends Controller
 {

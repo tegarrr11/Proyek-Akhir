@@ -56,16 +56,20 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
   </button>
 
   <div id="step1" class="bg-white border-t active-step">
+    <?php
+      $fasilitasData = $fasilitasLainnya ?? collect();
+    ?>
+
     <?php if (isset($component)) { $__componentOriginal7258606b4ba94c28952e37259d97a7b6 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal7258606b4ba94c28952e37259d97a7b6 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.form-peminjaman.tahap1','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.form-peminjaman.tahap1','data' => ['fasilitasLainnya' => $fasilitasData]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('form-peminjaman.tahap1'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes([]); ?>
+<?php $component->withAttributes(['fasilitasLainnya' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($fasilitasData)]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal7258606b4ba94c28952e37259d97a7b6)): ?>
@@ -76,6 +80,7 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
 <?php $component = $__componentOriginal7258606b4ba94c28952e37259d97a7b6; ?>
 <?php unset($__componentOriginal7258606b4ba94c28952e37259d97a7b6); ?>
 <?php endif; ?>
+
   </div>
 
   
@@ -152,6 +157,10 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
 
   function validateAndSubmit(event) {
     const form = document.getElementById('peminjamanForm');
+    const validasiForm = document.getElementById('validasi-form');
+    validasiForm.classList.add('hidden');
+    validasiForm.textContent = "";
+
     const requiredFields = form.querySelectorAll('[required]');
     let firstInvalid = null;
 
@@ -168,12 +177,30 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
       const parent = firstInvalid.closest('#step1') || firstInvalid.closest('#step2');
       if (parent?.id === 'step1') toggleStep(1);
       if (parent?.id === 'step2') toggleStep(2);
-      firstInvalid.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       firstInvalid.focus();
+
+      validasiForm.textContent = " Mohon lengkapi semua kolom sebelum menyimpan.";
+      validasiForm.classList.remove('hidden');
       return false;
+    }
+
+    // Validasi waktu kegiatan tidak boleh masa lampau
+    const tanggal = form.querySelector('input[name="tgl_kegiatan"]').value;
+    const waktuMulai = form.querySelector('input[name="waktu_mulai"]').value;
+
+    if (tanggal && waktuMulai) {
+      const now = new Date();
+      const waktuDipilih = new Date(`${tanggal}T${waktuMulai}`);
+      now.setSeconds(0, 0);
+
+      if (waktuDipilih < now) {
+        validasiForm.textContent = "⚠️ Tidak dapat mengajukan peminjaman untuk waktu yang sudah lewat.";
+        validasiForm.classList.remove('hidden');
+        toggleStep(2);
+        form.querySelector('input[name="tgl_kegiatan"]').focus();
+        return false;
+      }
     }
 
     return true;

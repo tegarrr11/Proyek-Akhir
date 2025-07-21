@@ -165,9 +165,9 @@ class PeminjamanController extends Controller
             $bem->notify(new \App\Notifications\PengajuanBaru($peminjaman));
         }
 
-        foreach ($adminUsers as $admin) {
-            $admin->notify(new \App\Notifications\PengajuanBaru($peminjaman));
-        }
+        // foreach ($adminUsers as $admin) {
+        //     $admin->notify(new \App\Notifications\PengajuanBaru($peminjaman));
+        // }
 
         \App\Helpers\NotifikasiHelper::kirimKeRoles(['bem', 'admin'], 'Pengajuan Baru', 'Pengajuan oleh ' . $mahasiswa->name);
 

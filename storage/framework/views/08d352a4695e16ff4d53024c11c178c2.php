@@ -36,8 +36,10 @@ use App\Models\Fasilitas;
 
 $gedungSlug = strtolower(request('gedung', ''));
 $gedung = Gedung::where('slug', $gedungSlug)->first();
-$fasilitasLainnya = Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
+$fasilitasLainnya = Fasilitas::where('gedung_id', 8)->where('stok', '>', 0)->get();
 $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('stok', '>', 0)->get() : [];
+
+$isMahasiswa = auth()->user()->role === 'mahasiswa';
 ?>
 
 <div id="step1" class="bg-white border-t p-4 space-y-4 active-step">
@@ -67,7 +69,7 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
   </div>
 
   
-  <?php if(!empty($fasilitasList)): ?>
+  <?php if($isMahasiswa && !empty($fasilitasList)): ?>
     <div id="fasilitas-section">
       <label class="block mb-1 text-sm font-medium">Barang dan Perlengkapan Default *</label>
       <table class="w-full border text-sm mb-6">
@@ -90,8 +92,8 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
               </td>
               <td class="border px-2 text-center">
                 <input type="number" name="barang[<?php echo e($index); ?>][jumlah]" class="jumlah-barang border rounded w-20 text-center"
-                       max="<?php echo e($item->stok); ?>" value="<?php echo e($item->stok); ?>" min="0">
-                <small class="text-gray-400 block">Max: <?php echo e($item->stok); ?></small>
+                      max="<?php echo e($item->stok); ?>" value="<?php echo e($item->stok); ?>" min="0">
+                  <small class="text-gray-400 block">Max: <?php echo e($item->stok); ?></small>
               </td>
               <td class="border px-2 text-center">
                 <button type="button" onclick="hapusBaris(this)" class="text-red-500 hover:text-red-700">
@@ -105,7 +107,7 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
         </tbody>
       </table>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
 
   
   <div id="fasilitas-tambahan-section" class="mt-4 hidden">
@@ -141,20 +143,23 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
           &times;
         </button>
         <h3 class="text-lg font-semibold mb-4">Fasilitas Tambahan</h3>
-        <div id="fasilitasList" class="space-y-3 max-h-[300px] overflow-y-auto text-sm text-gray-800">
-          <?php $__currentLoopData = $fasilitasLainnya; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <div class="flex justify-between items-center border-b py-2" id="modal-item-<?php echo e($item->id); ?>">
-              <div>
-                <div class="font-semibold"><?php echo e($item->nama_barang); ?></div>
-                <div class="text-xs text-gray-500">Stok: <?php echo e($item->stok); ?></div>
-              </div>
-              <button type="button" class="text-blue-600 hover:underline text-xs"
-                      onclick="tambahKeFasilitas(<?php echo e($item->id); ?>, '<?php echo e($item->nama_barang); ?>', <?php echo e($item->stok); ?>)">
-                Tambah
-              </button>
-            </div>
-          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </div>
+
+        <input type="text" id="searchFasilitasLainnya" placeholder="Cari fasilitas..."
+          class="w-full px-3 py-2 mb-3 border rounded text-sm focus:outline-none focus:ring focus:ring-blue-200">
+
+
+        <div id="fasilitasList" class="space-y-3 text-sm text-gray-800"></div>
+
+          <div id="pagination-controls" class="flex justify-center items-center gap-4 mt-4 text-sm text-gray-700">
+            <button onclick="gantiHalaman(-1)" id="prevBtn" class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50" disabled>
+              &lt;
+            </button>
+            <span id="pageIndicator">1 / 1</span>
+            <button onclick="gantiHalaman(1)" id="nextBtn" class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
+              &gt;
+            </button>
+          </div>
+
       </div>
     </div>
 
@@ -171,7 +176,9 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
   function showFasilitasModal() {
     document.getElementById('fasilitasModal').classList.remove('hidden');
     document.getElementById('fasilitasModal').classList.add('flex');
+    tampilkanFasilitas(); // <== ini yang harus ditambahkan
   }
+
 
   function hideFasilitasModal() {
     document.getElementById('fasilitasModal')?.classList.add('hidden');
@@ -324,5 +331,85 @@ $fasilitasList = $gedung ? Fasilitas::where('gedung_id', $gedung->id)->where('st
 
     toggleStep(1);
   });
+
+  // Search filter fasilitas tambahan
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchFasilitasLainnya');
+    const items = document.querySelectorAll('.fasilitas-item');
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const keyword = searchInput.value.toLowerCase();
+        items.forEach(item => {
+          const nama = item.dataset.nama;
+          item.style.display = nama.includes(keyword) ? 'flex' : 'none';
+        });
+      });
+    }
+  });
+
+  const semuaFasilitas = <?php echo json_encode($fasilitasLainnya, 15, 512) ?>;
+let halamanSekarang = 1;
+const itemPerHalaman = 5;
+
+function tampilkanFasilitas() {
+  const listContainer = document.getElementById('fasilitasList');
+  listContainer.innerHTML = '';
+
+  const awal = (halamanSekarang - 1) * itemPerHalaman;
+  const akhir = awal + itemPerHalaman;
+  const halamanData = semuaFasilitas.slice(awal, akhir);
+
+  halamanData.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'flex justify-between items-center border-b py-2 fasilitas-item';
+    div.id = `modal-item-${item.id}`;
+    div.dataset.nama = item.nama_barang.toLowerCase();
+
+    div.innerHTML = `
+      <div>
+        <div class="font-semibold">${item.nama_barang}</div>
+        <div class="text-xs text-gray-500">Stok: ${item.stok}</div>
+      </div>
+      <button type="button" class="text-blue-600 hover:underline text-xs"
+              onclick="tambahKeFasilitas(${item.id}, '${item.nama_barang}', ${item.stok})">
+        Tambah
+      </button>
+    `;
+    listContainer.appendChild(div);
+  });
+}
+
+  const fasilitasItems = Array.from(document.querySelectorAll('#fasilitasList > div'));
+  const itemsPerPage = 5;
+  let currentPage = 1;
+  let totalPages = Math.max(1, Math.ceil(fasilitasItems.length / itemsPerPage));
+
+  function renderHalaman() {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+
+    fasilitasItems.forEach((item, index) => {
+      item.style.display = (index >= start && index < end) ? 'flex' : 'none';
+    });
+
+    document.getElementById('pageIndicator').innerText = `${currentPage} / ${totalPages}`;
+    document.getElementById('prevBtn').disabled = currentPage === 1;
+    document.getElementById('nextBtn').disabled = currentPage === totalPages;
+  }
+
+  function gantiHalaman(arah) {
+    currentPage += arah;
+    if (currentPage < 1) currentPage = 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    renderHalaman();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    totalPages = Math.max(1, Math.ceil(fasilitasItems.length / itemsPerPage));
+    renderHalaman();
+  });
+
+
 </script>
 <?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/form-peminjaman/tahap1.blade.php ENDPATH**/ ?>

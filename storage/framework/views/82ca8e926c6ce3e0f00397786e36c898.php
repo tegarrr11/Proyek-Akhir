@@ -26,6 +26,11 @@
         </div>
 
         <div>
+          <p class="font-semibold text-[#1e2d5e]">Organisasi</p>
+          <p id="organisasi">-</p>
+        </div>
+
+        <div>
           <p class="font-semibold text-[#1e2d5e]">Penanggungjawab Kegiatan</p>
           <p id="penanggungJawab">-</p>
         </div>
@@ -57,7 +62,7 @@
       <!-- Kolom Kanan (Diskusi) -->
       <div class="w-full md:w-1/3 border border-gray-200 rounded-lg p-4 flex flex-col">
         <p class="font-semibold text-[#1e2d5e] mb-1">Diskusi</p>
-        <div id="diskusiArea" class="text-sm text-gray-400 italic flex-1">belum ada diskusi</div>
+        <div id="diskusiArea" class="text-sm text-gray-400 flex-1">belum ada diskusi</div>
         <div class="mt-4">
           <input class="inputDiskusi w-full border rounded px-3 py-2 text-sm mb-2" id="inputDiskusi" type="text" placeholder="Ketikkan di sini">
           <button class="btnKirimDiskusi bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded w-full" id="btnKirimDiskusi">Kirim</button>
@@ -103,6 +108,7 @@ function showDetail(id) {
       el('jamKegiatan').textContent = `${formatJam(data.waktu_mulai)} - ${formatJam(data.waktu_berakhir)}`;
       el('aktivitas').textContent = data.aktivitas || '-';
       el('penanggungJawab').textContent = data.penanggung_jawab || '-';
+      el('organisasi').textContent = data.organisasi || '-';
       el('keterangan').textContent = data.deskripsi_kegiatan || '-';
       el('ruangan').textContent = data.nama_ruangan || '-';
 

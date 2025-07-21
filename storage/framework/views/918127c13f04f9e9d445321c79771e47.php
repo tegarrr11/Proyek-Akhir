@@ -199,7 +199,7 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
 <?php $__env->stopPush(); ?>
 
-<?php if (! $__env->hasRenderedOnce('8957fa72-79f7-4721-b56f-713e77635bb1')): $__env->markAsRenderedOnce('8957fa72-79f7-4721-b56f-713e77635bb1'); ?>
+<?php if (! $__env->hasRenderedOnce('4e7c96b2-a793-4a34-968e-8bcfb88bee3f')): $__env->markAsRenderedOnce('4e7c96b2-a793-4a34-968e-8bcfb88bee3f'); ?>
 <?php $__env->startPush('scripts'); ?>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -255,9 +255,16 @@
         const startTime = event.start.substring(11, 16);
         const endTime = event.end.substring(11, 16);
         const role = event.title.split('(').pop()?.replace(')', '').trim().toLowerCase();
-        const isMahasiswa = ['AET', 'ITSA', 'HIMASISTIFO', 'HIMATRIK', 'HMM', 'HIMAKSI', 'HIMATEL', 'HIMIKA', 'HIMAKOM', 'HIMATRON',
-        'UKM Basket', 'UKM Futsal', 'UKM Volly', 'UKM Badminton', 'PCR-Rohil', 'PCR-Sumbar'].includes(role);
-        const labelColor = isMahasiswa ? '#E33C45' : '#28839D';
+
+        const isMahasiswa = [
+          'aet', 'itsa', 'himasistifo', 'himatrik', 'hmm', 'himaksi', 'himatel',
+          'himika', 'himakom', 'himatron',
+          'ukm basket', 'ukm futsal', 'ukm volly', 'ukm badminton',
+          'pcr-rohil', 'pcr-sumbar'
+        ].includes(role);
+
+        const labelColor = isMahasiswa ? '#28839D' : '#E33C45';
+
         return {
           id: event.id,
           title: `${startTime} - ${endTime} (${role.toUpperCase()})`,
@@ -266,6 +273,7 @@
           color: labelColor
         };
       })
+
     });
     calendar.render();
   });

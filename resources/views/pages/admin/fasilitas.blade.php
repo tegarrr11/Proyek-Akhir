@@ -58,7 +58,7 @@
       </div>
     </div>
     <div class="pt-2">
-      <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 text-sm">Simpan</button>
+      <button type="submit" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 text-sm">Simpan</button>
     </div>
   </form>
 

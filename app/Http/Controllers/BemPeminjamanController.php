@@ -10,6 +10,9 @@ use App\Mail\NotifikasiEmail;
 use App\Events\NotifikasiEvent;
 use App\Helpers\NotifikasiHelper;
 use App\Notifications\PengajuanDisetujuiBem;
+use App\Models\User;
+use App\Notifications\PengajuanKeAdmin;
+
 
 class BemPeminjamanController extends Controller
 {
@@ -53,6 +56,13 @@ class BemPeminjamanController extends Controller
         $judul = 'Pengajuan Menunggu Persetujuan Admin';
         $pesan = 'Pengajuan oleh ' . $peminjaman->user->name . ' telah disetujui BEM dan menunggu verifikasi admin.';
         NotifikasiHelper::kirimKeRole('admin', $judul, $pesan);
+
+        //Kirim notif email ke Admin
+        $adminUsers = User::where('role', 'admin')->get();
+
+        foreach ($adminUsers as $admin) {
+            $admin->notify(new PengajuanKeAdmin($peminjaman));
+        }
 
         // Kirim notifikasi email ke Mahasiswa
         $mahasiswa = $peminjaman->user;

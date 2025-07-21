@@ -8,99 +8,46 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-  <table class="w-full text-sm">
-    <thead class="bg-gray-100">
-      <tr>
+  <table class="w-full text-sm text-left text-gray-700">
+    <thead class="bg-gray-100 text-black border-b">
+      <tr class="text-sm font-semibold">
         <th class="px-4 py-2">No.</th>
         <th class="px-4 py-2">Pengajuan</th>
         <th class="px-4 py-2">Tanggal Pengajuan</th>
         <th class="px-4 py-2">Verifikasi BEM</th>
         <th class="px-4 py-2">Verifikasi Sarpras</th>
         <th class="px-4 py-2">Organisasi</th>
-        <th class="px-4 py-2">Status Peminjaman</th>
-        <th class="px-4 py-2">Status Pengembalian</th>
-        <th class="px-4 py-2 hidden status-kembali-col">Status Pengembalian</th>
-        <th class="px-4 py-2"></th>
+        <th class="px-4 py-2 text-center">Aksi</th>
       </tr>
     </thead>
     <tbody>
-      <?php $__empty_1 = true; $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-      <?php if($item->status_pengembalian === 'selesai'): ?>
-      <?php continue; ?>
-      <?php endif; ?>
-
+      <?php $__empty_1 = true; $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $pengajuan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
       <tr class="<?php echo e($i % 2 == 0 ? 'bg-white' : 'bg-gray-50'); ?>">
         <td class="px-4 py-2"><?php echo e($i + 1); ?></td>
-        <td class="px-4 py-2"><?php echo e($item->judul_kegiatan); ?></td>
-        <td class="px-4 py-2"><?php echo e(\Carbon\Carbon::parse($item->created_at)->format('d/m/Y')); ?></td>
+        <td class="px-4 py-2"><?php echo e($pengajuan->judul_kegiatan); ?></td>
+        <td class="px-4 py-2"><?php echo e(\Carbon\Carbon::parse($pengajuan->created_at)->format('d/m/Y')); ?></td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full <?php echo e($item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium' : 'bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium'); ?>">
-            <?php echo e(ucfirst($item->verifikasi_bem)); ?>
+          <span class="px-3 py-1 text-xs rounded <?php echo e($pengajuan->verifikasi_bem === 'diterima' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'); ?>">
+            <?php echo e(ucfirst($pengajuan->verifikasi_bem)); ?>
 
           </span>
         </td>
 
+        <td class="px-4 py-2 text-gray-500 text-xs">-</td>
+        <td class="px-4 py-2"><?php echo e($pengajuan->organisasi); ?></td>
+
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full
-            <?php if($item->verifikasi_sarpras === 'diterima'): ?>
-              bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium
-            <?php elseif($item->verifikasi_sarpras === 'proses'): ?>
-              bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-medium
-            <?php else: ?>
-              bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium
-            <?php endif; ?>">
-            <?php echo e(ucfirst($item->verifikasi_sarpras)); ?>
-
-          </span>
-        </td>
-
-        <td class="px-4 py-2"><?php echo e($item->organisasi); ?></td>
-        <td class="px-4 py-2">
-          <?php if($item->verifikasi_sarpras === 'diterima'): ?>
-          <?php if($item->status_peminjaman === 'kembalikan' && $item->status_pengembalian === 'proses'): ?>
-          <form method="POST" action="<?php echo e(route('mahasiswa.peminjaman.kembalikan', $item->id)); ?>" onsubmit="return confirm('Yakin ingin mengembalikan barang ini?')">
-            <?php echo csrf_field(); ?>
-            <?php echo method_field('PATCH'); ?>
-            <button class="bg-yellow-500 text-white px-3 py-1 text-xs rounded-full hover:bg-yellow-600 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
-              Kembalikan
-          </form>
-          <?php elseif(is_null($item->status_peminjaman)): ?>
-
-          <?php if($item->status_peminjaman === 'diambil'): ?>
-            <button class="bg-gray-300 text-gray-600 px-3 py-1 text-xs rounded-full cursor-not-allowed" disabled>Ambil</button>
-          <?php else: ?>
-            <form method="POST" action="<?php echo e(route('mahasiswa.peminjaman.ambil', $item->id)); ?>">
+          <div class="flex items-center gap-2 justify-center">
+            <form method="POST" action="<?php echo e(route('bem.peminjaman.verifikasi', $pengajuan->id)); ?>">
               <?php echo csrf_field(); ?>
-              <?php echo method_field('PATCH'); ?>
-              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded-full hover:bg-blue-700">Ambil</button>
+              <input type="hidden" name="verifikasi_bem" value="diterima">
+              <button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded">
+                Terima
+              </button>
             </form>
-          <?php endif; ?>
 
-          <?php else: ?>
-          <?php echo e(ucfirst($item->status_peminjaman)); ?>
-
-          <?php endif; ?>
-          <?php else: ?>
-          <span class="text-gray-400 text-xs italic">-</span>
-          <?php endif; ?>
-        </td>
-
-        <td class="px-4 py-2">
-          <?php if(in_array($item->status_pengembalian, ['proses', 'belum'])): ?>
-            <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full font-medium">Belum</span>
-          <?php else: ?>
-            <span class="text-gray-400 text-xs italic">-</span>
-          <?php endif; ?>
-        </td>
-        <td class="px-4 py-2 hidden status-kembali-col"><?php echo e(ucfirst($item->status_pengembalian ?? '-')); ?></td>
-
-        <td class="px-4 py-2">
-          <div class="flex items-center gap-2">
-            <button onclick="showDetail(<?php echo e($item->id); ?>)" class="text-gray-600 hover:text-blue-700" title="Detail">
+            <button onclick="showDetail(<?php echo e($pengajuan->id); ?>)" class="text-gray-600 hover:text-blue-700" title="Detail">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -110,7 +57,7 @@
       </tr>
       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
       <tr>
-        <td colspan="9" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
+        <td colspan="7" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
       </tr>
       <?php endif; ?>
     </tbody>
@@ -128,52 +75,13 @@
 
 <?php $__env->startPush('scripts'); ?>
 <script>
-  console.log('[DEBUG] Script chat loaded');
-
-  function tampilkanKolomKembali(event) {
-    event.preventDefault();
-    const form = event.target;
-    const row = form.closest('tr');
-    row.querySelector('.status-kembali-col').classList.remove('hidden');
-    form.submit();
-  }
-
-  function showTab(tab) {
-    const tabs = ['pengajuan', 'riwayat'];
-    tabs.forEach(id => {
-      const tabEl = document.getElementById(`tab${capitalize(id)}`);
-      const underline = document.getElementById(`underline${capitalize(id)}`);
-      if (id === tab) {
-        tabEl.classList.remove('text-gray-500');
-        tabEl.classList.add('text-[#003366]');
-        underline.classList.add('scale-x-100');
-        underline.classList.remove('scale-x-0');
-        document.getElementById(`${id}Tab`).classList.remove('hidden');
-      } else {
-        tabEl.classList.add('text-gray-500');
-        tabEl.classList.remove('text-[#003366]');
-        underline.classList.add('scale-x-0');
-        underline.classList.remove('scale-x-100');
-        document.getElementById(`${id}Tab`).classList.add('hidden');
-      }
-    });
-  }
-
-  function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    showTab('pengajuan');
-  });
-
   window.currentPeminjamanId = null;
 
   function bindDiskusiHandler() {
     const modal = document.getElementById('detailModal');
     if (!modal || modal.classList.contains('hidden')) return;
-    const btn = modal.querySelector('.btnKirimDiskusi');
-    const input = modal.querySelector('.inputDiskusi');
+    const btn = modal.querySelector('#btnKirimDiskusi');
+    const input = modal.querySelector('#inputDiskusi');
     if (!btn || !input) return;
 
     btn.onclick = function() {
@@ -185,6 +93,7 @@
         const tokenInput = document.querySelector('input[name=_token]');
         if (tokenInput) csrf = tokenInput.value;
       }
+
       fetch('/diskusi', {
           method: 'POST',
           headers: {
@@ -198,11 +107,8 @@
         })
         .then(res => res.json())
         .then(resp => {
-          if (resp.success) {
-            showDetail(currentPeminjamanId); // refresh chat
-          } else {
-            alert(resp.error || 'Gagal mengirim pesan.');
-          }
+          if (resp.success) showDetail(currentPeminjamanId);
+          else alert(resp.error || 'Gagal mengirim pesan.');
         })
         .catch(() => alert('Gagal mengirim pesan.'));
     };
@@ -333,4 +239,4 @@
     document.getElementById('detailModal')?.classList.add('hidden');
   }
 </script>
-<?php $__env->stopPush(); ?><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/pengajuan/table-pengajuan-mahasiswa.blade.php ENDPATH**/ ?>
+<?php $__env->stopPush(); ?><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/pengajuan/table-pengajuan-bem.blade.php ENDPATH**/ ?>
