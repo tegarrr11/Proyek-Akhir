@@ -27,6 +27,10 @@ class SocialiteController extends Controller
         $email = $socialUser->email;
         $role = 'mahasiswa'; // Default
 
+        if (!Str::endsWith($email, '@mahasiswa.pcr.ac.id') && !Str::endsWith($email, '@pcr.ac.id')) {
+            return redirect()->route('login')->with('error', 'Email tidak valid.');
+        }
+
         $registeredUser = User::where('google_id', $socialUser->id)
             ->orWhere('email', $email)
             ->first();
