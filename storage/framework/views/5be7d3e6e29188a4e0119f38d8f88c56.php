@@ -257,8 +257,29 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
   }
 
   function lanjutTahap2() {
+  const jumlahInputs = document.querySelectorAll('.jumlah-barang');
+  let stokValid = true;
+
+  jumlahInputs.forEach(input => {
+    const max = parseInt(input.max);
+    const value = parseInt(input.value);
+    if (value > max) {
+      stokValid = false;
+    }
+  });
+
+  const peringatan = document.getElementById('peringatan');
+
+  if (!stokValid) {
+    peringatan.classList.remove('hidden');
+    peringatan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  } else {
+    peringatan.classList.add('hidden');
     toggleStep(2);
   }
+}
+
 
   function handleJenisChange() {
     const selected = document.querySelector('input[name="jenis_kegiatan"]:checked');

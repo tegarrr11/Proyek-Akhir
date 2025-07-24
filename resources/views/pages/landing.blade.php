@@ -150,22 +150,21 @@
     <h2 class="text-2xl font-bold text-gray-800">Kalender</h2>
     <div class="flex items-center gap-3">
       <!-- Dropdown Gedung -->
-      <form method="GET" action="{{ Request::url() }}" class="mr-2">
-        <select
-          name="gedung_id"
-          onchange="this.form.submit()"
-          class="text-[#003366] border border-[#003366] text-sm px-4 pr-10 h-9 w-48 rounded-md shadow-sm appearance-none bg-white font-semibold leading-tight ">
-          @foreach($gedungs as $gedung)
-            <option value="{{ $gedung->id }}" {{ $gedung->id == $selectedGedungId ? 'selected' : '' }}>
-              {{ $gedung->nama }}
-            </option>
-          @endforeach
-        </select>
-      </form>
-
+      <!-- Dropdown -->
+        <form method="GET" action="{{ Request::url() }}">
+          <select name="gedung_id"
+            onchange="this.form.submit()"
+            class="border border-grey-500 text-sm px-4 py-2 h-10 rounded w-52">
+            @foreach($gedungs->where('id', '!=', 8) as $gedung)
+              <option value="{{ $gedung->id }}" {{ $gedung->id == $selectedGedungId ? 'selected' : '' }}>
+                {{ $gedung->nama }}
+              </option>
+            @endforeach
+          </select>
+        </form>
       <!-- Tombol Login -->
       <a href="{{ route('login') }}"
-        class="inline-flex items-center justify-center bg-[#003366] hover:bg-[#002244] text-white w-32 text-xs font-medium h-9 px-4 rounded-md shadow">
+        class="inline-flex items-center justify-center bg-[#003366] hover:bg-[#002244] text-white w-32 text-xs font-medium h-10 px-4 rounded-md shadow">
         Login
       </a>
     </div>

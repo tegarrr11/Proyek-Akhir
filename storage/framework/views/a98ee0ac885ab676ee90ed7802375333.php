@@ -93,11 +93,14 @@
         />
 
         <!-- Dropdown -->
-        <select name="gedung_id" class="border rounded px-2 py-1 text-sm w-40" onchange="setRiwayatTabFlag(); this.form.submit();">
+        <select name="gedung_id" class="border rounded px-2 py-1 text-sm w-48" onchange="handleDropdownChange(this.form)">
           <option value="">Semua Ruangan</option>
-          <?php $__currentLoopData = App\Models\Gedung::all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gedung): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-          <option value="<?php echo e($gedung->id); ?>" <?php echo e(request('gedung_id') == $gedung->id ? 'selected' : ''); ?>><?php echo e($gedung->nama); ?></option>
-          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            <?php $__currentLoopData = App\Models\Gedung::where('id', '!=', 8)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gedung): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <option value="<?php echo e($gedung->id); ?>" <?php echo e(request('gedung_id') == $gedung->id ? 'selected' : ''); ?>>
+                <?php echo e($gedung->nama); ?>
+
+              </option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </select>
 
         <input type="hidden" name="tab" id="tabInput" value="riwayat">
@@ -166,6 +169,11 @@
     const tab = new URLSearchParams(window.location.search).get('tab') || 'pengajuan';
     showTab(tab);
   });
+
+  function handleDropdownChange(form) {
+  document.getElementById('tabInput').value = 'riwayat';
+  setTimeout(() => form.submit(), 10); 
+  }
 
   window.showDetail = function(id) {
     console.log('[DEBUG] Global showDetail called with id:', id);

@@ -86,6 +86,16 @@ Route::post('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
+Route::get('pegawai/list', function () {
+    $response = Http::withHeaders([
+        'apikey' => 'Ovk9PikyPmncW649C0vzEMmRWoOz20Ng',
+        // 'Accept' => 'application/json'
+    ])->asForm()->post('https://v2.api.pcr.ac.id/api/pegawai?collection=pegawai-aktif', [
+        'collection' => 'pegawai-aktif'
+    ]);
+    return $response->json();
+});
+
 // ========== NON-AUTH ROUTES (untuk popup/detail yang tidak masuk prefix auth) ==========
 Route::get('/sarpras/peminjaman/{id}/detail', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.detail');
 Route::get('/kalender', [KalenderController::class, 'index'])->middleware('auth')->name('kalender.index');
@@ -100,6 +110,7 @@ Route::get('/api/fasilitas-tambahan', function () {
     return Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
 });
 Route::post('/admin/fasilitas/import', [AdminController::class, 'importFasilitas'])->name('admin.fasilitas.import');
+
 
 
 // ========== AUTH GROUP ==========

@@ -39,8 +39,7 @@
     </div>
   </header>
   <!-- Sidebar -->
-  <aside id="sidebar" class="w-64 bg-white border-r flex flex-col justify-between md:static fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40">
-    <div class="p-6">
+<aside id="sidebar" class="w-64 bg-white border-r flex flex-col justify-between md:static fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40">    <div class="p-6">
       <div class="text-center mt-4 mb-6 md:mt-12 md:mb-8 block">
         <img src="{{ asset('images/sarpras-logo.png') }}" alt="Logo" class="w-32 md:w-40 mx-auto mb-2">
       </div>

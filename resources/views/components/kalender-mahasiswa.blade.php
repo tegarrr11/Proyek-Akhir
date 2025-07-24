@@ -119,25 +119,24 @@
 
 </style>
 
-<div class="bg-white rounded-xl shadow px-4 sm:px-6 md:px-8 lg:px-12 py-6 pb-18">
+<div class="flex-1 bg-white rounded-xl shadow px-4 sm:px-6 md:px-8 lg:px-12 py-6 pb-18">
   <!-- Header -->
   <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4 border-b pb-4">
     <h2 class="text-xl font-bold text-gray-800">Kalender</h2>
     <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
       <div class="h-[2px] bg-gray-200 mb-4"></div>
       <!-- Dropdown -->
-      <form method="GET" action="{{ Request::url() }}">
-        <select name="gedung_id"
-          onchange="this.form.submit()"
-          class="border border-grey-500 text-sm px-4 py-2 h-10 rounded w-52">
-          @foreach($gedungs as $gedung)
-          <option value="{{ $gedung->id }}" {{ $gedung->id == $selectedGedungId ? 'selected' : '' }}>
-            {{ $gedung->nama }}
-          </option>
-          @endforeach
-        </select>
-      </form>
-
+        <form method="GET" action="{{ Request::url() }}">
+          <select name="gedung_id"
+            onchange="this.form.submit()"
+            class="border border-grey-500 text-sm px-4 py-2 h-10 rounded w-52">
+            @foreach($gedungs->where('id', '!=', 8) as $gedung)
+              <option value="{{ $gedung->id }}" {{ $gedung->id == $selectedGedungId ? 'selected' : '' }}>
+                {{ $gedung->nama }}
+              </option>
+            @endforeach
+          </select>
+        </form>
       <!-- Tombol Ajukan -->
       @php $user = auth()->user(); @endphp
       @if($user && $user->role === 'admin')
@@ -259,7 +258,8 @@
           'aet', 'itsa', 'himasistifo', 'himatrik', 'hmm', 'himaksi', 'himatel',
           'himika', 'himakom', 'himatron',
           'ukm basket', 'ukm futsal', 'ukm volly', 'ukm badminton',
-          'pcr-rohil', 'pcr-sumbar'
+          'pcr-rohil', 'pcr-sumbar',
+          'bem', 'blm', 'ukm star', 'pmk', 'permadhis'
         ].includes(role);
 
         const labelColor = isMahasiswa ? '#28839D' : '#E33C45';

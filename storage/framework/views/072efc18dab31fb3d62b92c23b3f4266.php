@@ -26,6 +26,11 @@
         </div>
 
         <div>
+          <p class="font-semibold text-[#1e2d5e]">Organisasi</p>
+          <p id="organisasi">-</p>
+        </div>
+
+        <div>
           <p class="font-semibold text-[#1e2d5e]">Penanggungjawab Kegiatan</p>
           <p id="penanggungJawab">-</p>
         </div>
@@ -103,6 +108,7 @@ function showDetail(id) {
       el('jamKegiatan').textContent = `${formatJam(data.waktu_mulai)} - ${formatJam(data.waktu_berakhir)}`;
       el('aktivitas').textContent = data.aktivitas || '-';
       el('penanggungJawab').textContent = data.penanggung_jawab || '-';
+      el('organisasi').textContent = data.organisasi || '-';
       el('keterangan').textContent = data.deskripsi_kegiatan || '-';
       el('ruangan').textContent = data.nama_ruangan || '-';
 

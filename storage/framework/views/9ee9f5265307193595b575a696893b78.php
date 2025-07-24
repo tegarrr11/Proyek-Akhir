@@ -142,6 +142,7 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
     const step2 = document.getElementById('step2');
     const btn1 = document.getElementById('btn1');
     const btn2 = document.getElementById('btn2');
+    const validasiForm = document.getElementById('validasi-form');
 
     [step1, step2].forEach(s => s.classList.remove('active-step'));
     [btn1, btn2].forEach(b => b.classList.remove('bg-green-100', 'font-semibold'));
@@ -149,7 +150,29 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
     if (step === 1) {
       step1.classList.add('active-step');
       btn1.classList.add('bg-green-100', 'font-semibold');
-    } else {
+    }
+
+    if (step === 2) {
+      const tahap1Fields = step1.querySelectorAll('[required]');
+      let valid = true;
+
+      tahap1Fields.forEach(field => {
+        if (!field.value) {
+          valid = false;
+          field.classList.add('border-red-500');
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      });
+
+      if (!valid) {
+        validasiForm.textContent = "⚠️ Mohon lengkapi semua kolom di Tahap 1 terlebih dahulu.";
+        validasiForm.classList.remove('hidden');
+        toggleStep(1);
+        return;
+      }
+
+      validasiForm.classList.add('hidden');
       step2.classList.add('active-step');
       btn2.classList.add('bg-green-100', 'font-semibold');
     }
@@ -214,8 +237,34 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
     toggleStep(1);
     <?php endif; ?>
 
+    // Klik Tahap 1
     document.getElementById('btn1')?.addEventListener('click', () => toggleStep(1));
-    document.getElementById('btn2')?.addEventListener('click', () => toggleStep(2));
+
+    // Klik Tahap 2 dengan validasi
+    document.getElementById('btn2')?.addEventListener('click', (e) => {
+      const tahap1Fields = document.querySelectorAll('#step1 [required]');
+      let valid = true;
+
+      tahap1Fields.forEach(field => {
+        if (!field.value) {
+          valid = false;
+          field.classList.add('border-red-500');
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      });
+
+      const validasiForm = document.getElementById('validasi-form');
+      if (!valid) {
+        toggleStep(1);
+        validasiForm.textContent = "⚠️ Mohon lengkapi semua kolom di Tahap 1 terlebih dahulu.";
+        validasiForm.classList.remove('hidden');
+        return;
+      }
+
+      validasiForm.classList.add('hidden');
+      toggleStep(2);
+    });
 
     // Jenis kegiatan eksternal check
     const jenisKegiatanRadios = document.querySelectorAll('input[name="jenis_kegiatan"]');
@@ -233,5 +282,6 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
     updateUndanganVisibility();
   });
 </script>
+
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.sidebar-mahasiswa', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/pages/mahasiswa/peminjaman/create.blade.php ENDPATH**/ ?>

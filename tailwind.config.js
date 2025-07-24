@@ -10,13 +10,12 @@ export default {
     ],
 
     theme: {
-        extend: {
+    extend: {
         fontFamily: {
-            poppins: ['Poppins', 'sans-serif'],
-        },
+        sans: ['Poppins', 'sans-serif'], // override default font-sans
         },
     },
-
+    },
 
     plugins: [forms],
 };

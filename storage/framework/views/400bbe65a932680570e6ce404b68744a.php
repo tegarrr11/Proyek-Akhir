@@ -90,7 +90,7 @@ unset($__errorArgs, $__bag); ?>
       <option value="">Pilih organisasi</option>
       <?php $__currentLoopData = [
         "AET", "ITSA", "HIMASISTIFO", "HIMATRIK", "HMM", "HIMAKSI", "HIMATEL", "HIMIKA", "HIMAKOM", "HIMATRON",
-        "UKM Basket", "UKM Futsal", "UKM Volly", "UKM Badminton", "PCR-Rohil", "PCR-Sumbar", ""
+        "UKM Basket", "UKM Futsal", "UKM Volly", "UKM Badminton", "PCR-Rohil", "PCR-Sumbar"
       ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $org): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <option value="<?php echo e($org); ?>" <?php echo e(old('organisasi') == $org ? 'selected' : ''); ?>><?php echo e($org); ?></option>
       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -101,14 +101,7 @@ unset($__errorArgs, $__bag); ?>
   <div>
     <label class="block text-sm font-medium mb-1">Penanggung Jawab *</label>
     <select id="penanggungSelect" name="penanggung_jawab" class="w-full select2" required>
-      <option value="">Pilih penanggung jawab...</option>
-      <?php $__currentLoopData = [
-        "AAZ - Alvin Alvarez", "JKT - Jessica Kartika", "FZN - Fajar Zainuddin", "IDI - Indah Lestari",
-        "DDS - Dadang Syarif Sihabudin Sahid", "SPA - Satria Perdana Arifin", "AGW - Agus Wijayanto",
-        "YAS - Yoanda Alim Syahbana", "YDL - Yohana Dewi Lulu", "JNS - Juni Nurma Sari"
-      ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pj): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <option value="<?php echo e($pj); ?>" <?php echo e(old('penanggung_jawab') == $pj ? 'selected' : ''); ?>><?php echo e($pj); ?></option>
-      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+      <option value="">Pilih atau cari penanggung jawab...</option>
     </select>
   </div>
 
@@ -147,70 +140,40 @@ unset($__errorArgs, $__bag); ?>
   </div>
 </form>
 
-<!-- Tambahkan ini sebelum </body> -->
+<!-- Script -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-  const penanggungJawabList = {
-    "AAZ - Alvin Alvarez": "AAZ - Alvin Alvarez",
-    "JKT - Jessica Kartika": "JKT - Jessica Kartika",
-    "FZN - Fajar Zainuddin": "FZN - Fajar Zainuddin",
-    "IDI - Indah Lestari": "IDI - Indah Lestari",
-    "DDS - Dadang Syarif Sihabudin Sahid": "DDS - Dadang Syarif Sihabudin Sahid",
-    "SPA - Satria Perdana Arifin": "SPA - Satria Perdana Arifin",
-    "AGW - Agus Wijayanto": "AGW - Agus Wijayanto",
-    "YAS - Yoanda Alim Syahbana": "YAS - Yoanda Alim Syahbana",
-    "YDL - Yohana Dewi Lulu": "YDL - Yohana Dewi Lulu",
-    "JNS - Juni Nurma Sari": "JNS - Juni Nurma Sari"
-  };
+$(document).ready(function() {
+    // Load pegawai dari endpoint Laravel (proxy ke API PCR)
+    $.getJSON('/pegawai/list', function(data) {
+        if (!data.items) {
+            alert("Gagal memuat data pegawai dari API.");
+            return;
+        }
 
-  const organisasiList = [
-    "AET",
-    "ITSA",
-    "HIMASISTIFO",
-    "HIMATRIK",
-    "HMM",
-    "HIMAKSI",
-    "HIMATEL",
-    "HIMIKA",
-    "HIMAKOM",
-    "HIMATRON",
-    "UKM Basket",
-    "UKM Futsal",
-    "UKM Volly",
-    "UKM Badminton",
-    "PCR-Rohil",
-    "PCR-Sumbar",
-  ];
+        data.items.forEach(function(peg) {
+            $('#penanggungSelect').append(
+                $('<option>', {
+                    value: peg.inisial + ' - ' + peg.nama,
+                    text: peg.inisial + ' - ' + peg.nama
+                })
+            );
+        });
 
-  const penanggungSelect = document.getElementById('penanggungSelect');
-  Object.entries(penanggungJawabList).forEach(([value, label]) => {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = label;
-    penanggungSelect.appendChild(option);
-  });
+        $('#penanggungSelect').select2({
+            width: '100%',
+            placeholder: "Pilih atau cari penanggung jawab...",
+            dropdownAutoWidth: true
+        });
 
-  const organisasiSelect = document.getElementById('organisasiSelect');
-  organisasiList.forEach(org => {
-    const option = document.createElement('option');
-    option.value = org;
-    option.textContent = org;
-    organisasiSelect.appendChild(option);
-  });
-
-  $(document).ready(function() {
-    $('#organisasiSelect').select2({
-      width: '100%',
-      placeholder: "Pilih organisasi",
-      dropdownAutoWidth: true
+        $('#organisasiSelect').select2({
+            width: '100%',
+            placeholder: "Pilih organisasi",
+            dropdownAutoWidth: true
+        });
     });
-
-    $('#penanggungSelect').select2({
-      width: '100%',
-      placeholder: "Pilih penanggung jawab...",
-      dropdownAutoWidth: true
-    });
-  });
-</script><?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/components/form-peminjaman/tahap2.blade.php ENDPATH**/ ?>
+});
+</script>
+<?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/components/form-peminjaman/tahap2.blade.php ENDPATH**/ ?>

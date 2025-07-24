@@ -119,26 +119,25 @@
 
 </style>
 
-<div class="bg-white rounded-xl shadow px-4 sm:px-6 md:px-8 lg:px-12 py-6 pb-18">
+<div class="flex-1 bg-white rounded-xl shadow px-4 sm:px-6 md:px-8 lg:px-12 py-6 pb-18">
   <!-- Header -->
   <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4 border-b pb-4">
     <h2 class="text-xl font-bold text-gray-800">Kalender</h2>
     <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
       <div class="h-[2px] bg-gray-200 mb-4"></div>
       <!-- Dropdown -->
-      <form method="GET" action="<?php echo e(Request::url()); ?>">
-        <select name="gedung_id"
-          onchange="this.form.submit()"
-          class="border border-grey-500 text-sm px-4 py-2 h-10 rounded w-52">
-          <?php $__currentLoopData = $gedungs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gedung): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-          <option value="<?php echo e($gedung->id); ?>" <?php echo e($gedung->id == $selectedGedungId ? 'selected' : ''); ?>>
-            <?php echo e($gedung->nama); ?>
+        <form method="GET" action="<?php echo e(Request::url()); ?>">
+          <select name="gedung_id"
+            onchange="this.form.submit()"
+            class="border border-grey-500 text-sm px-4 py-2 h-10 rounded w-52">
+            <?php $__currentLoopData = $gedungs->where('id', '!=', 8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gedung): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <option value="<?php echo e($gedung->id); ?>" <?php echo e($gedung->id == $selectedGedungId ? 'selected' : ''); ?>>
+                <?php echo e($gedung->nama); ?>
 
-          </option>
-          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
-      </form>
-
+              </option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+          </select>
+        </form>
       <!-- Tombol Ajukan -->
       <?php $user = auth()->user(); ?>
       <?php if($user && $user->role === 'admin'): ?>
@@ -199,7 +198,7 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
 <?php $__env->stopPush(); ?>
 
-<?php if (! $__env->hasRenderedOnce('fc236f9d-1b11-4f80-a5a5-d99c870575a9')): $__env->markAsRenderedOnce('fc236f9d-1b11-4f80-a5a5-d99c870575a9'); ?>
+<?php if (! $__env->hasRenderedOnce('2be7935b-b2f4-4c7b-ae10-55927a82f32a')): $__env->markAsRenderedOnce('2be7935b-b2f4-4c7b-ae10-55927a82f32a'); ?>
 <?php $__env->startPush('scripts'); ?>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -260,7 +259,8 @@
           'aet', 'itsa', 'himasistifo', 'himatrik', 'hmm', 'himaksi', 'himatel',
           'himika', 'himakom', 'himatron',
           'ukm basket', 'ukm futsal', 'ukm volly', 'ukm badminton',
-          'pcr-rohil', 'pcr-sumbar'
+          'pcr-rohil', 'pcr-sumbar',
+          'bem', 'blm', 'ukm star', 'pmk', 'permadhis'
         ].includes(role);
 
         const labelColor = isMahasiswa ? '#28839D' : '#E33C45';
