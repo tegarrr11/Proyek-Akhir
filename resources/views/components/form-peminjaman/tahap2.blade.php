@@ -114,10 +114,13 @@
   </div>
 
   <div class="flex justify-end mt-4">
-    <button id="btn-simpan" type="submit"
-      class="bg-green-500 hover:bg-green-600 text-white font-medium px-5 py-2 rounded disabled:opacity-60 disabled:cursor-not-allowed">
-      Simpan
-    </button>
+      <button id="btn-simpan" type="submit"
+        class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-5 py-2 rounded disabled:opacity-60 disabled:cursor-not-allowed">       
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        Simpan
+      </button>
   </div>
 </form>
 
