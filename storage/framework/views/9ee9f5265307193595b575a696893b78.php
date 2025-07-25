@@ -144,12 +144,22 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
     const btn2 = document.getElementById('btn2');
     const validasiForm = document.getElementById('validasi-form');
 
+    // Reset semua tampilan & warna
     [step1, step2].forEach(s => s.classList.remove('active-step'));
-    [btn1, btn2].forEach(b => b.classList.remove('bg-green-100', 'font-semibold'));
+    [btn1, btn2].forEach(btn => {
+      btn.classList.remove(
+        'bg-green-100', 'text-green-800',       // hijau
+        'bg-[#ccf3f9]', 'text-[#003366]',       // biru
+        'bg-[#ecfeff]',                         // abu-abu muda
+        'bg-gray-100', 'text-gray-500'          // abu-abu fallback
+      );
+    });
 
     if (step === 1) {
       step1.classList.add('active-step');
-      btn1.classList.add('bg-green-100', 'font-semibold');
+      btn1.classList.add('bg-[#ccf3f9]', 'text-[#003366]'); // Biru aktif
+
+      btn2.classList.add('bg-gray-100', 'text-gray-500');  // Abu-abu pasif
     }
 
     if (step === 2) {
@@ -174,7 +184,9 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
 
       validasiForm.classList.add('hidden');
       step2.classList.add('active-step');
-      btn2.classList.add('bg-green-100', 'font-semibold');
+
+      btn1.classList.add('bg-green-100', 'text-green-800');     // Hijau setelah selesai
+      btn2.classList.add('bg-[#ccf3f9]', 'text-[#003366]');     // Biru aktif
     }
   }
 

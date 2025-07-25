@@ -62,27 +62,29 @@
       class="w-full border border-gray-500 rounded px-3 py-2" required>
   </div>
 
-  {{-- Organisasi --}}
-  <div>
-    <label class="block text-sm font-medium mb-1">Organisasi *</label>
-    <select id="organisasiSelect" name="organisasi" class="w-full select2" required>
-      <option value="">Pilih organisasi</option>
-      @foreach ([
-        "AET", "ITSA", "HIMASISTIFO", "HIMATRIK", "HMM", "HIMAKSI", "HIMATEL", "HIMIKA", "HIMAKOM", "HIMATRON",
-        "UKM Basket", "UKM Futsal", "UKM Volly", "UKM Badminton", "PCR-Rohil", "PCR-Sumbar"
-      ] as $org)
-        <option value="{{ $org }}" {{ old('organisasi') == $org ? 'selected' : '' }}>{{ $org }}</option>
-      @endforeach
-    </select>
+{{-- Organisasi --}}
+<div class="relative">
+  <label class="block text-sm font-medium mb-1">Organisasi *</label>
+  <input type="text" id="organisasiInput" name="organisasi"
+         value="{{ old('organisasi') }}"
+         class="w-full border border-gray-500 rounded px-3 py-2" required
+         autocomplete="off">
+  <div id="organisasiList"
+       class="absolute hidden border border-gray-300 mt-1 rounded shadow max-h-[7.5rem] overflow-y-auto bg-white z-50 w-full text-sm">
   </div>
+</div>
 
-  {{-- Penanggung Jawab --}}
-  <div>
-    <label class="block text-sm font-medium mb-1">Penanggung Jawab *</label>
-    <select id="penanggungSelect" name="penanggung_jawab" class="w-full select2" required>
-      <option value="">Pilih atau cari penanggung jawab...</option>
-    </select>
+{{-- Penanggung Jawab --}}
+<div class="relative">
+  <label class="block text-sm font-medium mb-1">Penanggung Jawab *</label>
+  <input type="text" id="penanggungInput" name="penanggung_jawab"
+         value="{{ old('penanggung_jawab') }}"
+         class="w-full border border-gray-500 rounded px-3 py-2" required
+         autocomplete="off">
+  <div id="penanggungList"
+       class="absolute hidden border border-gray-300 mt-1 rounded shadow max-h-[7.5rem] overflow-y-auto bg-white z-50 w-full text-sm">
   </div>
+</div>
 
   {{-- Keterangan --}}
   <div>
@@ -119,6 +121,7 @@
   </div>
 </form>
 
+
 <!-- Script -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -154,4 +157,79 @@ $(document).ready(function() {
         });
     });
 });
+
+  const organisasiData = [
+    "AET", "ITSA", "HIMASISTIFO", "HIMATRIK", "HMM", "HIMAKSI", "HIMATEL", "HIMIKA", "HIMAKOM", "HIMATRON",
+    "UKM Basket", "UKM Futsal", "UKM Volly", "UKM Badminton", "PCR-Rohil", "PCR-Sumbar"
+  ];
+
+  const organisasiInput = document.getElementById('organisasiInput');
+  const organisasiList = document.getElementById('organisasiList');
+
+  organisasiInput.addEventListener('focus', showOrganisasiList);
+  organisasiInput.addEventListener('input', showOrganisasiList);
+
+  function showOrganisasiList() {
+    const keyword = organisasiInput.value.toLowerCase();
+    const filtered = organisasiData.filter(name => name.toLowerCase().includes(keyword));
+
+    organisasiList.innerHTML = '';
+    filtered.slice(0, 50).forEach((name, i) => {
+      const div = document.createElement('div');
+      div.textContent = name;
+      div.className = 'cursor-pointer px-3 py-1 hover:bg-gray-100';
+      div.onclick = () => {
+        organisasiInput.value = name;
+        organisasiList.classList.add('hidden');
+      };
+      organisasiList.appendChild(div);
+    });
+
+    organisasiList.classList.toggle('hidden', filtered.length === 0);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!organisasiInput.contains(e.target) && !organisasiList.contains(e.target)) {
+      organisasiList.classList.add('hidden');
+    }
+  });
+
+  // Penanggung jawab
+  const penanggungInput = document.getElementById('penanggungInput');
+  const penanggungList = document.getElementById('penanggungList');
+  let allPegawai = [];
+
+  fetch('/pegawai/list')
+    .then(res => res.json())
+    .then(data => {
+      allPegawai = data.items.map(d => `${d.inisial} - ${d.nama}`);
+    });
+
+  penanggungInput.addEventListener('focus', showPenanggungList);
+  penanggungInput.addEventListener('input', showPenanggungList);
+
+  function showPenanggungList() {
+    const keyword = penanggungInput.value.toLowerCase();
+    const filtered = allPegawai.filter(name => name.toLowerCase().includes(keyword));
+
+    penanggungList.innerHTML = '';
+    filtered.slice(0, 50).forEach(name => {
+      const div = document.createElement('div');
+      div.textContent = name;
+      div.className = 'cursor-pointer px-3 py-1 hover:bg-gray-100';
+      div.onclick = () => {
+        penanggungInput.value = name;
+        penanggungList.classList.add('hidden');
+      };
+      penanggungList.appendChild(div);
+    });
+
+    penanggungList.classList.toggle('hidden', filtered.length === 0);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!penanggungInput.contains(e.target) && !penanggungList.contains(e.target)) {
+      penanggungList.classList.add('hidden');
+    }
+  });
 </script>

@@ -128,46 +128,58 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
 
   
   <div class="flex justify-end items-center gap-4 mt-4">
-    <div id="peringatan" class="text-red-600 text-sm hidden">
-      ⚠️ Jumlah barang melebihi batas maksimal stok!
-    </div>
 
     <button type="button" onclick="showFasilitasModal()"
             class="bg-white border border-[#003366] text-[#003366] hover:bg-[#e6f0ff] px-5 py-2 rounded text-sm font-medium">
       Tambah Fasilitas
     </button>
 
-    <div id="fasilitasModal" class="fixed inset-0 bg-black/40 z-50 hidden justify-center items-center">
-      <div class="bg-white rounded-xl p-6 w-[400px] relative">
-        <button onclick="hideFasilitasModal()" class="absolute top-4 right-4 text-gray-500 hover:text-black text-xl">
-          &times;
-        </button>
-        <h3 class="text-lg font-semibold mb-4">Fasilitas Tambahan</h3>
+      <div id="fasilitasModal" class="fixed inset-0 bg-black/40 z-50 hidden justify-center items-center">
+        <div class="bg-white rounded-xl p-6 w-[400px] max-h-[90vh] overflow-hidden relative flex flex-col">
 
-        <input type="text" id="searchFasilitasLainnya" placeholder="Cari fasilitas..."
-          class="w-full px-3 py-2 mb-3 border rounded text-sm focus:outline-none focus:ring focus:ring-blue-200">
+          <!-- Tombol Close -->
+          <button onclick="hideFasilitasModal()" class="absolute top-4 right-4 text-gray-500 hover:text-black text-xl">
+            &times;
+          </button>
 
+          <!-- Judul -->
+          <h3 class="text-base font-semibold mb-4">Fasilitas Tambahan</h3>
 
-        <div id="fasilitasList" class="space-y-3 text-sm text-gray-800"></div>
-
-          <div id="pagination-controls" class="flex justify-center items-center gap-4 mt-4 text-sm text-gray-700">
-            <button onclick="gantiHalaman(-1)" id="prevBtn" class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50" disabled>
-              &lt;
-            </button>
-            <span id="pageIndicator">1 / 1</span>
-            <button onclick="gantiHalaman(1)" id="nextBtn" class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
-              &gt;
-            </button>
+          <!-- Input Search -->
+          <div class="relative mb-3">
+            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+            <input type="text" id="searchFasilitasLainnya" placeholder="Cari Barang"
+                  class="w-full pl-10 pr-3 py-2 border rounded text-sm focus:outline-none focus:ring focus:ring-blue-200" />
           </div>
 
-      </div>
-    </div>
+          <!-- Daftar Fasilitas -->
+          <div id="fasilitasList" class="flex-1 overflow-y-auto divide-y divide-gray-200 text-sm text-gray-800">
+            <!-- Diisi oleh JS -->
+          </div>
 
-    <button type="button" onclick="lanjutTahap2()"
+          <!-- Pagination + Tambah -->
+          <div class="flex justify-between items-center mt-4 text-sm">
+            <div id="paginationControls" class="flex gap-1"></div>
+            <button onclick="tambahFasilitasTerpilih()"
+                    id="tombolTambah"
+                    class="px-4 py-1.5 bg-cyan-200 hover:bg-cyan-300 text-sm text-gray-900 font-medium rounded disabled:opacity-50"
+                    disabled>Tambah</button>
+          </div>
+        </div>
+      </div>
+
+    <button type="button" id="btnTahap1Next" onclick="lanjutKeTahap2()"
             class="bg-[#003366] hover:bg-[#002244] text-white px-5 py-2 rounded text-sm font-medium">
       Selanjutnya
     </button>
   </div>
+    <p id="peringatan" class="text-red-500 hidden mt-2 text-sm flex justify-end items-center">Jumlah fasilitas melebihi stok yang tersedia</p>
+    <p id="gedungErrorMsg" class="text-red-500 text-sm mt-2 hidden flex justify-end items-center">Harap pilih ruangan terlebih dahulu sebelum lanjut ke Tahap 2.</p>
 </div>
 
 <script>
@@ -176,7 +188,7 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
   function showFasilitasModal() {
     document.getElementById('fasilitasModal').classList.remove('hidden');
     document.getElementById('fasilitasModal').classList.add('flex');
-    tampilkanFasilitas(); // <== ini yang harus ditambahkan
+    tampilkanFasilitas(); 
   }
 
 
@@ -237,49 +249,6 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
     const row = btn.closest('tr');
     if (row) row.remove();
   }
-
-  function toggleStep(step) {
-    const step1 = document.getElementById('step1');
-    const step2 = document.getElementById('step2');
-    const btn1 = document.getElementById('btn1');
-    const btn2 = document.getElementById('btn2');
-
-    [step1, step2].forEach(s => s?.classList.remove('active-step'));
-    [btn1, btn2].forEach(b => b?.classList.remove('bg-green-100', 'font-semibold'));
-
-    if (step === 1) {
-      step1?.classList.add('active-step');
-      btn1?.classList.add('bg-green-100', 'font-semibold');
-    } else if (step === 2) {
-      step2?.classList.add('active-step');
-      btn2?.classList.add('bg-green-100', 'font-semibold');
-    }
-  }
-
-  function lanjutTahap2() {
-  const jumlahInputs = document.querySelectorAll('.jumlah-barang');
-  let stokValid = true;
-
-  jumlahInputs.forEach(input => {
-    const max = parseInt(input.max);
-    const value = parseInt(input.value);
-    if (value > max) {
-      stokValid = false;
-    }
-  });
-
-  const peringatan = document.getElementById('peringatan');
-
-  if (!stokValid) {
-    peringatan.classList.remove('hidden');
-    peringatan.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  } else {
-    peringatan.classList.add('hidden');
-    toggleStep(2);
-  }
-}
-
 
   function handleJenisChange() {
     const selected = document.querySelector('input[name="jenis_kegiatan"]:checked');
@@ -369,67 +338,151 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
     }
   });
 
-  const semuaFasilitas = <?php echo json_encode($fasilitasLainnya, 15, 512) ?>;
-let halamanSekarang = 1;
-const itemPerHalaman = 5;
+  let semuaFasilitas = <?php echo json_encode($fasilitasLainnya, 15, 512) ?>; 
+  let halaman = 1;
+  const perHalaman = 5;
+  let fasilitasTerpilih = new Set();
 
-function tampilkanFasilitas() {
-  const listContainer = document.getElementById('fasilitasList');
-  listContainer.innerHTML = '';
+  function tampilkanFasilitas() {
+    const keyword = document.getElementById('searchFasilitasLainnya').value.toLowerCase();
+    const hasilFilter = semuaFasilitas.filter(f => f.nama_barang.toLowerCase().includes(keyword));
+    const totalHalaman = Math.ceil(hasilFilter.length / perHalaman);
 
-  const awal = (halamanSekarang - 1) * itemPerHalaman;
-  const akhir = awal + itemPerHalaman;
-  const halamanData = semuaFasilitas.slice(awal, akhir);
+    halaman = Math.max(1, Math.min(halaman, totalHalaman)); 
+    const awal = (halaman - 1) * perHalaman;
+    const akhir = awal + perHalaman;
+    const daftar = hasilFilter.slice(awal, akhir);
 
-  halamanData.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'flex justify-between items-center border-b py-2 fasilitas-item';
-    div.id = `modal-item-${item.id}`;
-    div.dataset.nama = item.nama_barang.toLowerCase();
-
-    div.innerHTML = `
-      <div>
-        <div class="font-semibold">${item.nama_barang}</div>
-        <div class="text-xs text-gray-500">Stok: ${item.stok}</div>
-      </div>
-      <button type="button" class="text-blue-600 hover:underline text-xs"
-              onclick="tambahKeFasilitas(${item.id}, '${item.nama_barang}', ${item.stok})">
-        Tambah
-      </button>
-    `;
-    listContainer.appendChild(div);
-  });
-}
-
-  const fasilitasItems = Array.from(document.querySelectorAll('#fasilitasList > div'));
-  const itemsPerPage = 5;
-  let currentPage = 1;
-  let totalPages = Math.max(1, Math.ceil(fasilitasItems.length / itemsPerPage));
-
-  function renderHalaman() {
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-
-    fasilitasItems.forEach((item, index) => {
-      item.style.display = (index >= start && index < end) ? 'flex' : 'none';
+    // Render daftar
+    const container = document.getElementById('fasilitasList');
+    container.innerHTML = '';
+    daftar.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'flex justify-between items-center py-2 px-2 pr-4 hover:bg-gray-50';
+      el.innerHTML = `
+        <div>
+          <div class="font-medium">${item.nama_barang}</div>
+          <div class="text-xs text-gray-500">Stok: ${item.stok}</div>
+        </div>
+        <input type="checkbox" value="${item.id}" class="form-checkbox h-4 w-4 text-blue-600 rounded"
+          ${fasilitasTerpilih.has(item.id) ? 'checked' : ''} onchange="toggleFasilitas(${item.id}, this)">
+      `;
+      container.appendChild(el);
     });
 
-    document.getElementById('pageIndicator').innerText = `${currentPage} / ${totalPages}`;
-    document.getElementById('prevBtn').disabled = currentPage === 1;
-    document.getElementById('nextBtn').disabled = currentPage === totalPages;
+    renderPagination(totalHalaman);
+    toggleTombolTambah();
   }
 
-  function gantiHalaman(arah) {
-    currentPage += arah;
-    if (currentPage < 1) currentPage = 1;
-    if (currentPage > totalPages) currentPage = totalPages;
-    renderHalaman();
+  function renderPagination(totalHalaman) {
+    const container = document.getElementById('paginationControls');
+    container.innerHTML = '';
+
+    const buatTombol = (label, page, aktif = false) => {
+      const btn = document.createElement('button');
+      btn.textContent = label;
+      btn.className = `px-2 py-1 border rounded ${aktif ? 'bg-blue-100 text-blue-700' : ''}`;
+      btn.onclick = () => {
+        halaman = page;
+        tampilkanFasilitas();
+      };
+      container.appendChild(btn);
+    };
+
+    if (halaman > 1) buatTombol('<', halaman - 1);
+    for (let i = 1; i <= totalHalaman; i++) {
+      if (i === 1 || i === totalHalaman || Math.abs(i - halaman) <= 1) {
+        buatTombol(i, i, i === halaman);
+      } else if (
+        (i === 2 && halaman > 3) ||
+        (i === totalHalaman - 1 && halaman < totalHalaman - 2)
+      ) {
+        const dots = document.createElement('span');
+        dots.textContent = '...';
+        container.appendChild(dots);
+      }
+    }
+    if (halaman < totalHalaman) buatTombol('>', halaman + 1);
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    totalPages = Math.max(1, Math.ceil(fasilitasItems.length / itemsPerPage));
-    renderHalaman();
+  function toggleFasilitas(id, checkbox) {
+    if (checkbox.checked) {
+      fasilitasTerpilih.add(id);
+    } else {
+      fasilitasTerpilih.delete(id);
+    }
+    toggleTombolTambah();
+  }
+
+  function toggleTombolTambah() {
+    document.getElementById('tombolTambah').disabled = fasilitasTerpilih.size === 0;
+  }
+
+  function tambahFasilitasTerpilih() {
+    // Misalnya, isi hidden input atau lanjut ke step berikutnya
+    console.log('Fasilitas dipilih:', Array.from(fasilitasTerpilih));
+    hideFasilitasModal();
+  }
+
+  document.getElementById('searchFasilitasLainnya').addEventListener('input', () => {
+    halaman = 1;
+    tampilkanFasilitas();
   });
+
+  function showFasilitasModal() {
+    document.getElementById('fasilitasModal').classList.remove('hidden');
+    document.getElementById('fasilitasModal').classList.add('flex');
+    tampilkanFasilitas();
+  }
+
+  function hideFasilitasModal() {
+    document.getElementById('fasilitasModal').classList.add('hidden');
+    document.getElementById('fasilitasModal').classList.remove('flex');
+  }
+
+function lanjutKeTahap2() {
+  const selectGedung = document.getElementById('gedung-select');
+  const errorMsg = document.getElementById('gedungErrorMsg');
+  const jumlahInputs = document.querySelectorAll('.jumlah-barang');
+  const peringatan = document.getElementById('peringatan'); // ⚠️ pastikan id-nya sudah diganti di HTML
+
+  let stokValid = true;
+
+  // Cek stok untuk semua input
+  jumlahInputs.forEach(input => {
+    const max = parseInt(input.max);
+    const value = parseInt(input.value);
+
+    if (value > max) {
+      stokValid = false;
+      input.classList;
+    } else {
+      input.classList;
+    }
+  });
+
+  // Jika stok tidak valid, tampilkan pesan dan hentikan proses
+  if (!stokValid) {
+    peringatan.classList.remove('hidden');
+    peringatan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  } else {
+    peringatan.classList.add('hidden');
+  }
+
+  // Validasi ruangan
+  if (!selectGedung.value) {
+    errorMsg.classList.remove('hidden');
+    return;
+  } else {
+    errorMsg.classList.add('hidden');
+  }
+
+  // Jika semua valid, lanjut ke tahap 2
+  document.getElementById('step1').classList.remove('active-step');
+  document.getElementById('step2').classList.add('active-step');
+  toggleStep(2);
+}
 
 
 </script>
