@@ -1,3 +1,13 @@
+<?php
+  // Pagination manual di Blade
+  $perPage = 10;
+  $currentPage = request()->get('page', 1);
+  $offset = ($currentPage - 1) * $perPage;
+
+  $paginatedItems = $items->slice($offset, $perPage)->values();
+  $totalPages = ceil($items->count() / $perPage);
+?>
+
 <?php if (isset($component)) { $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table-wrapper','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -21,11 +31,11 @@
       </tr>
     </thead>
     <tbody>
-      <?php $__empty_1 = true; $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+      <?php $__empty_1 = true; $__currentLoopData = $paginatedItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
       <tr class="<?php echo e($i % 2 == 0 ? 'bg-white' : 'bg-gray-50'); ?>">
-        <td class="px-4 py-2"><?php echo e($i + 1); ?></td>
+        <td class="px-4 py-2"><?php echo e($offset + $i + 1); ?></td>
         <td class="px-4 py-2"><?php echo e($item->judul_kegiatan); ?></td>
-        <td class="px-4 py-2"><?php echo e($item->created_at->format('d/m/Y')); ?></td>
+        <td class="px-4 py-2"><?php echo e($item->created_at ? $item->created_at->format('d/m/Y') : '-'); ?></td>
         <td class="px-4 py-2">
           <span class="px-3 py-1 text-xs rounded
             <?php if($item->verifikasi_bem === 'diterima'): ?>
@@ -35,7 +45,7 @@
             <?php else: ?>
               bg-yellow-500 text-white
             <?php endif; ?>">
-            <?php echo e(ucfirst($item->verifikasi_bem)); ?>
+            <?php echo e(ucfirst($item->verifikasi_bem ?? '-')); ?>
 
           </span>
         </td>
@@ -48,14 +58,14 @@
             <?php else: ?>
               bg-yellow-500 text-white
             <?php endif; ?>">
-            <?php echo e(ucfirst($item->verifikasi_sarpras)); ?>
+            <?php echo e(ucfirst($item->verifikasi_sarpras ?? '-')); ?>
 
           </span>
         </td>
-        <td class="px-4 py-2"><?php echo e($item->organisasi); ?></td>
+        <td class="px-4 py-2"><?php echo e($item->organisasi ?? '-'); ?></td>
         <td class="px-4 py-2">
           <button
-            onclick="console.log('[DEBUG] Detail clicked for ID:', <?php echo e($item->id); ?>); showDetail(<?php echo e($item->id); ?>)"
+            onclick="showDetail(<?php echo e($item->id); ?>)"
             class="text-blue-600 hover:text-blue-800 text-sm"
             title="Lihat Detail">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,6 +81,20 @@
       <?php endif; ?>
     </tbody>
   </table>
+
+  
+  <div class="flex justify-start mt-4 pl-4 pb-4 gap-1">
+    <?php for($page = 1; $page <= $totalPages; $page++): ?>
+      <a href="<?php echo e(request()->fullUrlWithQuery(['page' => $page, 'tab' => 'riwayat'])); ?>"
+        class="px-3 py-1 rounded-md border text-sm shadow-sm transition
+                <?php echo e($page == $currentPage
+                    ? 'bg-sky-900 text-white '
+                    : 'bg-white text-gray-700 hover:bg-gray-100'); ?>">
+        <?php echo e($page); ?>
+
+      </a>
+    <?php endfor; ?>
+  </div>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997)): ?>
@@ -80,4 +104,5 @@
 <?php if (isset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997)): ?>
 <?php $component = $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997; ?>
 <?php unset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997); ?>
-<?php endif; ?><?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/components/riwayat/table-riwayat-admin.blade.php ENDPATH**/ ?>
+<?php endif; ?>
+<?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/components/riwayat/table-riwayat-admin.blade.php ENDPATH**/ ?>

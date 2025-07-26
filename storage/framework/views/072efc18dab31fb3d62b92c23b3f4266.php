@@ -65,7 +65,7 @@
         <div id="diskusiArea" class="text-sm text-gray-400 flex-1">belum ada diskusi</div>
         <div class="mt-4">
           <input class="inputDiskusi w-full border rounded px-3 py-2 text-sm mb-2" id="inputDiskusi" type="text" placeholder="Ketikkan di sini">
-          <button class="btnKirimDiskusi bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded w-full" id="btnKirimDiskusi">Kirim</button>
+          <button class="btnKirimDiskusi bg-sky-900 text-white text-sm px-4 py-2 rounded w-full" id="btnKirimDiskusi">Kirim</button>
         </div>
       </div>
     </div>

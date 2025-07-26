@@ -74,7 +74,7 @@
     </div>
   </aside>
   <!-- Main Content -->
-  <main class="flex-1 p-6 overflow-auto">
+  <main class="flex-1 p-6 overflow-auto w-full">
     @yield('content')
   </main>
   <div id="notif-toast" class="fixed bottom-6 right-6 z-50 space-y-2 text-sm"></div>

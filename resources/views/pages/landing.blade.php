@@ -85,54 +85,53 @@
     min-height: 80px !important;
   }
 
-  .fc-event {
-    border: none !important;
-    padding: 4px 8px;
-    font-size: 0.75rem;
-    font-weight: normal !important;
+  .fc .fc-event {
+    padding: 4px 6px !important;
+    font-size: 0.7rem;
+    font-weight: 500;
     color: white !important;
     border-radius: 6px;
-    display: inline-block;
     margin-bottom: 4px;
-    white-space: nowrap;
-    cursor: pointer;
+    white-space: normal !important;
+    word-break: break-word;
+    line-height: 1.2;
   }
 
   .fc-event:hover {
-    opacity: 0.9;
-  }
+      opacity: 0.9;
+    }
 
   .p-6 {
-    padding: 1rem !important;
-  }
+      padding: 1rem !important;
+    }
 
   .fc .fc-day-today {
-  background-color: transparent !important;
-  position: relative;
-}
-.fc .fc-day-today {
-  background-color: transparent !important;
-}
+    background-color: transparent !important;
+    position: relative;
+  }
+  .fc .fc-day-today {
+    background-color: transparent !important;
+  }
 
-/* Atur struktur frame agar isi (termasuk angka tanggal) bisa diatur vertikal */
-.fc .fc-daygrid-day-frame {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* posisi atas */
-  padding-top: 6px; /* beri sedikit jarak dari atas */
-}
+  /* Atur struktur frame agar isi (termasuk angka tanggal) bisa diatur vertikal */
+  .fc .fc-daygrid-day-frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; 
+    padding: 4px !important; 
+  }
 
-/* Angka tanggal di tengah horizontal dan atas */
-.fc .fc-daygrid-day-number {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.75rem;
-  color: #1f2937;
-  width: 28px;
-  height: 28px;
-}
+  /* Angka tanggal di tengah horizontal dan atas */
+  .fc .fc-daygrid-day-number {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #1f2937;
+    width: 28px;
+    height: 28px;
+  }
 
 /* Khusus hari ini: angka dalam lingkaran biru */
 .fc .fc-day-today .fc-daygrid-day-number {
@@ -140,6 +139,16 @@
   color: white !important;
   font-weight: 600;
   border-radius: 9999px;
+}
+
+.fc .fc-daygrid-event-harness {
+  margin-top: 2px !important; /* Ganti auto jadi jarak aman */
+  margin-left: 2px;
+  margin-right: 2px;
+  width: calc(100% - 4px);
+  box-sizing: border-box;
+  order: 1;
+  position: relative;
 }
 
 </style>
@@ -214,13 +223,6 @@
       },
       eventDisplay: 'block',
       displayEventTime: false,
-      eventClick: function(info) {
-        fetch(`/mahasiswa/peminjaman/${info.event.id}`)
-          .then(res => res.json())
-          .then(data => {
-            alert(`📌 ${data.judul_kegiatan}\n📅 ${formatTanggal(data.tgl_kegiatan)}\n🕒 ${data.waktu_mulai} - ${data.waktu_berakhir}\n📚 ${data.organisasi}`);
-          });
-      },
       events: events.map(event => {
         const startTime = event.start.substring(11, 16);
         const endTime = event.end.substring(11, 16);
@@ -230,7 +232,7 @@
           'aet', 'itsa', 'himasistifo', 'himatrik', 'hmm', 'himaksi', 'himatel',
           'himika', 'himakom', 'himatron',
           'ukm basket', 'ukm futsal', 'ukm volly', 'ukm badminton',
-          'pcr-rohil', 'pcr-sumbar'
+          'pcr-rohil', 'pcr-sumbar','bem','blm'
         ].includes(role);
 
         const labelColor = isMahasiswa ? '#28839D' : '#E33C45';

@@ -1,3 +1,13 @@
+@php
+  // Pagination manual di Blade
+  $perPage = 10;
+  $currentPage = request()->get('page', 1);
+  $offset = ($currentPage - 1) * $perPage;
+
+  $paginatedItems = $items->slice($offset, $perPage)->values(); // ambil hanya 10 item
+  $totalPages = ceil($items->count() / $perPage);
+@endphp
+
 <x-table-wrapper>
   <table class="w-full text-sm">
     <thead class="bg-gray-100">
@@ -12,9 +22,9 @@
       </tr>
     </thead>
     <tbody>
-      @forelse($items as $i => $item)
+      @forelse($paginatedItems as $i => $item)
       <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
-        <td class="px-4 py-2">{{ $i + 1 }}</td>
+        <td class="px-4 py-2">{{ $offset + $i + 1 }}</td>
         <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
         <td class="px-4 py-2">{{ $item->created_at->format('d/m/Y') }}</td>
         <td class="px-4 py-2">
@@ -32,9 +42,7 @@
         <td class="px-4 py-2">{{ $item->organisasi }}</td>
         <td class="px-4 py-2">
           <button onclick="showDetail({{ $item->id }})" class="text-blue-600 hover:text-blue-800 text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
           </button>
         </td>
       </tr>
@@ -45,4 +53,17 @@
       @endforelse
     </tbody>
   </table>
+
+  {{-- PAGINATION --}}
+  <div class="flex justify-start mt-4 pl-4 pb-4 gap-1">
+    @for($page = 1; $page <= $totalPages; $page++)
+      <a href="{{ request()->fullUrlWithQuery(['page' => $page, 'tab' => 'riwayat']) }}"
+        class="px-3 py-1 rounded-md border text-sm shadow-sm transition
+                {{ $page == $currentPage
+                    ? 'bg-sky-900 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100' }}">
+        {{ $page }}
+      </a>
+    @endfor
+  </div>
 </x-table-wrapper>

@@ -81,6 +81,12 @@
       });
     });
 
+  document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab') || 'pengajuan'; 
+    showTab(tab);
+  });
+
 
     function getActiveTableId() {
       if (!document.getElementById('pengajuanTab').classList.contains('hidden')) return 'tablePengajuan';

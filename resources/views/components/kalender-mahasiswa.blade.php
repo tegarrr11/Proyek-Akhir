@@ -1,7 +1,27 @@
 @php use Illuminate\Support\Facades\Request; @endphp
 
 <style>
-<style>
+  h2.text-2xl {
+    font-size: 1.125rem; 
+  }
+
+  .legend-icon svg {
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+  }
+
+  .legend-icon span {
+    font-size: 0.75rem;
+  }
+
+  #calendar {
+    width: 100%;
+    max-width: 100%;
+    min-height: 500px;
+    overflow: hidden;
+    font-size: 0.75rem !important;
+  }
+
   .fc .fc-toolbar-title {
     font-size: 0.875rem;
     font-weight: 600;
@@ -58,53 +78,55 @@
     min-height: 80px !important;
   }
 
-  .fc-event {
-    border: none !important;
-    padding: 4px 8px;
-    font-size: 0.75rem;
-    font-weight: normal !important;
+  .fc .fc-event {
+    padding: 4px 6px !important;
+    font-size: 0.7rem;
+    font-weight: 500;
     color: white !important;
     border-radius: 6px;
-    display: inline-block;
     margin-bottom: 4px;
-    white-space: nowrap;
-    cursor: pointer;
+    white-space: normal !important;
+    word-break: break-word;
+    line-height: 1.2;
   }
 
   .fc-event:hover {
-    opacity: 0.9;
-  }
+      opacity: 0.9;
+    }
 
   .p-6 {
-    padding: 1rem !important;
-  }
+      padding: 1rem !important;
+    }
 
   .fc .fc-day-today {
-  background-color: transparent !important;
-  position: relative;
-}
-.fc .fc-day-today {
-  background-color: transparent !important;
-}
+    background-color: transparent !important;
+    position: relative;
+  }
+  .fc .fc-day-today {
+    background-color: transparent !important;
+  }
 
-.fc .fc-daygrid-day-frame {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; 
-  padding-top: 6px; 
-}
+  /* Atur struktur frame agar isi (termasuk angka tanggal) bisa diatur vertikal */
+  .fc .fc-daygrid-day-frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; 
+    padding: 4px !important; 
+  }
 
-.fc .fc-daygrid-day-number {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.75rem;
-  color: #1f2937;
-  width: 28px;
-  height: 28px;
-}
+  /* Angka tanggal di tengah horizontal dan atas */
+  .fc .fc-daygrid-day-number {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #1f2937;
+    width: 28px;
+    height: 28px;
+  }
 
+/* Khusus hari ini: angka dalam lingkaran biru */
 .fc .fc-day-today .fc-daygrid-day-number {
   background-color: #0d6efd;
   color: white !important;
@@ -112,12 +134,19 @@
   border-radius: 9999px;
 }
 
-.fc .fc-col-header-cell-cushion {
-  font-weight: 600 !important;
+.fc .fc-daygrid-event-harness {
+  margin-top: 2px !important; /* Ganti auto jadi jarak aman */
+  margin-left: 2px;
+  margin-right: 2px;
+  width: calc(100% - 4px);
+  box-sizing: border-box;
+  order: 1;
+  position: relative;
 }
 
-
 </style>
+
+
 
 <div class="flex-1 bg-white rounded-xl shadow px-4 sm:px-6 md:px-8 lg:px-12 py-6 pb-18">
   <!-- Header -->
@@ -259,7 +288,7 @@
           'himika', 'himakom', 'himatron',
           'ukm basket', 'ukm futsal', 'ukm volly', 'ukm badminton',
           'pcr-rohil', 'pcr-sumbar',
-          'bem', 'blm', 'ukm star', 'pmk', 'permadhis'
+          'bem', 'blm', 'ukm star', 'pmk', 'permadhis','bem','blm'
         ].includes(role);
 
         const labelColor = isMahasiswa ? '#28839D' : '#E33C45';
