@@ -1,10 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   html {
     font-family: 'Poppins', sans-serif;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus,
+  button:focus,
+  [type='checkbox']:focus,
+  [type='radio']:focus,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  button:focus-visible,
+  [type='checkbox']:focus-visible,
+  [type='radio']:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
   }
 }

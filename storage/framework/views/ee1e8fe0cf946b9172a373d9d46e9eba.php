@@ -46,9 +46,9 @@
             <?php if($item->verifikasi_sarpras === 'diterima'): ?>
               bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium
             <?php elseif($item->verifikasi_sarpras === 'proses'): ?>
-              bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-medium
+              bg-yellow-100 text-yellow-700 text-xs px-3 py-1 rounded-full font-medium
             <?php else: ?>
-              bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium
+              bg-yellow-100 text-yellow-600 text-xs px-3 py-1 rounded-full font-medium
             <?php endif; ?>">
             <?php echo e(ucfirst($item->verifikasi_sarpras)); ?>
 
@@ -101,13 +101,7 @@
         <td class="px-4 py-2">
           <div class="flex items-center gap-2">
             <button onclick="showDetail(<?php echo e($item->id); ?>)" class="text-gray-600 hover:text-blue-700" title="Detail">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-          </div>
-        </td>
-      </tr>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>      </tr>
       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
       <tr>
         <td colspan="9" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>

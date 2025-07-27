@@ -6,8 +6,30 @@
 <x-header title="Fasilitas" breadcrumb="Admin > Fasilitas" />
 
 @if(session('success'))
-  <div class="mb-4 p-3 bg-green-100 text-green-700 rounded">
-    {{ session('success') }}
+  <div
+    x-data="{ show: true }"
+    x-init="setTimeout(() => show = false, 2000)"
+    x-show="show"
+    x-transition:leave="transition ease-in duration-500"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-90"
+    class="fixed top-6 right-6 z-50 flex items-center justify-between gap-4 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg text-sm font-normal"
+  >
+    <div class="flex items-center gap-2">
+      <!-- Icon cek -->
+      <div class="bg-white text-green-600 rounded-full p-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <span>{{ session('success') }}</span>
+    </div>
+    <!-- Tombol close -->
+    <button @click="show = false" class="text-white hover:text-gray-200">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
   </div>
 @endif
 
@@ -58,7 +80,7 @@
       </div>
     </div>
     <div class="pt-2">
-      <button type="submit" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 text-sm">Simpan</button>
+      <button type="submit" class="bg-[#003366] text-white px-5 py-2 rounded hover:bg-[#002244] text-sm">Simpan</button>
     </div>
   </form>
 
@@ -92,7 +114,7 @@
   @foreach($gedung->fasilitas as $index => $item)
     @php
       $isEditing = request('edit') == $item->id;
-      $rowClass = $index % 2 === 0 ? 'bg-white' : 'bg-gray-50'; // warna selang-seling
+      $rowClass = $index % 2 === 0 ? 'bg-white' : 'bg-gray-50'; 
     @endphp
 
     @if($isEditing)

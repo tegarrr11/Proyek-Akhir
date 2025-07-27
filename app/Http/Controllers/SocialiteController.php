@@ -129,7 +129,7 @@ class SocialiteController extends Controller
         if ($posisi) {
             if (strtolower($posisi) === 'dosen') {
                 $role = 'dosen';
-            } elseif (strtolower($posisi) === 'staf') { //pastiin posisi di API 
+            } elseif (strtolower($posisi) === 'Staf Saran dan Prasarana') { //pastiin posisi di API 
                 $role = 'admin';
             }
         }

@@ -83,54 +83,53 @@
     min-height: 80px !important;
   }
 
-  .fc-event {
-    border: none !important;
-    padding: 4px 8px;
-    font-size: 0.75rem;
-    font-weight: normal !important;
+  .fc .fc-event {
+    padding: 4px 6px !important;
+    font-size: 0.7rem;
+    font-weight: 500;
     color: white !important;
     border-radius: 6px;
-    display: inline-block;
     margin-bottom: 4px;
-    white-space: nowrap;
-    cursor: pointer;
+    white-space: normal !important;
+    word-break: break-word;
+    line-height: 1.2;
   }
 
   .fc-event:hover {
-    opacity: 0.9;
-  }
+      opacity: 0.9;
+    }
 
   .p-6 {
-    padding: 1rem !important;
-  }
+      padding: 1rem !important;
+    }
 
   .fc .fc-day-today {
-  background-color: transparent !important;
-  position: relative;
-}
-.fc .fc-day-today {
-  background-color: transparent !important;
-}
+    background-color: transparent !important;
+    position: relative;
+  }
+  .fc .fc-day-today {
+    background-color: transparent !important;
+  }
 
-/* Atur struktur frame agar isi (termasuk angka tanggal) bisa diatur vertikal */
-.fc .fc-daygrid-day-frame {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* posisi atas */
-  padding-top: 6px; /* beri sedikit jarak dari atas */
-}
+  /* Atur struktur frame agar isi (termasuk angka tanggal) bisa diatur vertikal */
+  .fc .fc-daygrid-day-frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; 
+    padding: 4px !important; 
+  }
 
-/* Angka tanggal di tengah horizontal dan atas */
-.fc .fc-daygrid-day-number {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.75rem;
-  color: #1f2937;
-  width: 28px;
-  height: 28px;
-}
+  /* Angka tanggal di tengah horizontal dan atas */
+  .fc .fc-daygrid-day-number {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #1f2937;
+    width: 28px;
+    height: 28px;
+  }
 
 /* Khusus hari ini: angka dalam lingkaran biru */
 .fc .fc-day-today .fc-daygrid-day-number {
@@ -138,6 +137,16 @@
   color: white !important;
   font-weight: 600;
   border-radius: 9999px;
+}
+
+.fc .fc-daygrid-event-harness {
+  margin-top: 2px !important; /* Ganti auto jadi jarak aman */
+  margin-left: 2px;
+  margin-right: 2px;
+  width: calc(100% - 4px);
+  box-sizing: border-box;
+  order: 1;
+  position: relative;
 }
 
 </style>
@@ -148,23 +157,22 @@
     <h2 class="text-2xl font-bold text-gray-800">Kalender</h2>
     <div class="flex items-center gap-3">
       <!-- Dropdown Gedung -->
-      <form method="GET" action="<?php echo e(Request::url()); ?>" class="mr-2">
-        <select
-          name="gedung_id"
-          onchange="this.form.submit()"
-          class="text-[#003366] border border-[#003366] text-sm px-4 pr-10 h-9 w-48 rounded-md shadow-sm appearance-none bg-white font-semibold leading-tight ">
-          <?php $__currentLoopData = $gedungs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gedung): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <option value="<?php echo e($gedung->id); ?>" <?php echo e($gedung->id == $selectedGedungId ? 'selected' : ''); ?>>
-              <?php echo e($gedung->nama); ?>
+      <!-- Dropdown -->
+        <form method="GET" action="<?php echo e(Request::url()); ?>">
+          <select name="gedung_id"
+            onchange="this.form.submit()"
+            class="border border-grey-500 text-sm px-4 py-2 h-10 rounded w-52">
+            <?php $__currentLoopData = $gedungs->where('id', '!=', 8); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gedung): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <option value="<?php echo e($gedung->id); ?>" <?php echo e($gedung->id == $selectedGedungId ? 'selected' : ''); ?>>
+                <?php echo e($gedung->nama); ?>
 
-            </option>
-          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
-      </form>
-
+              </option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+          </select>
+        </form>
       <!-- Tombol Login -->
       <a href="<?php echo e(route('login')); ?>"
-        class="inline-flex items-center justify-center bg-[#003366] hover:bg-[#002244] text-white w-32 text-xs font-medium h-9 px-4 rounded-md shadow">
+        class="inline-flex items-center justify-center bg-[#003366] hover:bg-[#002244] text-white w-32 text-xs font-medium h-10 px-4 rounded-md shadow">
         Login
       </a>
     </div>
@@ -214,13 +222,6 @@
       },
       eventDisplay: 'block',
       displayEventTime: false,
-      eventClick: function(info) {
-        fetch(`/mahasiswa/peminjaman/${info.event.id}`)
-          .then(res => res.json())
-          .then(data => {
-            alert(`📌 ${data.judul_kegiatan}\n📅 ${formatTanggal(data.tgl_kegiatan)}\n🕒 ${data.waktu_mulai} - ${data.waktu_berakhir}\n📚 ${data.organisasi}`);
-          });
-      },
       events: events.map(event => {
         const startTime = event.start.substring(11, 16);
         const endTime = event.end.substring(11, 16);
@@ -230,7 +231,7 @@
           'aet', 'itsa', 'himasistifo', 'himatrik', 'hmm', 'himaksi', 'himatel',
           'himika', 'himakom', 'himatron',
           'ukm basket', 'ukm futsal', 'ukm volly', 'ukm badminton',
-          'pcr-rohil', 'pcr-sumbar'
+          'pcr-rohil', 'pcr-sumbar','bem','blm'
         ].includes(role);
 
         const labelColor = isMahasiswa ? '#28839D' : '#E33C45';

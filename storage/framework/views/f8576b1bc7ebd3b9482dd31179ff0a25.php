@@ -123,7 +123,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    showTab('pengajuan');
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab') || 'pengajuan'; 
+    showTab(tab);
   });
 
   window.currentPeminjamanId = null;

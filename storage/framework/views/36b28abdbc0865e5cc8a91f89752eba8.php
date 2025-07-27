@@ -28,7 +28,7 @@
         <td class="px-4 py-2"><?php echo e(\Carbon\Carbon::parse($pengajuan->created_at)->format('d/m/Y')); ?></td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded <?php echo e($pengajuan->verifikasi_bem === 'diterima' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'); ?>">
+          <span class="px-3 py-1 text-xs rounded-full <?php echo e($pengajuan->verifikasi_bem === 'diterima' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'); ?>">
             <?php echo e(ucfirst($pengajuan->verifikasi_bem)); ?>
 
           </span>
@@ -48,10 +48,7 @@
             </form>
 
             <button onclick="showDetail(<?php echo e($pengajuan->id); ?>)" class="text-gray-600 hover:text-blue-700" title="Detail">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>            </button>
           </div>
         </td>
       </tr>

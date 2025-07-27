@@ -83,34 +83,29 @@ unset($__errorArgs, $__bag); ?>
       class="w-full border border-gray-500 rounded px-3 py-2" required>
   </div>
 
-  
-  <div>
-    <label class="block text-sm font-medium mb-1">Organisasi *</label>
-    <select id="organisasiSelect" name="organisasi" class="w-full select2" required>
-      <option value="">Pilih organisasi</option>
-      <?php $__currentLoopData = [
-        "AET", "ITSA", "HIMASISTIFO", "HIMATRIK", "HMM", "HIMAKSI", "HIMATEL", "HIMIKA", "HIMAKOM", "HIMATRON",
-        "UKM Basket", "UKM Futsal", "UKM Volly", "UKM Badminton", "PCR-Rohil", "PCR-Sumbar", ""
-      ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $org): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <option value="<?php echo e($org); ?>" <?php echo e(old('organisasi') == $org ? 'selected' : ''); ?>><?php echo e($org); ?></option>
-      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    </select>
-  </div>
 
-  
-  <div>
-    <label class="block text-sm font-medium mb-1">Penanggung Jawab *</label>
-    <select id="penanggungSelect" name="penanggung_jawab" class="w-full select2" required>
-      <option value="">Pilih penanggung jawab...</option>
-      <?php $__currentLoopData = [
-        "AAZ - Alvin Alvarez", "JKT - Jessica Kartika", "FZN - Fajar Zainuddin", "IDI - Indah Lestari",
-        "DDS - Dadang Syarif Sihabudin Sahid", "SPA - Satria Perdana Arifin", "AGW - Agus Wijayanto",
-        "YAS - Yoanda Alim Syahbana", "YDL - Yohana Dewi Lulu", "JNS - Juni Nurma Sari"
-      ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pj): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <option value="<?php echo e($pj); ?>" <?php echo e(old('penanggung_jawab') == $pj ? 'selected' : ''); ?>><?php echo e($pj); ?></option>
-      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    </select>
+<div class="relative">
+  <label class="block text-sm font-medium mb-1">Organisasi *</label>
+  <input type="text" id="organisasiInput" name="organisasi"
+         value="<?php echo e(old('organisasi')); ?>"
+         class="w-full border border-gray-500 rounded px-3 py-2" required
+         autocomplete="off">
+  <div id="organisasiList"
+       class="absolute hidden border border-gray-300 mt-1 rounded shadow max-h-[7.5rem] overflow-y-auto bg-white z-50 w-full text-sm">
   </div>
+</div>
+
+
+<div class="relative">
+  <label class="block text-sm font-medium mb-1">Penanggung Jawab *</label>
+  <input type="text" id="penanggungInput" name="penanggung_jawab"
+         value="<?php echo e(old('penanggung_jawab')); ?>"
+         class="w-full border border-gray-500 rounded px-3 py-2" required
+         autocomplete="off">
+  <div id="penanggungList"
+       class="absolute hidden border border-gray-300 mt-1 rounded shadow max-h-[7.5rem] overflow-y-auto bg-white z-50 w-full text-sm">
+  </div>
+</div>
 
   
   <div>
@@ -140,77 +135,126 @@ unset($__errorArgs, $__bag); ?>
   </div>
 
   <div class="flex justify-end mt-4">
-    <button id="btn-simpan" type="submit"
-      class="bg-green-500 hover:bg-green-600 text-white font-medium px-5 py-2 rounded disabled:opacity-60 disabled:cursor-not-allowed">
-      Simpan
-    </button>
+      <button id="btn-simpan" type="submit"
+        class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-5 py-2 rounded disabled:opacity-60 disabled:cursor-not-allowed">       
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        Simpan
+      </button>
   </div>
 </form>
 
-<!-- Tambahkan ini sebelum </body> -->
+
+<!-- Script -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-  const penanggungJawabList = {
-    "AAZ - Alvin Alvarez": "AAZ - Alvin Alvarez",
-    "JKT - Jessica Kartika": "JKT - Jessica Kartika",
-    "FZN - Fajar Zainuddin": "FZN - Fajar Zainuddin",
-    "IDI - Indah Lestari": "IDI - Indah Lestari",
-    "DDS - Dadang Syarif Sihabudin Sahid": "DDS - Dadang Syarif Sihabudin Sahid",
-    "SPA - Satria Perdana Arifin": "SPA - Satria Perdana Arifin",
-    "AGW - Agus Wijayanto": "AGW - Agus Wijayanto",
-    "YAS - Yoanda Alim Syahbana": "YAS - Yoanda Alim Syahbana",
-    "YDL - Yohana Dewi Lulu": "YDL - Yohana Dewi Lulu",
-    "JNS - Juni Nurma Sari": "JNS - Juni Nurma Sari"
-  };
+$(document).ready(function() {
+    // Load pegawai dari endpoint Laravel (proxy ke API PCR)
+    $.getJSON('/pegawai/list', function(data) {
+        if (!data.items) {
+            alert("Gagal memuat data pegawai dari API.");
+            return;
+        }
 
-  const organisasiList = [
-    "AET",
-    "ITSA",
-    "HIMASISTIFO",
-    "HIMATRIK",
-    "HMM",
-    "HIMAKSI",
-    "HIMATEL",
-    "HIMIKA",
-    "HIMAKOM",
-    "HIMATRON",
-    "UKM Basket",
-    "UKM Futsal",
-    "UKM Volly",
-    "UKM Badminton",
-    "PCR-Rohil",
-    "PCR-Sumbar",
+        data.items.forEach(function(peg) {
+            $('#penanggungSelect').append(
+                $('<option>', {
+                    value: peg.inisial + ' - ' + peg.nama,
+                    text: peg.inisial + ' - ' + peg.nama
+                })
+            );
+        });
+
+        $('#penanggungSelect').select2({
+            width: '100%',
+            placeholder: "Pilih atau cari penanggung jawab...",
+            dropdownAutoWidth: true
+        });
+
+        $('#organisasiSelect').select2({
+            width: '100%',
+            placeholder: "Pilih organisasi",
+            dropdownAutoWidth: true
+        });
+    });
+});
+
+  const organisasiData = [
+    "AET", "ITSA", "HIMASISTIFO", "HIMATRIK", "HMM", "HIMAKSI", "HIMATEL", "HIMIKA", "HIMAKOM", "HIMATRON",
+    "UKM Basket", "UKM Futsal", "UKM Volly", "UKM Badminton", "PCR-Rohil", "PCR-Sumbar"
   ];
 
-  const penanggungSelect = document.getElementById('penanggungSelect');
-  Object.entries(penanggungJawabList).forEach(([value, label]) => {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = label;
-    penanggungSelect.appendChild(option);
-  });
+  const organisasiInput = document.getElementById('organisasiInput');
+  const organisasiList = document.getElementById('organisasiList');
 
-  const organisasiSelect = document.getElementById('organisasiSelect');
-  organisasiList.forEach(org => {
-    const option = document.createElement('option');
-    option.value = org;
-    option.textContent = org;
-    organisasiSelect.appendChild(option);
-  });
+  organisasiInput.addEventListener('focus', showOrganisasiList);
+  organisasiInput.addEventListener('input', showOrganisasiList);
 
-  $(document).ready(function() {
-    $('#organisasiSelect').select2({
-      width: '100%',
-      placeholder: "Pilih organisasi",
-      dropdownAutoWidth: true
+  function showOrganisasiList() {
+    const keyword = organisasiInput.value.toLowerCase();
+    const filtered = organisasiData.filter(name => name.toLowerCase().includes(keyword));
+
+    organisasiList.innerHTML = '';
+    filtered.slice(0, 50).forEach((name, i) => {
+      const div = document.createElement('div');
+      div.textContent = name;
+      div.className = 'cursor-pointer px-3 py-1 hover:bg-gray-100';
+      div.onclick = () => {
+        organisasiInput.value = name;
+        organisasiList.classList.add('hidden');
+      };
+      organisasiList.appendChild(div);
     });
 
-    $('#penanggungSelect').select2({
-      width: '100%',
-      placeholder: "Pilih penanggung jawab...",
-      dropdownAutoWidth: true
-    });
+    organisasiList.classList.toggle('hidden', filtered.length === 0);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!organisasiInput.contains(e.target) && !organisasiList.contains(e.target)) {
+      organisasiList.classList.add('hidden');
+    }
   });
-</script><?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/components/form-peminjaman/tahap2.blade.php ENDPATH**/ ?>
+
+  // Penanggung jawab
+  const penanggungInput = document.getElementById('penanggungInput');
+  const penanggungList = document.getElementById('penanggungList');
+  let allPegawai = [];
+
+  fetch('/pegawai/list')
+    .then(res => res.json())
+    .then(data => {
+      allPegawai = data.items.map(d => `${d.inisial} - ${d.nama}`);
+    });
+
+  penanggungInput.addEventListener('focus', showPenanggungList);
+  penanggungInput.addEventListener('input', showPenanggungList);
+
+  function showPenanggungList() {
+    const keyword = penanggungInput.value.toLowerCase();
+    const filtered = allPegawai.filter(name => name.toLowerCase().includes(keyword));
+
+    penanggungList.innerHTML = '';
+    filtered.slice(0, 50).forEach(name => {
+      const div = document.createElement('div');
+      div.textContent = name;
+      div.className = 'cursor-pointer px-3 py-1 hover:bg-gray-100';
+      div.onclick = () => {
+        penanggungInput.value = name;
+        penanggungList.classList.add('hidden');
+      };
+      penanggungList.appendChild(div);
+    });
+
+    penanggungList.classList.toggle('hidden', filtered.length === 0);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!penanggungInput.contains(e.target) && !penanggungList.contains(e.target)) {
+      penanggungList.classList.add('hidden');
+    }
+  });
+</script>
+<?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/components/form-peminjaman/tahap2.blade.php ENDPATH**/ ?>

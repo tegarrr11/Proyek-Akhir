@@ -75,7 +75,7 @@
       'aet', 'itsa', 'himasistifo', 'himatrik', 'hmm', 'himaksi', 'himatel',
       'himika', 'himakom', 'himatron',
       'ukm basket', 'ukm futsal', 'ukm volly', 'ukm badminton',
-      'pcr-rohil', 'pcr-sumbar'
+      'pcr-rohil', 'pcr-sumbar','bem','blm'
     ];
 
     const organisasi = (data.organisasi || '').toLowerCase();

@@ -87,16 +87,51 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
     const step2 = document.getElementById('step2');
     const btn1 = document.getElementById('btn1');
     const btn2 = document.getElementById('btn2');
+    const validasiForm = document.getElementById('validasi-form');
 
+    // Reset semua tampilan & warna
     [step1, step2].forEach(s => s.classList.remove('active-step'));
-    [btn1, btn2].forEach(b => b.classList.remove('bg-green-100', 'font-semibold'));
+    [btn1, btn2].forEach(btn => {
+      btn.classList.remove(
+        'bg-green-100', 'text-green-800',       // hijau
+        'bg-[#ccf3f9]', 'text-[#003366]',       // biru
+        'bg-[#ecfeff]',                         // abu-abu muda
+        'bg-gray-100', 'text-gray-500'          // abu-abu fallback
+      );
+    });
 
     if (step === 1) {
       step1.classList.add('active-step');
-      btn1.classList.add('bg-green-100', 'font-semibold');
-    } else {
+      btn1.classList.add('bg-[#ccf3f9]', 'text-[#003366]'); // Biru aktif
+
+      btn2.classList.add('bg-gray-100', 'text-gray-500');  // Abu-abu pasif
+    }
+
+    if (step === 2) {
+      const tahap1Fields = step1.querySelectorAll('[required]');
+      let valid = true;
+
+      tahap1Fields.forEach(field => {
+        if (!field.value) {
+          valid = false;
+          field.classList.add('border-red-500');
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      });
+
+      if (!valid) {
+        validasiForm.textContent = "⚠️ Mohon lengkapi semua kolom di Tahap 1 terlebih dahulu.";
+        validasiForm.classList.remove('hidden');
+        toggleStep(1);
+        return;
+      }
+
+      validasiForm.classList.add('hidden');
       step2.classList.add('active-step');
-      btn2.classList.add('bg-green-100', 'font-semibold');
+
+      btn1.classList.add('bg-green-100', 'text-green-800');     // Hijau setelah selesai
+      btn2.classList.add('bg-[#ccf3f9]', 'text-[#003366]');     // Biru aktif
     }
   }
 
@@ -159,8 +194,34 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
     toggleStep(1);
     @endif
 
+    // Klik Tahap 1
     document.getElementById('btn1')?.addEventListener('click', () => toggleStep(1));
-    document.getElementById('btn2')?.addEventListener('click', () => toggleStep(2));
+
+    // Klik Tahap 2 dengan validasi
+    document.getElementById('btn2')?.addEventListener('click', (e) => {
+      const tahap1Fields = document.querySelectorAll('#step1 [required]');
+      let valid = true;
+
+      tahap1Fields.forEach(field => {
+        if (!field.value) {
+          valid = false;
+          field.classList.add('border-red-500');
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      });
+
+      const validasiForm = document.getElementById('validasi-form');
+      if (!valid) {
+        toggleStep(1);
+        validasiForm.textContent = "⚠️ Mohon lengkapi semua kolom di Tahap 1 terlebih dahulu.";
+        validasiForm.classList.remove('hidden');
+        return;
+      }
+
+      validasiForm.classList.add('hidden');
+      toggleStep(2);
+    });
 
     // Jenis kegiatan eksternal check
     const jenisKegiatanRadios = document.querySelectorAll('input[name="jenis_kegiatan"]');
@@ -178,4 +239,5 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
     updateUndanganVisibility();
   });
 </script>
+
 @endsection
