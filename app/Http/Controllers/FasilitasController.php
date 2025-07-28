@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Fasilitas;
-use App\Models\Gedung;
 use Illuminate\Http\Request;
 
 class FasilitasController extends Controller
@@ -26,7 +25,7 @@ class FasilitasController extends Controller
             'gedung_id' => $request->gedung_id,
             'nama_barang' => $request->nama_barang,
             'stok' => $request->stok,
-            'is_available' => true // optional jika ada kolom ini
+            'is_available' => true // kalau ada kolom ini
         ]);
 
         return redirect()->route('admin.fasilitas')->with('success', 'Fasilitas berhasil ditambahkan.');
@@ -47,13 +46,21 @@ class FasilitasController extends Controller
             'gedung_id' => $request->gedung_id,
         ]);
 
+        if ($request->ajax()) {
+            return response()->json(['message' => 'Berhasil diperbarui']);
+        }
+
         return redirect()->route('admin.fasilitas')->with('success', 'Fasilitas berhasil diperbarui.');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $fasilitas = Fasilitas::findOrFail($id);
         $fasilitas->delete();
+
+        if ($request->ajax()) {
+            return response()->json(['message' => 'Berhasil dihapus']);
+        }
 
         return redirect()->route('admin.fasilitas')->with('success', 'Fasilitas berhasil dihapus.');
     }

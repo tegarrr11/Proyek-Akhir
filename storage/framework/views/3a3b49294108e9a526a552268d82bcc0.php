@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?php echo $__env->yieldContent('title'); ?></title>
   <?php echo $__env->make('layouts.partials.head', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
   <?php echo $__env->yieldPushContent('head'); ?>
   <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
   <?php if(Auth::check()): ?>
-    <meta name="user-id" content="<?php echo e(Auth::id()); ?>">
+  <meta name="user-id" content="<?php echo e(Auth::id()); ?>">
   <?php endif; ?>
   <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
 </head>
-<body class="bg-gray-50 h-screen flex flex-col md:flex-row">
+
+<body class="bg-gray-50 h-screen grid grid-cols-1 md:grid-cols-[256px_1fr]">
   <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-30 hidden md:hidden"></div>
   <!-- Mobile Header -->
   <header class="md:hidden flex justify-between items-center px-4 py-3 bg-white border-b">
@@ -39,42 +41,49 @@
     </div>
   </header>
   <!-- Sidebar -->
-<aside id="sidebar" class="w-64 bg-white border-r flex flex-col justify-between md:static fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40">    <div class="p-6">
-      <div class="text-center mt-4 mb-6 md:mt-12 md:mb-8 block">
+  <aside id="sidebar" class=" bg-white border-r flex flex-col justify-between md:static fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40">
+    <div class="!p-3">
+      <div class="text-center mb-6 md:mt-12 md:mb-8 block">
         <img src="<?php echo e(asset('images/sarpras-logo.png')); ?>" alt="Logo" class="w-32 md:w-40 mx-auto mb-2">
       </div>
       <nav class="space-y-2">
         <a href="<?php echo e(route('mahasiswa.dashboard')); ?>"
-           class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium <?php echo e(request()->routeIs('mahasiswa.dashboard') || request()->routeIs('mahasiswa.auditorium') || request()->routeIs('mahasiswa.gsg') || request()->routeIs('mahasiswa.gor') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100'); ?>">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium <?php echo e(request()->routeIs('mahasiswa.dashboard') || request()->routeIs('mahasiswa.auditorium') || request()->routeIs('mahasiswa.gsg') || request()->routeIs('mahasiswa.gor') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100'); ?>">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house">
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          </svg>
           Dashboard
         </a>
         <a href="<?php echo e(route('mahasiswa.fasilitas')); ?>"
-           class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium <?php echo e(request()->routeIs('mahasiswa.fasilitas') || request()->routeIs('peminjaman.create') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100'); ?>">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list-icon lucide-clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+          class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium <?php echo e(request()->routeIs('mahasiswa.fasilitas') || request()->routeIs('peminjaman.create') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100'); ?>">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list-icon lucide-clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
           Peminjaman
         </a>
         <a href="<?php echo e(route('mahasiswa.peminjaman')); ?>"
-           class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium <?php echo e(request()->routeIs('mahasiswa.peminjaman*') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100'); ?>">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history-icon lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium <?php echo e(request()->routeIs('mahasiswa.peminjaman*') ? 'bg-[#c4f7fd] text-[#003366]' : 'text-gray-600 hover:bg-gray-100'); ?>">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history-icon lucide-history">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+            <path d="M12 7v5l4 2" />
+          </svg>
           Pengajuan & Riwayat
         </a>
       </nav>
     </div>
-    <div class="p-6">
-      <form method="POST" action="<?php echo e(route('logout')); ?>">
+    <div class="p-6 ">
+      <form method="POST" action="<?php echo e(route('logout')); ?> ">
         <?php echo csrf_field(); ?>
-        <button type="submit" class="logout flex items-center gap-2 text-[#003366] text-sm font-medium hover:underline">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
-          </svg>
+        <button type="submit" class="logout flex items-center gap-2 text-[#003366] text-sm font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#002352" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out">
+            <path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
           Log Out
         </button>
       </form>
     </div>
   </aside>
   <!-- Main Content -->
-  <main class="flex-1 p-6 overflow-auto w-full">
+  <main class="flex-1 !p-6 overflow-auto w-full">
     <?php echo $__env->yieldContent('content'); ?>
   </main>
   <div id="notif-toast" class="fixed bottom-6 right-6 z-50 space-y-2 text-sm"></div>
@@ -90,6 +99,7 @@
       sidebar.classList.toggle('-translate-x-full');
       overlay.classList.toggle('hidden');
     });
+
     function notifDropdown() {
       return {
         open: false,
@@ -153,7 +163,7 @@
   </script>
   <script src="https://unpkg.com/alpinejs" defer></script>
   <?php echo $__env->yieldPushContent('scripts'); ?>
-    <?php echo $__env->yieldContent('script'); ?>
+  <?php echo $__env->yieldContent('script'); ?>
 </body>
-</html>
-<?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/layouts/sidebar-mahasiswa.blade.php ENDPATH**/ ?>
+
+</html><?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/layouts/sidebar-mahasiswa.blade.php ENDPATH**/ ?>

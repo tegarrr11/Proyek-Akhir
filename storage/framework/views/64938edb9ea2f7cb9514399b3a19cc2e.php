@@ -1,12 +1,17 @@
 <?php
-  // Pagination manual di Blade
   $perPage = 10;
   $currentPage = request()->get('page', 1);
   $offset = ($currentPage - 1) * $perPage;
 
-  $paginatedItems = $items->slice($offset, $perPage)->values();
-  $totalPages = ceil($items->count() / $perPage);
+  $filtered = $items->filter(function ($item) {
+    $search = strtolower(request()->get('search', ''));
+    return str_contains(strtolower($item->judul_kegiatan), $search);
+  });
+
+  $paginatedItems = $filtered->slice($offset, $perPage)->values();
+  $totalPages = ceil($filtered->count() / $perPage);
 ?>
+
 
 <?php if (isset($component)) { $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $attributes; } ?>
@@ -68,9 +73,7 @@
             onclick="showDetail(<?php echo e($item->id); ?>)"
             class="text-blue-600 hover:text-blue-800 text-sm"
             title="Lihat Detail">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>            </button>
           </button>
         </td>
       </tr>

@@ -227,7 +227,7 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
 <?php $__env->stopPush(); ?>
 
-<?php if (! $__env->hasRenderedOnce('2e06fca3-e18e-4dd5-9021-aebed8e6621e')): $__env->markAsRenderedOnce('2e06fca3-e18e-4dd5-9021-aebed8e6621e'); ?>
+<?php if (! $__env->hasRenderedOnce('ce2316cb-84b8-4729-8d06-b601215a4365')): $__env->markAsRenderedOnce('ce2316cb-84b8-4729-8d06-b601215a4365'); ?>
 <?php $__env->startPush('scripts'); ?>
 <script>
   document.addEventListener('DOMContentLoaded', function() {

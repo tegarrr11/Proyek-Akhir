@@ -1,12 +1,17 @@
 @php
-  // Pagination manual di Blade
   $perPage = 10;
   $currentPage = request()->get('page', 1);
   $offset = ($currentPage - 1) * $perPage;
 
-  $paginatedItems = $items->slice($offset, $perPage)->values();
-  $totalPages = ceil($items->count() / $perPage);
+  $filtered = $items->filter(function ($item) {
+    $search = strtolower(request()->get('search', ''));
+    return str_contains(strtolower($item->judul_kegiatan), $search);
+  });
+
+  $paginatedItems = $filtered->slice($offset, $perPage)->values();
+  $totalPages = ceil($filtered->count() / $perPage);
 @endphp
+
 
 <x-table-wrapper>
   <table class="w-full text-sm">

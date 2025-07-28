@@ -37,14 +37,14 @@
             @elseif($item->verifikasi_sarpras === 'ditolak')
               bg-red-100 text-red-600
             @else
-              bg-yellow-100 text-yellow-500 font-medium
+              bg-grey-100 text-grey-500 font-medium
             @endif">
             {{ ucfirst($item->verifikasi_sarpras) }}
           </span>
         </td>
         <td class="px-4 py-2">{{ $item->organisasi }}</td>
         <td class="px-4 py-2">
-          @if($item->status_peminjaman === 'diambil' && $item->status_pengembalian === 'proses')
+          @if($item->status_peminjaman === 'ambil')
             <form method="POST" action="{{ route('admin.peminjaman.kembalikan', $item->id) }}" onsubmit="return confirm('Yakin ingin menandai sebagai dikembalikan?')">
               @csrf
               @method('PATCH')

@@ -10,52 +10,46 @@ use App\Models\User;
 
 class AdminPeminjamanController extends Controller
 {
-        public function index(Request $request)
-        {
-            $gedungId = $request->get('gedung_id');
+    public function index(Request $request)
+    {
+        $gedungId = $request->get('gedung_id');
 
-            // DATA PENGAJUAN (yang belum selesai dikembalikan)
-            $pengajuans = Peminjaman::with('user')
-                ->where(function ($query) {
-                    $query->where('verifikasi_sarpras', 'diajukan')
-                        ->orWhere(function ($q) {
-                            $q->where('verifikasi_sarpras', 'diterima')
-                                ->where('status_pengembalian', '!=', 'selesai');
-                        });
-                })
-                ->where('verifikasi_bem', 'diterima')
-                ->whereHas('user', function ($q) {
-                    $q->where('role', '!=', 'admin'); // Hanya non-admin
-                })
-                ->latest();
+        $pengajuans = Peminjaman::with('user')
+            ->where('verifikasi_bem', 'diterima')
+            ->whereHas('user', function ($q) {
+                $q->where('role', '!=', 'admin');
+            })
+            ->where(function ($query) {
+                $query->where('verifikasi_sarpras', 'diajukan')
+                    ->orWhere(function ($q) {
+                        $q->where('verifikasi_sarpras', 'diterima')
+                            ->where('status_pengembalian', '!=', 'selesai');
+                    });
+            });
 
-            // DATA RIWAYAT (yang sudah selesai)
-            $riwayats = Peminjaman::with('user', 'gedung')
-                ->where(function($query) use ($gedungId) {
-                    $query->where('verifikasi_sarpras', 'diterima')
-                        ->where('status_pengembalian', 'selesai')
-                        ->orWhere(function($q) {
-                            $q->where('verifikasi_sarpras', 'diajukan')
-                                ->whereHas('user', function($q2) {
-                                    $q2->where('role', 'admin'); // Riwayat admin
-                                });
-                        });
-
-                    if ($gedungId) {
-                        $query->where('gedung_id', $gedungId);
-                    }
+        $riwayats = Peminjaman::with('user', 'gedung')
+            ->where(function ($query) {
+                $query->where('verifikasi_sarpras', 'diterima')
+                    ->where('status_pengembalian', 'selesai');
+            })
+            ->orWhere(function ($q) {
+                $q->where('verifikasi_sarpras', 'diajukan')
+                ->whereHas('user', function ($q2) {
+                    $q2->where('role', 'admin');
                 });
+            });
 
-            if ($gedungId) {
-                $pengajuans = $pengajuans->where('gedung_id', $gedungId);
-                $riwayats = $riwayats->where('gedung_id', $gedungId);
-            }
 
-            $pengajuans = $pengajuans->get();
-            $riwayats = $riwayats->latest()->get();
-
-            return view('pages.admin.peminjaman', compact('pengajuans', 'riwayats'));
+        if ($gedungId) {
+            $pengajuans = $pengajuans->where('gedung_id', $gedungId);
+            $riwayats   = $riwayats->where('gedung_id', $gedungId);
         }
+
+        $pengajuans = $pengajuans->latest()->get();
+        $riwayats   = $riwayats->latest()->get();
+
+        return view('pages.admin.peminjaman', compact('pengajuans', 'riwayats'));
+    }
 
     public function approve($id)
     {

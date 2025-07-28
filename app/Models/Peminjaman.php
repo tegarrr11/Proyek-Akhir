@@ -14,7 +14,8 @@ class Peminjaman extends Model
     protected $fillable = [
     'user_id', 
     'judul_kegiatan', 
-    'tgl_kegiatan', 
+    'tgl_kegiatan',
+    'tgl_kegiatan_berakhir',
     'waktu_mulai', 
     'waktu_berakhir',
     'aktivitas', 
@@ -27,9 +28,9 @@ class Peminjaman extends Model
     'undangan_pembicara',
     'status_peminjaman', 
     'status_pengembalian',
-    'verifikasi_bem', // DITAMBAHKAN
-    'verifikasi_sarpras', // DITAMBAHKAN
-    'status', // DITAMBAHKAN
+    'verifikasi_bem',
+    'verifikasi_sarpras', 
+    'status',
     ];
 
     public function detailPeminjaman()

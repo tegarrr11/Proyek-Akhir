@@ -26,7 +26,7 @@
         <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium' : 'bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium' }}">
+          <span class="px-3 py-1 text-xs rounded-full {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full font-medium' : 'bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium' }}">
             {{ ucfirst($item->verifikasi_bem) }}
           </span>
         </td>
@@ -34,11 +34,11 @@
         <td class="px-4 py-2">
           <span class="px-3 py-1 text-xs rounded-full
             @if($item->verifikasi_sarpras === 'diterima')
-              bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium
+              bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full font-medium
             @elseif($item->verifikasi_sarpras === 'proses')
-              bg-yellow-100 text-yellow-700 text-xs px-3 py-1 rounded-full font-medium
+              bg-gray-200 text-grey-700 text-xs px-3 py-1 rounded-full font-medium
             @else
-              bg-yellow-100 text-yellow-600 text-xs px-3 py-1 rounded-full font-medium
+              bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium
             @endif">
             {{ ucfirst($item->verifikasi_sarpras) }}
           </span>
@@ -65,7 +65,7 @@
             <form method="POST" action="{{ route('mahasiswa.peminjaman.ambil', $item->id) }}">
               @csrf
               @method('PATCH')
-              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded-full hover:bg-blue-700">Ambil</button>
+              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Ambil</button>
             </form>
           @endif
 
