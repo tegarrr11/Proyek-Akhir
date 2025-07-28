@@ -266,6 +266,9 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('peminjaman.downloadProposal');
 });
 
+Route::put('/admin/fasilitas/{id}', [FasilitasController::class, 'update'])->name('admin.fasilitas.update');
+
+
 // Route untuk fiturr diskusi
 Route::middleware(['auth'])->group(function () {
     Route::post('/diskusi', [DiskusiController::class, 'store'])->name('diskusi.store');

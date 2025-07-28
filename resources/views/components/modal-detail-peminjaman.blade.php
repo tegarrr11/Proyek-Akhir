@@ -69,10 +69,6 @@
         </div>
       </div>
     </div>
-
-    <div class="mt-6 text-right">
-      <button onclick="closeModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">Tutup</button>
-    </div>
   </div>
 </div>
 

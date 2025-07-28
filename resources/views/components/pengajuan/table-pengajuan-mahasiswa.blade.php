@@ -34,11 +34,11 @@
         <td class="px-4 py-2">
           <span class="px-3 py-1 text-xs rounded-full
             @if($item->verifikasi_sarpras === 'diterima')
-              bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium
+              bg-green-700 text-green-100 text-xs px-3 py-1 rounded-full font-medium
             @elseif($item->verifikasi_sarpras === 'proses')
-              bg-yellow-100 text-yellow-700 text-xs px-3 py-1 rounded-full font-medium
+              bg-gray-200 text-grey-700 text-xs px-3 py-1 rounded-full font-medium
             @else
-              bg-yellow-100 text-yellow-600 text-xs px-3 py-1 rounded-full font-medium
+              bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium
             @endif">
             {{ ucfirst($item->verifikasi_sarpras) }}
           </span>

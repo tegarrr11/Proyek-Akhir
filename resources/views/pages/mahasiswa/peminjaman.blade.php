@@ -5,7 +5,7 @@
 @section('content')
   <x-header title="Peminjaman" breadcrumb="Peminjaman > Pengajuan" />
 
-  <div class="bg-white rounded-md shadow flex-1 p-6 overflow-visible">
+  <div class="bg-white rounded-md p-6 shadow flex-1 overflow-visible">
     {{-- Tabs --}}
     <div class="flex items-center justify-between mb-4">
       <div class="flex gap-6 relative">
@@ -31,13 +31,11 @@
         </button>
 
         <!-- Input Search -->
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="cari kegiatan ..."
-          class="hidden md:block border border-gray-300 rounded px-3 py-1 text-sm bg-white shadow z-20 w-40 md:w-52
-                focus:outline-none focus:ring-0 focus:border-gray-300 transition-all"
-        />
+          <form method="GET" action="{{ route('mahasiswa.peminjaman') }}" class="relative">
+            <input type="hidden" name="tab" value="riwayat">
+            <input type="text" name="search" value="{{ request('search') }}"
+              placeholder="Cari kegiatan ..." class="border rounded px-3 py-1 text-sm w-52" />
+          </form>
       </div>
 
     </div>
@@ -65,96 +63,95 @@
 @push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    showTab('pengajuan');
+    // Ambil tab dari URL dan tampilkan tab terkait
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab') || 'pengajuan';
+    showTab(tab);
 
     const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        const keyword = this.value.toLowerCase();
+        const activeTable = getActiveTableId();
+        if (!activeTable) return;
 
-    searchInput?.addEventListener('input', function () {
-      const keyword = this.value.toLowerCase();
-      const activeTable = getActiveTableId();
-      if (!activeTable) return;
-      const rows = document.querySelectorAll(`#${activeTable} tbody tr`);
-      rows.forEach(row => {
-        const kolomJudul = row.children[1];
-        const isi = kolomJudul?.textContent.toLowerCase() || '';
-        row.style.display = isi.includes(keyword) ? '' : 'none';
+        const rows = document.querySelectorAll(`#${activeTable} tbody tr`);
+        rows.forEach(row => {
+          const kolomJudul = row.children[1];
+          const isi = kolomJudul?.textContent.toLowerCase() || '';
+          row.style.display = isi.includes(keyword) ? '' : 'none';
+        });
       });
+    }
+
+    // Toggle input search saat di mobile
+    window.toggleSearchInput = function () {
+      const input = document.getElementById('searchInput');
+      const icon = document.getElementById('searchIcon');
+
+      input.classList.toggle('hidden');
+      if (!input.classList.contains('hidden')) {
+        input.focus();
+        icon.classList.add('hidden');
+      } else {
+        icon.classList.remove('hidden');
+      }
+    };
+
+    // Tutup search input saat klik di luar
+    document.addEventListener('click', function (e) {
+      const input = document.getElementById('searchInput');
+      const icon = document.getElementById('searchIcon');
+
+      if (!input.contains(e.target) && !icon.contains(e.target)) {
+        input.classList.add('hidden');
+        icon.classList.remove('hidden');
+      }
+    });
+  });
+
+  // Fungsi ganti tab
+  window.showTab = function(tab) {
+    const tabs = ['pengajuan', 'riwayat'];
+    tabs.forEach(id => {
+      const tabBtn = document.getElementById(`tab${capitalize(id)}`);
+      const underline = document.getElementById(`underline${capitalize(id)}`);
+      const tabContent = document.getElementById(`${id}Tab`);
+
+      if (id === tab) {
+        tabBtn?.classList.remove('text-gray-500');
+        tabBtn?.classList.add('text-[#003366]');
+        underline?.classList.add('scale-x-100');
+        underline?.classList.remove('scale-x-0');
+        tabContent?.classList.remove('hidden');
+      } else {
+        tabBtn?.classList.add('text-gray-500');
+        tabBtn?.classList.remove('text-[#003366]');
+        underline?.classList.add('scale-x-0');
+        underline?.classList.remove('scale-x-100');
+        tabContent?.classList.add('hidden');
+      }
     });
 
-  document.addEventListener('DOMContentLoaded', function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tab = urlParams.get('tab') || 'pengajuan'; 
-    showTab(tab);
-  });
-
-
-    function getActiveTableId() {
-      if (!document.getElementById('pengajuanTab').classList.contains('hidden')) return 'tablePengajuan';
-      if (!document.getElementById('riwayatTab').classList.contains('hidden')) return 'tableRiwayat';
-      return null;
-    }
-
-    window.showTab = function(tab) {
-      const tabs = ['pengajuan', 'riwayat'];
-      tabs.forEach(id => {
-        const tabBtn = document.getElementById(`tab${capitalize(id)}`);
-        const underline = document.getElementById(`underline${capitalize(id)}`);
-        const tabContent = document.getElementById(`${id}Tab`);
-
-        if (id === tab) {
-          tabBtn?.classList.remove('text-gray-500');
-          tabBtn?.classList.add('text-[#003366]');
-          underline?.classList.add('scale-x-100');
-          underline?.classList.remove('scale-x-0');
-          tabContent?.classList.remove('hidden');
-        } else {
-          tabBtn?.classList.add('text-gray-500');
-          tabBtn?.classList.remove('text-[#003366]');
-          underline?.classList.add('scale-x-0');
-          underline?.classList.remove('scale-x-100');
-          tabContent?.classList.add('hidden');
-        }
-      });
-
-      // Reset pencarian dan tampilkan ulang semua baris
-      const input = document.getElementById('searchInput');
-      input.value = '';
-      const activeTable = tab === 'pengajuan' ? 'tablePengajuan' : 'tableRiwayat';
-      const rows = document.querySelectorAll(`#${activeTable} tbody tr`);
-      rows.forEach(row => row.style.display = '');
-    }
-
-    function capitalize(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-  });
-
-function toggleSearchInput() {
-  const input = document.getElementById('searchInput');
-  const icon = document.getElementById('searchIcon');
-
-  input.classList.toggle('hidden');
-  if (!input.classList.contains('hidden')) {
-    input.focus();
-    icon.classList.add('hidden');
-  } else {
-    icon.classList.remove('hidden');
+    // Reset pencarian setiap kali tab berganti
+    const input = document.getElementById('searchInput');
+    if (input) input.value = '';
+    const activeTable = tab === 'pengajuan' ? 'tablePengajuan' : 'tableRiwayat';
+    const rows = document.querySelectorAll(`#${activeTable} tbody tr`);
+    rows.forEach(row => row.style.display = '');
   }
-}
 
-document.addEventListener('click', function (e) {
-  const input = document.getElementById('searchInput');
-  const icon = document.getElementById('searchIcon');
-
-  if (
-    !input.contains(e.target) &&
-    !icon.contains(e.target)
-  ) {
-    input.classList.add('hidden');
-    icon.classList.remove('hidden');
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
-});
 
+  function getActiveTableId() {
+    if (!document.getElementById('pengajuanTab').classList.contains('hidden')) return 'tablePengajuan';
+    if (!document.getElementById('riwayatTab').classList.contains('hidden')) return 'tableRiwayat';
+    return null;
+  }
 </script>
 @endpush
 @endsection
+
+

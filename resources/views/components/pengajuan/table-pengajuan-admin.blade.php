@@ -37,7 +37,7 @@
             @elseif($item->verifikasi_sarpras === 'ditolak')
               bg-red-100 text-red-600
             @else
-              bg-yellow-100 text-yellow-500 font-medium
+              bg-grey-100 text-grey-500 font-medium
             @endif">
             {{ ucfirst($item->verifikasi_sarpras) }}
           </span>

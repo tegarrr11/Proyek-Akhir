@@ -6,7 +6,7 @@
 
   $paginatedItems = $items->slice($offset, $perPage)->values(); // ambil hanya 10 item
   $totalPages = ceil($items->count() / $perPage);
-@endphp
+@endphp 
 
 <x-table-wrapper>
   <table class="w-full text-sm">
@@ -28,11 +28,11 @@
         <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
         <td class="px-4 py-2">{{ $item->created_at->format('d/m/Y') }}</td>
         <td class="px-4 py-2">
-          <span class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">Diterima</span>
+          <span class="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">Diterima</span>
         </td>
         <td class="px-4 py-2">
           @if ($item->verifikasi_sarpras === 'diterima')
-          <span class="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600">Diterima</span>
+          <span class="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">Diterima</span>
           @elseif ($item->verifikasi_sarpras === 'ditolak')
           <span class="bg-green-100 text-red-800 text-xs font-semibold px-3 py-1 rounded hover:bg-red-200 transition">Ditolak</span>
           @else

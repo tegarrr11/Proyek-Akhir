@@ -184,7 +184,7 @@ $(document).ready(function() {
 
   const organisasiData = [
     "AET", "ITSA", "HIMASISTIFO", "HIMATRIK", "HMM", "HIMAKSI", "HIMATEL", "HIMIKA", "HIMAKOM", "HIMATRON",
-    "UKM Basket", "UKM Futsal", "UKM Volly", "UKM Badminton", "PCR-Rohil", "PCR-Sumbar"
+    "UKM Basket", "UKM Futsal", "UKM Volly", "UKM Badminton", "PCR-Rohil", "PCR-Sumbar","BEM","BLM"
   ];
 
   const organisasiInput = document.getElementById('organisasiInput');

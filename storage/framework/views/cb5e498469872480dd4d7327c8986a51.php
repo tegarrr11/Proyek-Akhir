@@ -47,7 +47,7 @@
             <?php elseif($item->verifikasi_sarpras === 'ditolak'): ?>
               bg-red-100 text-red-600
             <?php else: ?>
-              bg-yellow-100 text-yellow-500 font-medium
+              bg-grey-100 text-grey-500 font-medium
             <?php endif; ?>">
             <?php echo e(ucfirst($item->verifikasi_sarpras)); ?>
 
@@ -83,7 +83,7 @@
             </button>
 
             <button onclick="showDetail(<?php echo e($item->id); ?>)" class="text-gray-600 hover:text-blue-700" title="Detail">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a1a1a1" stroke-width="2.625" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>          </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>            </button>
         </td>
       </tr>
       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
