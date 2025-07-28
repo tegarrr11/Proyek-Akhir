@@ -267,7 +267,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::put('/admin/fasilitas/{id}', [FasilitasController::class, 'update'])->name('admin.fasilitas.update');
-
+Route::patch('/mahasiswa/peminjaman/{id}/ambil', [MahasiswaController::class, 'ambilPeminjaman'])->name('mahasiswa.peminjaman.ambil');
 
 // Route untuk fiturr diskusi
 Route::middleware(['auth'])->group(function () {

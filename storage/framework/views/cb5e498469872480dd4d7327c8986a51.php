@@ -55,7 +55,7 @@
         </td>
         <td class="px-4 py-2"><?php echo e($item->organisasi); ?></td>
         <td class="px-4 py-2">
-          <?php if($item->status_peminjaman === 'diambil' && $item->status_pengembalian === 'proses'): ?>
+          <?php if($item->status_peminjaman === 'ambil'): ?>
             <form method="POST" action="<?php echo e(route('admin.peminjaman.kembalikan', $item->id)); ?>" onsubmit="return confirm('Yakin ingin menandai sebagai dikembalikan?')">
               <?php echo csrf_field(); ?>
               <?php echo method_field('PATCH'); ?>

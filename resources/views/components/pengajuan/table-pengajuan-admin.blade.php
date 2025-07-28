@@ -44,7 +44,7 @@
         </td>
         <td class="px-4 py-2">{{ $item->organisasi }}</td>
         <td class="px-4 py-2">
-          @if($item->status_peminjaman === 'diambil' && $item->status_pengembalian === 'proses')
+          @if($item->status_peminjaman === 'ambil')
             <form method="POST" action="{{ route('admin.peminjaman.kembalikan', $item->id) }}" onsubmit="return confirm('Yakin ingin menandai sebagai dikembalikan?')">
               @csrf
               @method('PATCH')

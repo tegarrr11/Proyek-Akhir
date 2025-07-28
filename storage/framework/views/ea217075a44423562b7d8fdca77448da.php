@@ -6,7 +6,7 @@
 
   $paginatedItems = $items->slice($offset, $perPage)->values(); // ambil hanya 10 item
   $totalPages = ceil($items->count() / $perPage);
-?>
+?> 
 
 <?php if (isset($component)) { $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $attributes; } ?>

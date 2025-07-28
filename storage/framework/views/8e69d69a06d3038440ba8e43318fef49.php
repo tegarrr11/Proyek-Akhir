@@ -93,40 +93,49 @@
                 </form>
                 <?php else: ?>
                 <?php $editingId = request('edit'); ?>
-                <tr x-data="{ editing: false }" class="<?php echo e($rowClass); ?> border-t border-gray-200">
-                  
+                <tr 
+                  x-data="{
+                    editing: false,
+                    nama: '<?php echo e($item->nama_barang); ?>',
+                    stok: '<?php echo e($item->stok); ?>'
+                  }" 
+                  class="<?php echo e($rowClass); ?> border-t border-gray-200"
+                >
                   <td class="px-4 py-2 align-middle"><?php echo e($nomor); ?></td>
 
                   
                   <td class="px-4 py-2 align-middle">
                     <template x-if="editing">
-                      <input type="text" x-ref="nama" value="<?php echo e($item->nama_barang); ?>" class="border px-2 py-1 rounded text-sm w-full">
+                      <input type="text" x-model="nama" class="border px-2 py-1 rounded text-sm w-full">
                     </template>
                     <template x-if="!editing">
-                      <span x-text="$refs.nama?.value || '<?php echo e($item->nama_barang); ?>'"></span>
+                      <span x-text="nama"></span>
                     </template>
                   </td>
 
                   
                   <td class="px-4 py-2 align-middle">
                     <template x-if="editing">
-                      <input type="number" x-ref="stok" value="<?php echo e($item->stok); ?>" class="border px-2 py-1 rounded text-sm w-16 text-right">
+                      <input type="number" x-model="stok" class="border px-2 py-1 rounded text-sm w-16 text-right">
                     </template>
                     <template x-if="!editing">
-                      <span x-text="$refs.stok?.value || '<?php echo e($item->stok); ?>'"></span>
+                      <span x-text="stok"></span>
                     </template>
                   </td>
 
-                  
                   <td class="px-4 py-2 align-middle">
-                    <div class="flex space-x-2 items-center">
-
-                      
+                    <div class="flex items-center gap-2">
                       <button type="button" @click="editing = true" x-show="!editing" class="text-blue-600 hover:text-blue-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-                          <path fill="#0071ff" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h8.925l-2 2H5v14h14v-6.95l2-2V19q0 .825-.587 1.413T19 21zm4-6v-4.25l9.175-9.175q.3-.3.675-.45t.75-.15q.4 0 .763.15t.662.45L22.425 3q.275.3.425.663T23 4.4t-.137.738t-.438.662L13.25 15zM21.025 4.4l-1.4-1.4zM11 13h1.4l5.8-5.8l-.7-.7l-.725-.7L11 11.575zm6.5-6.5l-.725-.7zl.7.7z"/>
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="#0071ff" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h8.925l-2 2H5v14h14v-6.95l2-2V19q0 .825-.587 1.413T19 21zm4-6v-4.25l9.175-9.175q.3-.3.675-.45t.75-.15q.4 0 .763.15t.662.45L22.425 3q.275.3.425.663T23 4.4t-.137.738t-.438.662L13.25 15zM21.025 4.4l-1.4-1.4zM11 13h1.4l5.8-5.8l-.7-.7l-.725-.7L11 11.575zm6.5-6.5l-.725-.7zl.7.7z"/></svg>
                       </button>
+
+                      <template x-if="editing">
+                        <form @submit.prevent="submitEdit($el, '<?php echo e(route('admin.fasilitas.update', $item->id)); ?>', nama, stok, '<?php echo e($item->gedung_id); ?>')" class="flex items-center gap-2">
+                          <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
+                          <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600">SIMPAN</button>
+                          <button type="button" @click="editing = false" class="text-gray-600 text-xs ml-2 hover:underline">Batal</button>
+                        </form>
+                      </template>
 
                       
                       <form action="<?php echo e(route('admin.fasilitas.destroy', $item->id)); ?>" method="POST" data-action="delete" x-show="!editing">
@@ -138,24 +147,9 @@
                           </svg>
                         </button>
                       </form>
-
-                      
-                      <template x-if="editing">
-                        <form @submit.prevent="submitEdit($el, '<?php echo e(route('admin.fasilitas.update', $item->id)); ?>')" class="flex items-center gap-2">
-                          <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
-                          <input type="hidden" name="gedung_id" value="<?php echo e($item->gedung_id); ?>">
-                          <input type="hidden" name="nama_barang">
-                          <input type="hidden" name="stok">
-
-                          <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600">SIMPAN</button>
-                          <button type="button" @click="editing = false" class="text-gray-600 text-xs ml-2 hover:underline">Batal</button>
-                        </form>
-                      </template>
-
                     </div>
                   </td>
                 </tr>
-
                 <?php endif; ?>
               <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
@@ -238,12 +232,13 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Form delete
+  // Form delete
     document.querySelectorAll('form[data-action="delete"]').forEach(form => {
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
         const formData = new FormData(this);
         const url = this.action;
+        const row = this.closest('tr'); // Baris tabel terdekat
 
         try {
           const res = await fetch(url, {
@@ -256,7 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
           });
 
           if (res.ok) {
-            location.href = `?tab=${currentTab}&success=Fasilitas berhasil dihapus`;
+            // Hapus baris dari tabel tanpa reload
+            if (row) row.remove();
+
+            // Tampilkan toast sukses
+            showSuccessToast('Fasilitas berhasil dihapus');
           } else {
             showSuccessToast('Gagal menghapus data!');
           }
@@ -297,35 +296,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  
+
   // Jalankan pertama kali
   bindAllEvents();
+
+  
 });
 
-function submitEdit(el, url) {
-  const row = el.closest('tr');
-  const nama = row.querySelector('[x-ref=nama]').value;
-  const stok = row.querySelector('[x-ref=stok]').value;
-
+window.submitEdit = async function (el, url, nama, stok, gedungId) {
   const formData = new FormData();
   formData.append('_method', 'PUT');
   formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
   formData.append('nama_barang', nama);
   formData.append('stok', stok);
-  formData.append('gedung_id', row.querySelector('input[name=gedung_id]')?.value);
+  formData.append('gedung_id', gedungId);
 
-  fetch(url, {
-    method: 'POST',
-    body: formData,
-    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-  }).then(res => {
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
+
     if (res.ok) {
-      const currentTab = new URLSearchParams(window.location.search).get('tab');
-      location.href = `?tab=${currentTab}&success=Fasilitas berhasil diperbarui`;
+      const row = el.closest('tr');
+      const alpineComponent = Alpine?.closestDataStack(row)?.[0];
+      if (alpineComponent) alpineComponent.editing = false;
+
+      showSuccessToast('Fasilitas berhasil diperbarui');
     } else {
-      alert('Gagal menyimpan data!');
+      showSuccessToast('Gagal menyimpan data!');
     }
-  }).catch(() => alert('Terjadi kesalahan saat menyimpan!'));
-}
+  } catch (err) {
+    showSuccessToast('Terjadi kesalahan saat menyimpan!');
+  }
+};
+
+
+window.showSuccessToast = function (message) {
+  const toast = document.getElementById('successToast');
+  if (!toast) return;
+
+  const alpineComponent = Alpine?.closestDataStack(toast)?.[0];
+  if (alpineComponent) {
+    alpineComponent.message = message;
+    alpineComponent.show = true;
+    setTimeout(() => alpineComponent.show = false, 2000);
+  }
+};
+
 
 </script>
 <?php $__env->stopPush(); ?>

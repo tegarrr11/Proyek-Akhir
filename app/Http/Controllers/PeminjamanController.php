@@ -48,6 +48,7 @@ class PeminjamanController extends Controller
         $request->validate([
             'judul_kegiatan' => 'required|string|max:255',
             'tgl_kegiatan' => 'required|date',
+            'tgl_kegiatan_berakhir' => 'required|date',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_berakhir' => 'required|date_format:H:i|after:waktu_mulai',
             'aktivitas' => 'required|string|max:255',
@@ -100,6 +101,7 @@ class PeminjamanController extends Controller
         $peminjaman = Peminjaman::create([
             'judul_kegiatan' => $request->judul_kegiatan,
             'tgl_kegiatan' => $request->tgl_kegiatan,
+            'tgl_kegiatan_berakhir' => $request->tgl_kegiatan_berakhir,
             'waktu_mulai' => $request->waktu_mulai,
             'waktu_berakhir' => $request->waktu_berakhir,
             'aktivitas' => $request->aktivitas,
@@ -121,18 +123,11 @@ class PeminjamanController extends Controller
         // ✅ Simpan fasilitas utama hanya jika role mahasiswa
         if (auth()->user()->role === 'mahasiswa') {
             foreach ($request->barang as $item) {
-                $fasilitas = Fasilitas::find($item['id']);
-                if ($fasilitas && $item['jumlah'] <= $fasilitas->stok) {
-                    DetailPeminjaman::create([
-                        'peminjaman_id' => $peminjaman->id,
-                        'fasilitas_id' => $fasilitas->id,
-                        'jumlah' => $item['jumlah'],
-                    ]);
-
-                    $fasilitas->decrement('stok', $item['jumlah']);
-                    $fasilitas->is_available = $fasilitas->stok > 0;
-                    $fasilitas->save();
-                }
+                DetailPeminjaman::create([
+                    'peminjaman_id' => $peminjaman->id,
+                    'fasilitas_id' => $item['id'],
+                    'jumlah' => $item['jumlah'],
+                ]);
             }
         }
 
@@ -146,15 +141,11 @@ class PeminjamanController extends Controller
                         'fasilitas_id' => $fasilitas->id,
                         'jumlah' => $item['jumlah'],
                     ]);
-
-                    $fasilitas->decrement('stok', $item['jumlah']);
-                    $fasilitas->is_available = $fasilitas->stok > 0;
-                    $fasilitas->save();
                 }
             }
         }
 
-        // ✅ Notifikasi realtime
+        // Notifikasi realtime
         $mahasiswa = Auth::user();
         $mahasiswa->notify(new \App\Notifications\PengajuanMasuk($peminjaman));
 
@@ -173,8 +164,6 @@ class PeminjamanController extends Controller
 
         return redirect()->route('mahasiswa.peminjaman')->with('success', 'Peminjaman berhasil diajukan.');
     }
-
-
 
     /**
      * Menampilkan daftar pengajuan dan riwayat peminjaman mahasiswa.
@@ -230,69 +219,64 @@ class PeminjamanController extends Controller
      */
     public function ambil($id)
     {
-        $peminjaman = Peminjaman::findOrFail($id);
+        $peminjaman = Peminjaman::with('detailPeminjaman.fasilitas')->findOrFail($id);
 
         // Validasi: hanya bisa ambil jika disetujui dan belum diambil
         if ($peminjaman->verifikasi_sarpras === 'diterima' && is_null($peminjaman->status_peminjaman)) {
+            foreach ($peminjaman->detailPeminjaman as $detail) {
+                $fasilitas = $detail->fasilitas;
+
+                if ($fasilitas && $fasilitas->stok >= $detail->jumlah) {
+                    $fasilitas->stok -= $detail->jumlah;
+                    $fasilitas->is_available = $fasilitas->stok > 0;
+                    $fasilitas->save();
+                } else {
+                    return back()->with('error', 'Stok tidak mencukupi untuk: ' . $fasilitas->nama_barang);
+                }
+            }
+
+            // Simpan status sebagai 'diambil' untuk mencocokkan dengan ENUM
             $peminjaman->update([
-                'status_peminjaman' => 'diambil',
+                'status_peminjaman' => 'ambil',
                 'status_pengembalian' => 'proses',
             ]);
+
+            return back()->with('success', 'Barang berhasil diambil.');
         }
 
-        return back()->with('success', 'Barang berhasil diambil.');
+        return back()->with('error', 'Peminjaman tidak valid atau sudah diambil.');
     }
 
     public function adminKembalikan($id)
     {
-        $peminjaman = Peminjaman::findOrFail($id);
+        $peminjaman = Peminjaman::with('detailPeminjaman.fasilitas')->findOrFail($id);
 
         if (
             $peminjaman->verifikasi_sarpras === 'diterima' &&
-            $peminjaman->status_peminjaman === 'diambil' &&
+            $peminjaman->status_peminjaman === 'ambil' &&
             $peminjaman->status_pengembalian === 'proses'
         ) {
-            $peminjaman->update([
-                'status_pengembalian' => 'selesai',
-            ]);
-        }
-
-        return back()->with('success', 'Peminjaman ditandai sudah dikembalikan.');
-    }
-
-
-
-    /**
-     * Mahasiswa mengembalikan barang setelah dipinjam.
-     */
-    public function kembalikan($id)
-    {
-        $peminjaman = Peminjaman::with('detailPeminjaman')->findOrFail($id);
-
-        if ($peminjaman->status_peminjaman === 'kembalikan' && $peminjaman->status_pengembalian === 'proses') {
-            // Tambahkan logika pengembalian stok
+            // Kembalikan stok fasilitas
             foreach ($peminjaman->detailPeminjaman as $detail) {
-                $fasilitas = Fasilitas::find($detail->fasilitas_id);
+                $fasilitas = $detail->fasilitas;
+
                 if ($fasilitas) {
-                    $fasilitas->increment('stok', $detail->jumlah);
+                    $fasilitas->stok += $detail->jumlah;
                     $fasilitas->is_available = true;
                     $fasilitas->save();
                 }
             }
 
+            // Tandai peminjaman sebagai selesai
             $peminjaman->update([
-                'status_peminjaman' => null,
                 'status_pengembalian' => 'selesai',
             ]);
         }
 
-        $judul = 'Pengembalian Fasilitas';
-        $pesan = Auth::user()->name . ' telah mengembalikan fasilitas "' . $peminjaman->judul_kegiatan . '"';
-        NotifikasiHelper::kirimKeRole('admin', $judul, $pesan);
-
-        return back()->with('success', 'Barang berhasil dikembalikan.');
+        // Redirect langsung ke tab riwayat
+        return redirect()->route('admin.peminjaman', ['tab' => 'riwayat'])
+                        ->with('success', 'Peminjaman ditandai sudah dikembalikan.');
     }
-
 
     /**
      * Menampilkan detail peminjaman untuk modal (JSON).
@@ -305,15 +289,12 @@ class PeminjamanController extends Controller
             'diskusi.user',
         ])->findOrFail($id);
 
-        // Validasi: mahasiswa hanya bisa akses miliknya
-        // if (auth()->user()->role === 'mahasiswa' && $peminjaman->user_id !== auth()->id()) {
-        //     abort(403, 'Tidak diizinkan mengakses data ini.');
-        // }
 
         return response()->json([
             'id' => $peminjaman->id,
             'judul_kegiatan' => $peminjaman->judul_kegiatan,
             'tgl_kegiatan' => $peminjaman->tgl_kegiatan,
+            'tgl_kegiatan_berakhir' => $peminjaman->tgl_kegiatan_berakhir,
             'waktu_mulai' => $peminjaman->waktu_mulai,
             'waktu_berakhir' => $peminjaman->waktu_berakhir,
             'aktivitas' => $peminjaman->aktivitas,

@@ -67,6 +67,7 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
     <label class="block text-sm font-medium mb-1">Jenis Kegiatan *</label>
     <div id="jenis-kegiatan-radio" class="flex gap-4 text-sm"></div>
   </div>
+  <p id="jenisErrorMsg" class="text-red-600 text-sm mt-1 hidden">Jenis kegiatan harus dipilih.</p>
 
   
   <?php if($isMahasiswa && !empty($fasilitasList)): ?>
@@ -75,10 +76,10 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
       <table class="w-full border text-sm mb-6">
         <thead class="bg-gray-100">
           <tr>
-            <th class="border px-2 py-1">No</th>
-            <th class="border px-2 py-1">Nama Barang</th>
-            <th class="border px-2 py-1">Jumlah</th>
-            <th class="border px-2 py-1">Aksi</th>
+            <th class="border px-2 py-2 w-[40px] text-left">No</th>
+            <th class="border px-2 py-2 text-left">Nama Barang</th>
+            <th class="border px-2 py-2 w-[100px] text-center">Jumlah</th>
+            <th class="border px-2 py-2 w-[60px] text-center">Aksi</th>
           </tr>
         </thead>
         <tbody id="fasilitas-body">
@@ -113,16 +114,31 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
   <div id="fasilitas-tambahan-section" class="mt-4 hidden">
     <label class="block mb-1 text-sm font-medium">Barang dan Perlengkapan Tambahan</label>
     <table class="w-full border text-sm">
-      <thead class="bg-gray-100">
+      <thead class="bg-gray-100 text-left">
         <tr>
-          <th class="border px-2 py-1">No</th>
-          <th class="border px-2 py-1">Nama Barang</th>
-          <th class="border px-2 py-1">Jumlah</th>
-          <th class="border px-2 py-1">Aksi</th>
+            <th class="border px-2 py-2 w-[40px] text-left">No</th>
+            <th class="border px-2 py-2 text-left">Nama Barang</th>
+            <th class="border px-2 py-2 w-[100px] text-center">Jumlah</th>
+            <th class="border px-2 py-2 w-[60px] text-center">Aksi</th>
         </tr>
       </thead>
       <tbody id="fasilitas-tambahan-body">
       </tbody>
+    </table>
+  </div>
+
+  <div id="tabelFasilitasTambahan" class="mt-4 hidden">
+     <h3 class="block mb-1 text-sm font-medium">Fasilitas Tambahan Dipilih:</h3>
+        <table class="w-full border text-sm">
+          <thead class="bg-gray-100 ">
+            <tr>
+              <th class="border px-2 py-2 w-[40px] text-left">No</th>
+              <th class="border px-2 py-2 text-left">Nama Barang</th>
+              <th class="border px-2 py-2 w-[100px] text-center">Jumlah</th>
+              <th class="border px-2 py-2 w-[60px] text-center">Aksi</th>
+            </tr>
+          </thead>
+        <tbody></tbody>
     </table>
   </div>
 
@@ -419,10 +435,61 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
   }
 
   function tambahFasilitasTerpilih() {
-    // Misalnya, isi hidden input atau lanjut ke step berikutnya
-    console.log('Fasilitas dipilih:', Array.from(fasilitasTerpilih));
-    hideFasilitasModal();
+    const container = document.getElementById('tabelFasilitasTambahan');
+    const tbody = container.querySelector('tbody');
+    tbody.innerHTML = ''; // Kosongkan isi tabel dulu
+
+    let index = 0;
+    fasilitasTerpilih.forEach((id) => {
+      const item = semuaFasilitas.find(f => f.id == id);
+      if (!item) return;
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+      <tr>
+        <td class="border px-2 text-center">${index + 1}</td>
+
+        <td class="border px-2">
+          ${item.nama_barang}
+          <input type="hidden" name="fasilitas_tambahan[${item.id}][id]" value="${item.id}">
+        </td>
+
+        <td class="border px-2 text-center align-top">
+          <div class="flex flex-col items-center">
+            <input 
+              type="number" 
+              name="fasilitas_tambahan[${item.id}][jumlah]" 
+              value="${item.jumlah || 1}" 
+              max="${item.stok}" 
+              min="1"
+              class="jumlah-barang border rounded w-20 text-center">
+            <small class="text-xs text-gray-500 mt-1">Max: ${item.stok}</small>
+          </div>
+        </td>
+
+        <td class="border px-2 text-center">
+          <button type="button" onclick="hapusFasilitasTambahan(${item.id})" class="text-red-600 hover:text-red-800 text-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current text-red-500" viewBox="0 0 24 24">
+              <path d="M9 3h6a1 1 0 011 1v1h5v2H4V5h5V4a1 1 0 011-1zm-4 6h14l-1.5 13.5a1 1 0 01-1 .5H7.5a1 1 0 01-1-.5L5 9z"/>
+            </svg>
+          </button>
+        </td>
+      </tr>
+      `;
+      tbody.appendChild(row);
+      index++;
+    });
+
+    container.classList.remove('hidden');
+    hideFasilitasModal(); // Tutup modal setelah selesai
   }
+
+  function hapusFasilitasTambahan(id) {
+    fasilitasTerpilih.delete(id);
+    document.querySelector(`[data-id="${id}"] input[type="checkbox"]`)?.click();
+    tambahFasilitasTerpilih(); // Refresh tabel
+  }
+
 
   document.getElementById('searchFasilitasLainnya').addEventListener('input', () => {
     halaman = 1;
@@ -443,25 +510,19 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
 function lanjutKeTahap2() {
   const selectGedung = document.getElementById('gedung-select');
   const errorMsg = document.getElementById('gedungErrorMsg');
+  const jenisErrorMsg = document.getElementById('jenisErrorMsg');
   const jumlahInputs = document.querySelectorAll('.jumlah-barang');
-  const peringatan = document.getElementById('peringatan'); // ⚠️ pastikan id-nya sudah diganti di HTML
+  const peringatan = document.getElementById('peringatan');
 
   let stokValid = true;
 
-  // Cek stok untuk semua input
+  // Validasi stok
   jumlahInputs.forEach(input => {
     const max = parseInt(input.max);
     const value = parseInt(input.value);
-
-    if (value > max) {
-      stokValid = false;
-      input.classList;
-    } else {
-      input.classList;
-    }
+    if (value > max) stokValid = false;
   });
 
-  // Jika stok tidak valid, tampilkan pesan dan hentikan proses
   if (!stokValid) {
     peringatan.classList.remove('hidden');
     peringatan.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -478,12 +539,20 @@ function lanjutKeTahap2() {
     errorMsg.classList.add('hidden');
   }
 
-  // Jika semua valid, lanjut ke tahap 2
+  // Validasi jenis kegiatan
+  const selectedJenis = document.querySelector('input[name="jenis_kegiatan"]:checked');
+  if (!selectedJenis) {
+    jenisErrorMsg.classList.remove('hidden');
+    return;
+  } else {
+    jenisErrorMsg.classList.add('hidden');
+  }
+
+  // Jika semua valid
   document.getElementById('step1').classList.remove('active-step');
   document.getElementById('step2').classList.add('active-step');
   toggleStep(2);
 }
-
 
 </script>
 <?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/components/form-peminjaman/tahap1.blade.php ENDPATH**/ ?>
