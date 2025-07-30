@@ -55,6 +55,7 @@ class DosenPeminjamanController extends Controller
         $request->validate([
             'judul_kegiatan' => 'required|string|max:255',
             'tgl_kegiatan' => 'required|date',
+            'tgl_kegiatan_berakhir' => 'required|date',
             'waktu_mulai' => 'required',
             'waktu_berakhir' => 'required',
             'aktivitas' => 'required|string|max:255',
@@ -72,6 +73,7 @@ class DosenPeminjamanController extends Controller
         $peminjaman = Peminjaman::create([
             'judul_kegiatan' => $request->judul_kegiatan,
             'tgl_kegiatan' => $request->tgl_kegiatan,
+            'tgl_kegiatan_berakhir' => $request->tgl_kegiatan_berakhir,
             'waktu_mulai' => $request->waktu_mulai,
             'waktu_berakhir' => $request->waktu_berakhir,
             'aktivitas' => $request->aktivitas,

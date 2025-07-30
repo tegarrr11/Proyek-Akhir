@@ -104,7 +104,6 @@ Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
 Route::get('/bem/dashboard', [BemController::class, 'dashboard']);
 Route::get('/dosen/dashboard', [BemController::class, 'dashboard']);
 Route::get('/dosen/peminjaman/create', [DosenPeminjamanController::class, 'create']);
-Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('mahasiswa.peminjaman');
 Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
 Route::get('/api/fasilitas-tambahan', function () {
     return Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();

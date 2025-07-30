@@ -300,7 +300,7 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
 
       jenisWrapper.classList.remove('hidden');
 
-      if (gedung === 'auditorium') {
+      if (gedung === 'Auditorium') {
         radioContainer.innerHTML = `
           <div class="flex items-center gap-2 relative group">
             <span class="font-medium text-sm">Eksternal</span>
@@ -513,8 +513,12 @@ function lanjutKeTahap2() {
   const jenisErrorMsg = document.getElementById('jenisErrorMsg');
   const jumlahInputs = document.querySelectorAll('.jumlah-barang');
   const peringatan = document.getElementById('peringatan');
+  const jenisKegiatanInputs = document.querySelectorAll('input[name="jenis_kegiatan"]');
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
 
   let stokValid = true;
+  let jenisKegiatanValid = true;
 
   // Validasi stok
   jumlahInputs.forEach(input => {
@@ -523,6 +527,7 @@ function lanjutKeTahap2() {
     if (value > max) stokValid = false;
   });
 
+  // Menampilkan peringatan jika stok tidak valid
   if (!stokValid) {
     peringatan.classList.remove('hidden');
     peringatan.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -531,7 +536,7 @@ function lanjutKeTahap2() {
     peringatan.classList.add('hidden');
   }
 
-  // Validasi ruangan
+  // Validasi ruangan (gedung)
   if (!selectGedung.value) {
     errorMsg.classList.remove('hidden');
     return;
@@ -543,15 +548,17 @@ function lanjutKeTahap2() {
   const selectedJenis = document.querySelector('input[name="jenis_kegiatan"]:checked');
   if (!selectedJenis) {
     jenisErrorMsg.classList.remove('hidden');
-    return;
+    jenisKegiatanValid = false;
   } else {
     jenisErrorMsg.classList.add('hidden');
   }
 
-  // Jika semua valid
-  document.getElementById('step1').classList.remove('active-step');
-  document.getElementById('step2').classList.add('active-step');
-  toggleStep(2);
+  // Jika semua valid, lanjutkan ke langkah 2
+  if (stokValid && jenisKegiatanValid) {
+    step1.classList.remove('active-step');
+    step2.classList.add('active-step');
+    toggleStep(2);
+  }
 }
 
 </script>

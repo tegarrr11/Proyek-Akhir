@@ -29,16 +29,17 @@ class AdminPeminjamanController extends Controller
 
         $riwayats = Peminjaman::with('user', 'gedung')
             ->where(function ($query) {
-                $query->where('verifikasi_sarpras', 'diterima')
+                $query->where(function ($q) {
+                    $q->where('verifikasi_sarpras', 'diterima')
                     ->where('status_pengembalian', 'selesai');
-            })
-            ->orWhere(function ($q) {
-                $q->where('verifikasi_sarpras', 'diajukan')
-                ->whereHas('user', function ($q2) {
-                    $q2->where('role', 'admin');
+                })
+                ->orWhere(function ($q) {
+                    $q->where('verifikasi_sarpras', 'diajukan')
+                    ->whereHas('user', function ($q2) {
+                        $q2->where('role', 'admin');
+                    });
                 });
             });
-
 
         if ($gedungId) {
             $pengajuans = $pengajuans->where('gedung_id', $gedungId);
@@ -125,6 +126,7 @@ class AdminPeminjamanController extends Controller
         $request->validate([
             'judul_kegiatan' => 'required|string|max:255',
             'tgl_kegiatan' => 'required|date',
+            'tgl_kegiatan_berakhir' => 'required|date',
             'waktu_mulai' => 'required',
             'waktu_berakhir' => 'required',
             'aktivitas' => 'required|string|max:255',
@@ -143,6 +145,7 @@ class AdminPeminjamanController extends Controller
         $peminjaman = \App\Models\Peminjaman::create([
             'judul_kegiatan' => $request->judul_kegiatan,
             'tgl_kegiatan' => $request->tgl_kegiatan,
+            'tgl_kegiatan_berakhir' => $request->tgl_kegiatan_berakhir,
             'waktu_mulai' => $request->waktu_mulai,
             'waktu_berakhir' => $request->waktu_berakhir,
             'aktivitas' => $request->aktivitas,

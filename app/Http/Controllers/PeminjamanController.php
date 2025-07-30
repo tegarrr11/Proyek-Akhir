@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
-
+use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
@@ -66,29 +66,34 @@ class PeminjamanController extends Controller
             'fasilitas_tambahan.*.jumlah' => 'integer|min:1',
         ]);
 
-        // ✅ Ambil gedung dari slug
+        //  Ambil gedung dari slug
         $gedung = Gedung::where('slug', $request->gedung)->first();
         if (!$gedung) {
             return back()->with('error', 'Gedung tidak ditemukan.');
         }
 
-        // ✅ Pengecekan bentrok waktu
+        //  Pengecekan bentrok waktu
+        $mulai = Carbon::createFromFormat('H:i', $request->waktu_mulai);
+        $akhir = Carbon::createFromFormat('H:i', $request->waktu_berakhir);
+
         $bentrok = Peminjaman::where('tgl_kegiatan', $request->tgl_kegiatan)
             ->where('gedung_id', $gedung->id)
-            ->whereIn('status', ['menunggu', 'disetujui'])
-            ->where(function ($query) use ($request) {
-                $query->where('waktu_mulai', '<', $request->waktu_berakhir)
-                    ->where('waktu_berakhir', '>', $request->waktu_mulai);
+            ->whereIn('verifikasi_sarpras', ['diajukan', 'diterima'])
+            ->where(function ($query) use ($mulai, $akhir) {
+                $query->where(function ($q) use ($mulai, $akhir) {
+                    $q->whereTime('waktu_mulai', '<', $akhir)
+                    ->whereTime('waktu_berakhir', '>', $mulai);
+                });
             })
             ->exists();
 
         if ($bentrok) {
             return back()->withErrors([
-                'waktu_mulai' => 'Waktu kegiatan bentrok dengan pengajuan lain.',
+                'waktu_mulai' => 'Waktu kegiatan bentrok dengan peminjaman lain.',
             ])->withInput();
         }
 
-        // ✅ Upload file jika ada
+        // Upload file jika ada
         $fileProposal = $request->hasFile('proposal')
             ? $request->file('proposal')->store('proposal', 'public')
             : null;

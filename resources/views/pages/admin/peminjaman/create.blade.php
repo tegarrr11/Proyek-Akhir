@@ -51,17 +51,39 @@
       @enderror
     </div>
 
-    <div>
+    {{-- Waktu Kegiatan --}}
+    <div class="mb-4">
       <label class="block text-sm font-medium mb-1">Waktu Kegiatan *</label>
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 items-center">
-        <input type="date" name="tgl_kegiatan" value="{{ old('tgl_kegiatan') }}"
-          class="border rounded px-2 py-1 w-full @error('tgl_kegiatan') border-red-500 @enderror" required>
-        <input type="time" name="waktu_mulai" value="{{ old('waktu_mulai') }}"
-          class="border rounded px-2 py-1 w-full @error('waktu_mulai') border-red-500 @enderror" required>
-        <span class="text-sm text-center">s/d</span>
-        <input type="time" name="waktu_berakhir" value="{{ old('waktu_berakhir') }}"
-          class="border rounded px-2 py-1 w-full @error('waktu_berakhir') border-red-500 @enderror" required>
+
+      {{-- Baris Tanggal --}}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+        <div>
+          <label class="block text-xs text-gray-600 mb-1">Tanggal Mulai</label>
+          <input type="date" name="tgl_kegiatan" value="{{ old('tgl_kegiatan') }}"
+            class="w-full border border-gray-500 rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-600 mb-1">Tanggal Berakhir</label>
+          <input type="date" name="tgl_kegiatan_berakhir" value="{{ old('tgl_kegiatan_berakhir') }}"
+            class="w-full border border-gray-500 rounded px-3 py-2" required>
+        </div>
       </div>
+
+      {{-- Baris Jam --}}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+        <div>
+          <label class="block text-xs text-gray-600 mb-1">Jam Mulai</label>
+          <input type="time" name="waktu_mulai" value="{{ old('waktu_mulai') }}"
+            class="w-full border border-gray-500 rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-600 mb-1">Jam Berakhir</label>
+          <input type="time" name="waktu_berakhir" value="{{ old('waktu_berakhir') }}"
+            class="w-full border border-gray-500 rounded px-3 py-2" required>
+        </div>
+      </div>
+
+      {{-- Error Message --}}
       @error('tgl_kegiatan')
         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
       @enderror
@@ -138,13 +160,14 @@
     const btn1 = document.getElementById('btn1');
     const btn2 = document.getElementById('btn2');
     [step1, step2].forEach(s => s.classList.remove('active-step'));
-    [btn1, btn2].forEach(b => b.classList.remove('bg-green-100', 'font-semibold'));
+    [btn1, btn2].forEach(b => b.classList.remove('bg-[#ccf3f9]', 'font-semibold'));
     if (step === 1) {
       step1.classList.add('active-step');
-      btn1.classList.add('bg-green-100', 'font-semibold');
+      btn1.classList.add('bg-[#ccf3f9]', 'font-semibold');
     } else {
       step2.classList.add('active-step');
-      btn2.classList.add('bg-green-100', 'font-semibold');
+      btn1.classList.add('bg-green-100', 'text-green-800');
+      btn2.classList.add('bg-[#ccf3f9]', 'font-semibold');
     }
   }
 
