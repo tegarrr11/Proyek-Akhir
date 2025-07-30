@@ -16,20 +16,34 @@ use App\Notifications\PengajuanKeAdmin;
 
 class BemPeminjamanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // Ambil kata kunci pencarian
+        $search = $request->input('search');
+
+        // Ambil data pengajuan (tidak perlu pagination jika tidak difilter)
         $pengajuans = Peminjaman::with('user')
             ->whereRaw("LOWER(verifikasi_bem) = 'diajukan'")
             ->whereHas('user', function ($q) {
-                $q->where('role', '!=', 'admin'); // Hanya non-admin
+                $q->where('role', '!=', 'admin');
             })
             ->latest()
             ->get();
 
-        $riwayats = Peminjaman::with('user')
+        // Ambil data riwayat
+        $riwayatsQuery = Peminjaman::with('user')
             ->whereRaw("LOWER(verifikasi_bem) = 'diterima'")
-            ->latest()
-            ->get();
+            ->latest();
+
+        // Filter berdasarkan kata kunci jika ada
+        if ($search) {
+            $riwayatsQuery->where(function ($query) use ($search) {
+                $query->whereRaw('LOWER(judul_kegiatan) LIKE ?', ['%' . strtolower($search) . '%']);
+            });
+        }
+
+        // Pagination untuk riwayat
+        $riwayats = $riwayatsQuery->paginate(10)->appends(['search' => $search, 'tab' => 'riwayat']);
 
         return view('pages.bem.peminjaman', compact('pengajuans', 'riwayats'));
     }

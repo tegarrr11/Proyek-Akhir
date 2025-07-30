@@ -149,7 +149,7 @@ unset($__errorArgs, $__bag); ?>
 
   <div class="flex justify-end items-center gap-4 mt-4">
     <div id="validasi-form" class="text-red-600 text-sm hidden">
-      ⚠️ Mohon lengkapi semua kolom sebelum menyimpan.
+      Mohon lengkapi semua kolom sebelum menyimpan.
     </div>
   </div>
 

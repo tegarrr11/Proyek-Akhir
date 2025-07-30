@@ -21,7 +21,7 @@ class AdminController extends Controller
                 'id' => $item->id,
                 'title' => $item->judul_kegiatan . ' (' . $item->organisasi . ')',
                 'start' => $item->tgl_kegiatan . 'T' . $item->waktu_mulai,
-                'end'   => $item->tgl_kegiatan . 'T' . $item->waktu_berakhir,
+                'end'   => $item->tgl_kegiatan_berakhir . 'T' . $item->waktu_berakhir,
             ];
         });
 

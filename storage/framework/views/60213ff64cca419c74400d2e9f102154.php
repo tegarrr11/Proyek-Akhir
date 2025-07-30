@@ -1,6 +1,6 @@
 
 
-<?php $__env->startSection('title', 'Ajukan Peminjaman (staff)'); ?>
+<?php $__env->startSection('title', 'Ajukan Peminjaman (Admin)'); ?>
 
 <?php $__env->startSection('content'); ?>
 <style>
@@ -103,38 +103,39 @@ endif;
 unset($__errorArgs, $__bag); ?>
     </div>
 
-    <div>
+    
+    <div class="mb-4">
       <label class="block text-sm font-medium mb-1">Waktu Kegiatan *</label>
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 items-center">
-        <input type="date" name="tgl_kegiatan" value="<?php echo e(old('tgl_kegiatan')); ?>"
-          class="border rounded px-2 py-1 w-full <?php $__errorArgs = ['tgl_kegiatan'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
-        <input type="time" name="waktu_mulai" value="<?php echo e(old('waktu_mulai')); ?>"
-          class="border rounded px-2 py-1 w-full <?php $__errorArgs = ['waktu_mulai'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
-        <span class="text-sm text-center">s/d</span>
-        <input type="time" name="waktu_berakhir" value="<?php echo e(old('waktu_berakhir')); ?>"
-          class="border rounded px-2 py-1 w-full <?php $__errorArgs = ['waktu_berakhir'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
+
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+        <div>
+          <label class="block text-xs text-gray-600 mb-1">Tanggal Mulai</label>
+          <input type="date" name="tgl_kegiatan" value="<?php echo e(old('tgl_kegiatan')); ?>"
+            class="w-full border border-gray-500 rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-600 mb-1">Tanggal Berakhir</label>
+          <input type="date" name="tgl_kegiatan_berakhir" value="<?php echo e(old('tgl_kegiatan_berakhir')); ?>"
+            class="w-full border border-gray-500 rounded px-3 py-2" required>
+        </div>
       </div>
+
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+        <div>
+          <label class="block text-xs text-gray-600 mb-1">Jam Mulai</label>
+          <input type="time" name="waktu_mulai" value="<?php echo e(old('waktu_mulai')); ?>"
+            class="w-full border border-gray-500 rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-600 mb-1">Jam Berakhir</label>
+          <input type="time" name="waktu_berakhir" value="<?php echo e(old('waktu_berakhir')); ?>"
+            class="w-full border border-gray-500 rounded px-3 py-2" required>
+        </div>
+      </div>
+
+      
       <?php $__errorArgs = ['tgl_kegiatan'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -219,30 +220,17 @@ unset($__errorArgs, $__bag); ?>
       <input type="text" name="organisasi" class="w-full border rounded px-3 py-2 bg-gray-100" value="Staff" readonly>
     </div>
 
-    <div>
+    
+    <div class="relative">
       <label class="block text-sm font-medium mb-1">Penanggung Jawab *</label>
-      <input type="text" name="penanggung_jawab"
-        value="<?php echo e(old('penanggung_jawab')); ?>"
-        class="w-full border rounded px-3 py-2 <?php $__errorArgs = ['penanggung_jawab'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
-      <?php $__errorArgs = ['penanggung_jawab'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-        <p class="text-red-600 text-sm mt-1"><?php echo e($message); ?></p>
-      <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+      <input type="text" id="penanggungInput" name="penanggung_jawab"
+            value="<?php echo e(old('penanggung_jawab')); ?>"
+            class="w-full border border-gray-500 rounded px-3 py-2" required
+            autocomplete="off">
+      <div id="penanggungList"
+          class="absolute hidden border border-gray-300 mt-1 rounded shadow max-h-[7.5rem] overflow-y-auto bg-white z-50 w-full text-sm">
+      </div>
     </div>
-
 
     <div class="flex justify-end mt-4">
       <button id="btn-simpan" type="submit"
@@ -259,6 +247,7 @@ unset($__errorArgs, $__bag); ?>
                 $errors->has('penanggung_jawab');
 ?>
 
+
 <?php if($errorStep2): ?>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -274,13 +263,14 @@ unset($__errorArgs, $__bag); ?>
     const btn1 = document.getElementById('btn1');
     const btn2 = document.getElementById('btn2');
     [step1, step2].forEach(s => s.classList.remove('active-step'));
-    [btn1, btn2].forEach(b => b.classList.remove('bg-green-100', 'font-semibold'));
+    [btn1, btn2].forEach(b => b.classList.remove('bg-[#ccf3f9]', 'font-semibold'));
     if (step === 1) {
       step1.classList.add('active-step');
-      btn1.classList.add('bg-green-100', 'font-semibold');
+      btn1.classList.add('bg-[#ccf3f9]', 'font-semibold');
     } else {
       step2.classList.add('active-step');
-      btn2.classList.add('bg-green-100', 'font-semibold');
+      btn1.classList.add('bg-green-100', 'text-green-800');
+      btn2.classList.add('bg-[#ccf3f9]', 'font-semibold');
     }
   }
 
@@ -311,6 +301,50 @@ unset($__errorArgs, $__bag); ?>
     toggleStep(1);
     document.getElementById('btn1')?.addEventListener('click', () => toggleStep(1));
     document.getElementById('btn2')?.addEventListener('click', () => toggleStep(2));
+        const penanggungInput = document.getElementById('penanggungInput');
+    const penanggungList = document.getElementById('penanggungList');
+    let allPegawai = [];
+
+    // Fetch data dari API
+    fetch('/pegawai/list')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.items) {
+          console.error('Data pegawai tidak ditemukan.');
+          return;
+        }
+        allPegawai = data.items.map(d => `${d.inisial} - ${d.nama}`);
+      })
+      .catch(err => console.error('Gagal memuat data pegawai:', err));
+
+    // Tampilkan list saat focus/input
+    penanggungInput.addEventListener('focus', showPenanggungList);
+    penanggungInput.addEventListener('input', showPenanggungList);
+
+    function showPenanggungList() {
+      const keyword = penanggungInput.value.toLowerCase();
+      const filtered = allPegawai.filter(name => name.toLowerCase().includes(keyword));
+
+      penanggungList.innerHTML = '';
+      filtered.slice(0, 50).forEach(name => {
+        const div = document.createElement('div');
+        div.textContent = name;
+        div.className = 'cursor-pointer px-3 py-1 hover:bg-gray-100';
+        div.onclick = () => {
+          penanggungInput.value = name;
+          penanggungList.classList.add('hidden');
+        };
+        penanggungList.appendChild(div);
+      });
+
+      penanggungList.classList.toggle('hidden', filtered.length === 0);
+    }
+
+    document.addEventListener('click', function (e) {
+      if (!penanggungInput.contains(e.target) && !penanggungList.contains(e.target)) {
+        penanggungList.classList.add('hidden');
+      }
+    });
   });
 </script>
 <?php $__env->stopSection(); ?>

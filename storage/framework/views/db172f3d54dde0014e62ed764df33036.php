@@ -16,13 +16,13 @@
 <body class="bg-[#eaf6fb] text-gray-800">
 
   
-  <div class="flex items-center px-4 sm:px-8 md:px-12 py-4 mt-4 ml-12 bg-[#eaf6fb]">
+  <div class="flex items-center py-2 ml-8 bg-[#eaf6fb]">
     <img src="<?php echo e(asset('images/sarpras-logo.png')); ?>" alt="Logo Sarpras"
-      class="h-16 sm:h-14 md:h-16 w-auto max-w-[100px] sm:max-w-[120px] md:max-w-[140px] object-contain mr-3">
+      class="h-12 sm:h-14 md:h-18 w-auto max-w-[100px] sm:max-w-[120px] md:max-w-[140px] object-contain mr-3">
   </div>
 
   
-  <div class="w-full px-12">
+  <div class="w-full px-4">
     <?php echo $__env->yieldContent('content'); ?>
   </div>
 

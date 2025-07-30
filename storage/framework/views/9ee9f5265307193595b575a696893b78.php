@@ -148,18 +148,18 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
     [step1, step2].forEach(s => s.classList.remove('active-step'));
     [btn1, btn2].forEach(btn => {
       btn.classList.remove(
-        'bg-green-100', 'text-green-800',       // hijau
-        'bg-[#ccf3f9]', 'text-[#003366]',       // biru
-        'bg-[#ecfeff]',                         // abu-abu muda
-        'bg-gray-100', 'text-gray-500'          // abu-abu fallback
+        'bg-green-100', 'text-green-800',      
+        'bg-[#ccf3f9]', 'text-[#003366]',      
+        'bg-[#ecfeff]',                        
+        'bg-gray-100', 'text-gray-500'          
       );
     });
 
     if (step === 1) {
       step1.classList.add('active-step');
-      btn1.classList.add('bg-[#ccf3f9]', 'text-[#003366]'); // Biru aktif
+      btn1.classList.add('bg-[#ccf3f9]', 'text-[#003366]'); 
 
-      btn2.classList.add('bg-gray-100', 'text-gray-500');  // Abu-abu pasif
+      btn2.classList.add('bg-gray-100', 'text-gray-500');  
     }
 
     if (step === 2) {
@@ -176,7 +176,7 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
       });
 
       if (!valid) {
-        validasiForm.textContent = "⚠️ Mohon lengkapi semua kolom di Tahap 1 terlebih dahulu.";
+        validasiForm.textContent = "Mohon lengkapi semua kolom di Tahap 1 terlebih dahulu.";
         validasiForm.classList.remove('hidden');
         toggleStep(1);
         return;
@@ -185,8 +185,8 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
       validasiForm.classList.add('hidden');
       step2.classList.add('active-step');
 
-      btn1.classList.add('bg-green-100', 'text-green-800');     // Hijau setelah selesai
-      btn2.classList.add('bg-[#ccf3f9]', 'text-[#003366]');     // Biru aktif
+      btn1.classList.add('bg-green-100', 'text-green-800');    
+      btn2.classList.add('bg-[#ccf3f9]', 'text-[#003366]');    
     }
   }
 
@@ -230,7 +230,7 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
       now.setSeconds(0, 0);
 
       if (waktuDipilih < now) {
-        validasiForm.textContent = "⚠️ Tidak dapat mengajukan peminjaman untuk waktu yang sudah lewat.";
+        validasiForm.textContent = "Tidak dapat mengajukan peminjaman untuk waktu yang sudah lewat.";
         validasiForm.classList.remove('hidden');
         toggleStep(2);
         form.querySelector('input[name="tgl_kegiatan"]').focus();
@@ -242,7 +242,6 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Tetap di Tahap 2 jika error waktu
     <?php if($adaErrorTahap2): ?>
     toggleStep(2);
     <?php else: ?>
@@ -269,7 +268,7 @@ $adaErrorTahap2 = $errors->has('tgl_kegiatan') || $errors->has('waktu_mulai') ||
       const validasiForm = document.getElementById('validasi-form');
       if (!valid) {
         toggleStep(1);
-        validasiForm.textContent = "⚠️ Mohon lengkapi semua kolom di Tahap 1 terlebih dahulu.";
+        validasiForm.textContent = "Mohon lengkapi semua kolom di Tahap 1 terlebih dahulu.";
         validasiForm.classList.remove('hidden');
         return;
       }

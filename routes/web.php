@@ -104,7 +104,6 @@ Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
 Route::get('/bem/dashboard', [BemController::class, 'dashboard']);
 Route::get('/dosen/dashboard', [BemController::class, 'dashboard']);
 Route::get('/dosen/peminjaman/create', [DosenPeminjamanController::class, 'create']);
-Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('mahasiswa.peminjaman');
 Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
 Route::get('/api/fasilitas-tambahan', function () {
     return Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
@@ -134,6 +133,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/peminjaman/{id}/verifikasi', [AdminPeminjamanController::class, 'verifikasi'])->name('admin.peminjaman.verifikasi');
         Route::post('/ruangan/update', [AdminController::class, 'update'])->name('admin.ruangan.update');
         Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('admin.peminjaman.downloadProposal');
+        Route::get('/peminjaman/download-undangan/{id}', [PeminjamanController::class, 'downloadUndangan']);
         Route::patch('/admin/peminjaman/kembalikan/{id}', [PeminjamanController::class, 'adminKembalikan'])->name('admin.peminjaman.kembalikan');
 
     });

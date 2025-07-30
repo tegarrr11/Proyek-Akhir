@@ -29,16 +29,17 @@ class AdminPeminjamanController extends Controller
 
         $riwayats = Peminjaman::with('user', 'gedung')
             ->where(function ($query) {
-                $query->where('verifikasi_sarpras', 'diterima')
+                $query->where(function ($q) {
+                    $q->where('verifikasi_sarpras', 'diterima')
                     ->where('status_pengembalian', 'selesai');
-            })
-            ->orWhere(function ($q) {
-                $q->where('verifikasi_sarpras', 'diajukan')
-                ->whereHas('user', function ($q2) {
-                    $q2->where('role', 'admin');
+                })
+                ->orWhere(function ($q) {
+                    $q->where('verifikasi_sarpras', 'diajukan')
+                    ->whereHas('user', function ($q2) {
+                        $q2->where('role', 'admin');
+                    });
                 });
             });
-
 
         if ($gedungId) {
             $pengajuans = $pengajuans->where('gedung_id', $gedungId);
@@ -99,7 +100,9 @@ class AdminPeminjamanController extends Controller
             'organisasi' => $peminjaman->organisasi,
             'penanggung_jawab' => $peminjaman->penanggung_jawab,
             'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
-            'link_dokumen' => $peminjaman->proposal ? 'ada' : null,
+            'proposal' => $peminjaman->proposal,
+            'undangan_pembicara' => $peminjaman->undangan_pembicara,
+            'link_undangan' => $peminjaman->undangan_pembicara ? 'ada' : null,
             'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
             'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
                 return [
@@ -119,12 +122,14 @@ class AdminPeminjamanController extends Controller
         ]);
     }
 
+
     public function store(Request $request)
     {
         // Validasi sesuai kebutuhan admin
         $request->validate([
             'judul_kegiatan' => 'required|string|max:255',
             'tgl_kegiatan' => 'required|date',
+            'tgl_kegiatan_berakhir' => 'required|date',
             'waktu_mulai' => 'required',
             'waktu_berakhir' => 'required',
             'aktivitas' => 'required|string|max:255',
@@ -143,6 +148,7 @@ class AdminPeminjamanController extends Controller
         $peminjaman = \App\Models\Peminjaman::create([
             'judul_kegiatan' => $request->judul_kegiatan,
             'tgl_kegiatan' => $request->tgl_kegiatan,
+            'tgl_kegiatan_berakhir' => $request->tgl_kegiatan_berakhir,
             'waktu_mulai' => $request->waktu_mulai,
             'waktu_berakhir' => $request->waktu_berakhir,
             'aktivitas' => $request->aktivitas,

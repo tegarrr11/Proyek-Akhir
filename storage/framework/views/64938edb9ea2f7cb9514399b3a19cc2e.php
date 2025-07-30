@@ -25,7 +25,7 @@
 <?php $component->withAttributes([]); ?>
   <table class="w-full text-sm">
     <thead class="bg-gray-100">
-      <tr class="font-semibold">
+      <tr class="font-semibold text-left">
         <th class="px-4 py-2 text-left">No.</th>
         <th class="px-4 py-2">Judul Kegiatan</th>
         <th class="px-4 py-2">Tanggal Pengajuan</th>
@@ -42,22 +42,22 @@
         <td class="px-4 py-2"><?php echo e($item->judul_kegiatan); ?></td>
         <td class="px-4 py-2"><?php echo e($item->created_at ? $item->created_at->format('d/m/Y') : '-'); ?></td>
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded
+          <span class="px-3 py-1 text-xs rounded-full font-medium
             <?php if($item->verifikasi_bem === 'diterima'): ?>
-              bg-green-500 text-white
+              bg-green-100 text-green-600
             <?php elseif($item->verifikasi_bem === 'ditolak'): ?>
               bg-red-100 text-red-600
             <?php else: ?>
-              bg-yellow-500 text-white
+              bg-yellow-100 text-white
             <?php endif; ?>">
             <?php echo e(ucfirst($item->verifikasi_bem ?? '-')); ?>
 
           </span>
         </td>
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded
+          <span class="px-3 py-1 text-xs rounded-full font-medium
             <?php if($item->verifikasi_sarpras === 'diterima'): ?>
-              bg-green-500 text-white
+              bg-green-100 text-green-600
             <?php elseif($item->verifikasi_sarpras === 'ditolak'): ?>
               bg-red-100 text-red-600
             <?php else: ?>

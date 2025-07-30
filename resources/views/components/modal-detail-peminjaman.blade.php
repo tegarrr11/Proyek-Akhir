@@ -54,7 +54,10 @@
 
         <div>
           <p class="font-semibold text-[#1e2d5e]">Dokumen</p>
-          <a id="linkDokumen" href="#" class="text-blue-600 underline text-sm hidden">Lihat Proposal</a>
+          <div class="flex flex-col gap-1">
+            <a id="linkDokumen" href="#" class="text-blue-600 underline text-sm hidden" target="_blank" rel="noopener noreferrer">Lihat Proposal</a>
+            <a id="linkUndangan" href="#" class="text-blue-600 underline text-sm hidden" target="_blank" rel="noopener noreferrer">Lihat Undangan</a>
+          </div>
           <span id="dokumenNotFound" class="text-gray-400 italic">Tidak ada dokumen</span>
         </div>
       </div>
@@ -80,144 +83,152 @@
     document.getElementById('detailModal')?.classList.add('hidden');
   }
 
-window.currentPeminjamanId = null;
+  function showDetail(id) {
+    currentPeminjamanId = id;
+    console.log('📌 showDetail dipanggil dengan id:', id);
 
-function showDetail(id) {
-  currentPeminjamanId = id;
-
-  console.log('✅ showDetail dipanggil dengan id:', id);
-
-  fetch(`/admin/peminjaman/${id}`)
-    .then(res => res.json())
-    .then(data => {
-      const el = id => document.getElementById(id);
-      const formatTanggal = tgl => new Date(tgl).toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric'
-      });
-      const formatJam = jam => jam?.slice(0, 5) || '-';
-
-      // -- Informasi Kegiatan
-      el('judulKegiatan').textContent = data.judul_kegiatan || '-';
-      el('tglKegiatan').textContent = formatTanggal(data.tgl_kegiatan);
-      el('jamKegiatan').textContent = `${formatJam(data.waktu_mulai)} - ${formatJam(data.waktu_berakhir)}`;
-      el('aktivitas').textContent = data.aktivitas || '-';
-      el('penanggungJawab').textContent = data.penanggung_jawab || '-';
-      el('organisasi').textContent = data.organisasi || '-';
-      el('keterangan').textContent = data.deskripsi_kegiatan || '-';
-      el('ruangan').textContent = data.nama_ruangan || '-';
-
-      // -- Perlengkapan
-      const perlengkapanList = el('perlengkapan');
-      perlengkapanList.innerHTML = '';
-      if (data.perlengkapan?.length > 0) {
-        data.perlengkapan.forEach(item => {
-          const li = document.createElement('li');
-          li.textContent = `${item.nama} - ${item.jumlah}`;
-          perlengkapanList.appendChild(li);
-        });
-      } else {
-        const li = document.createElement('li');
-        li.className = 'italic text-gray-400';
-        li.textContent = 'Tidak ada perlengkapan';
-        perlengkapanList.appendChild(li);
-      }
-
-      // -- Dokumen
-      if (data.link_dokumen === 'ada') {
-        const prefix = window.location.pathname.split('/')[1];
-        const base = ['admin', 'bem', 'mahasiswa', 'dosen', 'staff'].includes(prefix) ? `/${prefix}` : '';
-        const url = `${base}/peminjaman/download-proposal/${data.id}`;
-        el('linkDokumen').href = url;
-        el('linkDokumen').classList.remove('hidden');
-        el('dokumenNotFound').classList.add('hidden');
-      } else {
-        el('linkDokumen').classList.add('hidden');
-        el('dokumenNotFound').classList.remove('hidden');
-      }
-
-      // -- Diskusi
-      let html = 'belum ada diskusi';
-      let adaAdminBem = false;
-      if (data.diskusi?.length > 0) {
-        html = '';
-        data.diskusi.forEach(d => {
-          html += `<div class="mb-1"><span class="font-semibold text-xs text-blue-700">${d.role}:</span> ${d.pesan}</div>`;
-          if (['admin', 'bem'].includes((d.role || '').toLowerCase())) {
-            adaAdminBem = true;
-          }
-        });
-      }
-      el('diskusiArea').innerHTML = html;
-
-      // -- Logika Aktivasi Input Chat
-      const userRole = @json(auth()->user()->role);
-      const enableDiskusi =
-        userRole !== 'dosen' &&
-        (userRole === 'admin' || userRole === 'bem' || (userRole === 'mahasiswa' && adaAdminBem));
-
-      // Debug log
-      console.log("Role Pengguna:", userRole);
-      console.log("Ada Admin/BEM:", adaAdminBem);
-      console.log("Diskusi Aktif:", enableDiskusi);
-
-      const input = el('inputDiskusi');
-      const btn = el('btnKirimDiskusi');
-
-      input.disabled = !enableDiskusi;
-      btn.disabled = !enableDiskusi;
-
-      btn.classList.toggle('bg-gray-300', !enableDiskusi);
-      btn.classList.toggle('cursor-not-allowed', !enableDiskusi);
-      btn.classList.toggle('bg-blue-600', enableDiskusi);
-      btn.classList.toggle('hover:bg-blue-700', enableDiskusi);
-
-      input.value = '';
-      document.getElementById('detailModal').classList.remove('hidden');
-
-      bindDiskusiHandler();
-    });
-}
-window.showDetail = showDetail;
-
-
-function bindDiskusiHandler() {
-console.log('✅ bindDiskusiHandler dipanggil');
-console.log('💬 Elemen input:', document.getElementById('inputDiskusi'));
-
-  const btn = document.getElementById('btnKirimDiskusi');
-  const input = document.getElementById('inputDiskusi');
-  if (!btn || !input) return;
-
-  btn.onclick = () => {
-    const pesan = input.value.trim();
-    if (!pesan || !currentPeminjamanId) return;
-
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    btn.disabled = true;
-
-    fetch('/diskusi', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrf
-      },
-      body: JSON.stringify({
-        peminjaman_id: currentPeminjamanId,
-        pesan
-      })
-    })
+    fetch(`/admin/peminjaman/${id}`)
       .then(res => res.json())
-      .then(resp => {
-        if (resp.success) {
-          showDetail(currentPeminjamanId); 
+      .then(data => {
+        console.log('✅ proposal:', data.proposal);
+        console.log('✅ undangan_pembicara:', data.undangan_pembicara);
+
+        const el = id => document.getElementById(id);
+        const formatTanggal = tgl => new Date(tgl).toLocaleDateString('id-ID', {
+          day: '2-digit', month: 'long', year: 'numeric'
+        });
+        const formatJam = jam => jam?.slice(0, 5) || '-';
+
+        // -- Informasi Kegiatan
+        el('judulKegiatan').textContent = data.judul_kegiatan || '-';
+        el('tglKegiatan').textContent = formatTanggal(data.tgl_kegiatan);
+        el('jamKegiatan').textContent = `${formatJam(data.waktu_mulai)} - ${formatJam(data.waktu_berakhir)}`;
+        el('aktivitas').textContent = data.aktivitas || '-';
+        el('penanggungJawab').textContent = data.penanggung_jawab || '-';
+        el('organisasi').textContent = data.organisasi || '-';
+        el('keterangan').textContent = data.deskripsi_kegiatan || '-';
+        el('ruangan').textContent = data.nama_ruangan || '-';
+
+        // -- Perlengkapan
+        const perlengkapanList = el('perlengkapan');
+        perlengkapanList.innerHTML = '';
+        if (data.perlengkapan?.length > 0) {
+          data.perlengkapan.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.nama} - ${item.jumlah}`;
+            perlengkapanList.appendChild(li);
+          });
         } else {
-          alert(resp.error || 'Gagal mengirim pesan.');
+          const li = document.createElement('li');
+          li.className = 'italic text-gray-400';
+          li.textContent = 'Tidak ada perlengkapan';
+          perlengkapanList.appendChild(li);
         }
+
+        // -- Dokumen Proposal
+        if (data.proposal) {
+          const dokumen = el('linkDokumen');
+          dokumen.href = `/storage/${data.proposal}`;
+          dokumen.target = '_blank';
+          dokumen.rel = 'noopener noreferrer';
+          dokumen.classList.remove('hidden');
+        } else {
+          el('linkDokumen').classList.add('hidden');
+        }
+
+        // -- Dokumen Undangan
+        if (data.undangan_pembicara) {
+          const undangan = el('linkUndangan');
+          undangan.href = `/storage/${data.undangan_pembicara}`;
+          undangan.target = '_blank';
+          undangan.rel = 'noopener noreferrer';
+          undangan.classList.remove('hidden');
+        } else {
+          el('linkUndangan').classList.add('hidden');
+        }
+
+        // -- Jika dua-duanya tidak ada
+        if (!data.proposal && !data.undangan_pembicara) {
+          el('dokumenNotFound').classList.remove('hidden');
+        } else {
+          el('dokumenNotFound').classList.add('hidden');
+        }
+
+        // -- Diskusi
+        let html = 'belum ada diskusi';
+        let adaAdminBem = false;
+        if (data.diskusi?.length > 0) {
+          html = '';
+          data.diskusi.forEach(d => {
+            html += `<div class="mb-1"><span class="font-semibold text-xs text-blue-700">${d.role}:</span> ${d.pesan}</div>`;
+            if (['admin', 'bem'].includes((d.role || '').toLowerCase())) {
+              adaAdminBem = true;
+            }
+          });
+        }
+        el('diskusiArea').innerHTML = html;
+
+        // -- Aktivasi Input Chat
+        const userRole = @json(auth()->user()->role);
+        const enableDiskusi = userRole !== 'dosen' &&
+          (userRole === 'admin' || userRole === 'bem' || (userRole === 'mahasiswa' && adaAdminBem));
+
+        const input = el('inputDiskusi');
+        const btn = el('btnKirimDiskusi');
+
+        input.disabled = !enableDiskusi;
+        btn.disabled = !enableDiskusi;
+
+        btn.classList.toggle('bg-gray-300', !enableDiskusi);
+        btn.classList.toggle('cursor-not-allowed', !enableDiskusi);
+        btn.classList.toggle('bg-blue-600', enableDiskusi);
+        btn.classList.toggle('hover:bg-blue-700', enableDiskusi);
+
+        input.value = '';
+        document.getElementById('detailModal').classList.remove('hidden');
+
+        bindDiskusiHandler();
+      });
+  }
+
+  window.showDetail = showDetail;
+
+  function bindDiskusiHandler() {
+    console.log('✅ bindDiskusiHandler dipanggil');
+
+    const btn = document.getElementById('btnKirimDiskusi');
+    const input = document.getElementById('inputDiskusi');
+    if (!btn || !input) return;
+
+    btn.onclick = () => {
+      const pesan = input.value.trim();
+      if (!pesan || !currentPeminjamanId) return;
+
+      const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      btn.disabled = true;
+
+      fetch('/diskusi', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrf
+        },
+        body: JSON.stringify({
+          peminjaman_id: currentPeminjamanId,
+          pesan
+        })
       })
-      .catch(() => alert('Gagal mengirim pesan.'));
-  };
-}
+        .then(res => res.json())
+        .then(resp => {
+          if (resp.success) {
+            showDetail(currentPeminjamanId); // Refresh diskusi
+          } else {
+            alert(resp.error || 'Gagal mengirim pesan.');
+          }
+        })
+        .catch(() => alert('Gagal mengirim pesan.'));
+    };
+  }
 </script>
+
 @endpush
