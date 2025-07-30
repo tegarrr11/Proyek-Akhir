@@ -102,7 +102,7 @@ class PeminjamanController extends Controller
             ? $request->file('undangan_pembicara')->store('undangan', 'public')
             : null;
 
-        // ✅ Simpan data peminjaman utama
+        // Simpan data peminjaman utama
         $peminjaman = Peminjaman::create([
             'judul_kegiatan' => $request->judul_kegiatan,
             'tgl_kegiatan' => $request->tgl_kegiatan,
@@ -125,7 +125,7 @@ class PeminjamanController extends Controller
             'status_pengembalian' => null,
         ]);
 
-        // ✅ Simpan fasilitas utama hanya jika role mahasiswa
+        // Simpan fasilitas utama hanya jika role mahasiswa
         if (auth()->user()->role === 'mahasiswa') {
             foreach ($request->barang as $item) {
                 DetailPeminjaman::create([
@@ -136,7 +136,7 @@ class PeminjamanController extends Controller
             }
         }
 
-        // ✅ Simpan fasilitas tambahan jika ada
+        // Simpan fasilitas tambahan jika ada
         if ($request->has('fasilitas_tambahan')) {
             foreach ($request->fasilitas_tambahan as $item) {
                 $fasilitas = Fasilitas::find($item['id']);
@@ -294,7 +294,6 @@ class PeminjamanController extends Controller
             'diskusi.user',
         ])->findOrFail($id);
 
-
         return response()->json([
             'id' => $peminjaman->id,
             'judul_kegiatan' => $peminjaman->judul_kegiatan,
@@ -307,13 +306,16 @@ class PeminjamanController extends Controller
             'penanggung_jawab' => $peminjaman->penanggung_jawab,
             'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
             'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
-            'link_dokumen' => $peminjaman->proposal ? 'ada' : null,
             'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
                 return [
                     'nama' => optional($detail->fasilitas)->nama_barang ?? '-',
                     'jumlah' => $detail->jumlah ?? 0,
                 ];
             }),
+            'proposal' => $peminjaman->proposal,
+            'undangan_pembicara' => $peminjaman->undangan_pembicara,
+            'link_dokumen' => $peminjaman->proposal ? true : false,
+            'link_undangan' => $peminjaman->undangan_pembicara ? true : false,
             'diskusi' => $peminjaman->diskusi->map(function ($d) {
                 return [
                     'id' => $d->id,
@@ -374,5 +376,14 @@ class PeminjamanController extends Controller
         }
         \Log::info('DOWNLOAD_PROPOSAL_SUCCESS', ['user_id' => $user->id, 'role' => $user->role, 'file' => $path]);
         return response()->download($path);
+    }
+
+    public function downloadUndangan($id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+        if ($peminjaman->undangan_pembicara && Storage::exists($peminjaman->undangan_pembicara)) {
+            return Storage::download($peminjaman->undangan_pembicara);
+        }
+        return redirect()->back()->with('error', 'File undangan tidak ditemukan.');
     }
 }

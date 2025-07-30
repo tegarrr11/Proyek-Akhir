@@ -100,7 +100,9 @@ class AdminPeminjamanController extends Controller
             'organisasi' => $peminjaman->organisasi,
             'penanggung_jawab' => $peminjaman->penanggung_jawab,
             'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
-            'link_dokumen' => $peminjaman->proposal ? 'ada' : null,
+            'proposal' => $peminjaman->proposal,
+            'undangan_pembicara' => $peminjaman->undangan_pembicara,
+            'link_undangan' => $peminjaman->undangan_pembicara ? 'ada' : null,
             'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
             'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
                 return [
@@ -119,6 +121,7 @@ class AdminPeminjamanController extends Controller
             }),
         ]);
     }
+
 
     public function store(Request $request)
     {

@@ -119,14 +119,15 @@
       <input type="text" name="organisasi" class="w-full border rounded px-3 py-2 bg-gray-100" value="Staff" readonly>
     </div>
 
-    <div>
+    <div class="relative">
       <label class="block text-sm font-medium mb-1">Penanggung Jawab *</label>
-      <input type="text" name="penanggung_jawab"
-        value="{{ old('penanggung_jawab') }}"
-        class="w-full border rounded px-3 py-2 @error('penanggung_jawab') border-red-500 @enderror" required>
-      @error('penanggung_jawab')
-        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-      @enderror
+      <input type="text" id="penanggungInput" name="penanggung_jawab"
+            value="{{ old('penanggung_jawab') }}"
+            class="w-full border border-gray-500 rounded px-3 py-2" required
+            autocomplete="off">
+      <div id="penanggungList"
+          class="absolute hidden border border-gray-300 mt-1 rounded shadow max-h-[7.5rem] overflow-y-auto bg-white z-50 w-full text-sm">
+      </div>
     </div>
 
     <div class="flex justify-end mt-4">
@@ -198,6 +199,50 @@
     toggleStep(1);
     document.getElementById('btn1')?.addEventListener('click', () => toggleStep(1));
     document.getElementById('btn2')?.addEventListener('click', () => toggleStep(2));
+        const penanggungInput = document.getElementById('penanggungInput');
+    const penanggungList = document.getElementById('penanggungList');
+    let allPegawai = [];
+
+    // Fetch data dari API
+    fetch('/pegawai/list')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.items) {
+          console.error('Data pegawai tidak ditemukan.');
+          return;
+        }
+        allPegawai = data.items.map(d => `${d.inisial} - ${d.nama}`);
+      })
+      .catch(err => console.error('Gagal memuat data pegawai:', err));
+
+    // Tampilkan list saat focus/input
+    penanggungInput.addEventListener('focus', showPenanggungList);
+    penanggungInput.addEventListener('input', showPenanggungList);
+
+    function showPenanggungList() {
+      const keyword = penanggungInput.value.toLowerCase();
+      const filtered = allPegawai.filter(name => name.toLowerCase().includes(keyword));
+
+      penanggungList.innerHTML = '';
+      filtered.slice(0, 50).forEach(name => {
+        const div = document.createElement('div');
+        div.textContent = name;
+        div.className = 'cursor-pointer px-3 py-1 hover:bg-gray-100';
+        div.onclick = () => {
+          penanggungInput.value = name;
+          penanggungList.classList.add('hidden');
+        };
+        penanggungList.appendChild(div);
+      });
+
+      penanggungList.classList.toggle('hidden', filtered.length === 0);
+    }
+
+    document.addEventListener('click', function (e) {
+      if (!penanggungInput.contains(e.target) && !penanggungList.contains(e.target)) {
+        penanggungList.classList.add('hidden');
+      }
+    });
   });
 </script>
 @endsection

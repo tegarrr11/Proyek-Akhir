@@ -133,6 +133,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/peminjaman/{id}/verifikasi', [AdminPeminjamanController::class, 'verifikasi'])->name('admin.peminjaman.verifikasi');
         Route::post('/ruangan/update', [AdminController::class, 'update'])->name('admin.ruangan.update');
         Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('admin.peminjaman.downloadProposal');
+        Route::get('/peminjaman/download-undangan/{id}', [PeminjamanController::class, 'downloadUndangan']);
         Route::patch('/admin/peminjaman/kembalikan/{id}', [PeminjamanController::class, 'adminKembalikan'])->name('admin.peminjaman.kembalikan');
 
     });

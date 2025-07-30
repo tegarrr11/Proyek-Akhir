@@ -14,14 +14,14 @@
 
 <?php if (isset($component)) { $__componentOriginalfd1f218809a441e923395fcbf03e4272 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalfd1f218809a441e923395fcbf03e4272 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.header','data' => ['title' => 'Peminjaman','breadcrumb' => 'Peminjaman > Staff - Ajukan Peminjaman']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.header','data' => ['title' => 'Peminjaman','breadcrumb' => 'Peminjaman > Admin - Ajukan Peminjaman']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('header'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['title' => 'Peminjaman','breadcrumb' => 'Peminjaman > Staff - Ajukan Peminjaman']); ?>
+<?php $component->withAttributes(['title' => 'Peminjaman','breadcrumb' => 'Peminjaman > Admin - Ajukan Peminjaman']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalfd1f218809a441e923395fcbf03e4272)): ?>
@@ -33,10 +33,10 @@
 <?php unset($__componentOriginalfd1f218809a441e923395fcbf03e4272); ?>
 <?php endif; ?>
 
-<form id="peminjamanForm" method="POST" action="<?php echo e(route('dosen.peminjaman.store')); ?>" onsubmit="return validateAndSubmit(event)">
+<form id="peminjamanForm" method="POST" action="<?php echo e(route('admin.peminjaman.store')); ?>" onsubmit="return validateAndSubmit(event)">
   <?php echo csrf_field(); ?>
   <div class="px-4 pt-2 pb-3 border-b border-gray-300 mb-4">
-    <h2 class="text-lg font-semibold text-[#003366]">Form Pengajuan Peminjaman (Staff)</h2>
+    <h2 class="text-lg font-semibold text-[#003366]">Form Pengajuan Peminjaman (Admin)</h2>
   </div>
 
   
@@ -220,7 +220,6 @@ unset($__errorArgs, $__bag); ?>
       <input type="text" name="organisasi" class="w-full border rounded px-3 py-2 bg-gray-100" value="Staff" readonly>
     </div>
 
-    
     <div class="relative">
       <label class="block text-sm font-medium mb-1">Penanggung Jawab *</label>
       <input type="text" id="penanggungInput" name="penanggung_jawab"
@@ -349,4 +348,4 @@ unset($__errorArgs, $__bag); ?>
 </script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.sidebar-dosen', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/pages/dosen/peminjaman/create.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.sidebar-admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/pages/admin/peminjaman/create.blade.php ENDPATH**/ ?>

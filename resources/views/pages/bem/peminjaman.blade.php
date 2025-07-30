@@ -23,11 +23,11 @@
       </div>
 
       <div class="flex gap-2">
-        <input type="text" placeholder="Cari........"
-          class="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-[#003366]">
-        <button class="border px-3 py-1 rounded text-sm text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white">
-          Filter
-        </button>
+        <form method="GET" action="{{ route('bem.peminjaman') }}" class="relative">
+          <input type="hidden" name="tab" value="riwayat">
+          <input id="searchInput" type="text" name="search" value="{{ request('search') }}"
+            placeholder="Cari kegiatan ..." class="border rounded px-3 py-1 text-sm w-52 hidden md:inline-block" />
+        </form>
       </div>
     </div>
 
@@ -50,6 +50,26 @@
 @section('script')
 @push('scripts')
 <script>
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab') || 'pengajuan';
+    showTab(tab);
+
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        const keyword = this.value.toLowerCase();
+        const activeTable = getActiveTableId();
+        if (!activeTable) return;
+
+        const rows = document.querySelectorAll(`#${activeTable} tbody tr`);
+        rows.forEach(row => {
+          const kolomJudul = row.children[1];
+          const isi = kolomJudul?.textContent.toLowerCase() || '';
+          row.style.display = isi.includes(keyword) ? '' : 'none';
+        });
+      });
+    }
   
   function tampilkanKolomKembali(event) {
     event.preventDefault();
@@ -271,6 +291,20 @@
   function closeModal() {
     document.getElementById('detailModal')?.classList.add('hidden');
   }
+
+  document.getElementById('searchInput').addEventListener('input', function () {
+    const keyword = this.value.toLowerCase();
+    const tabAktif = document.getElementById('riwayatTab');
+    if (tabAktif.classList.contains('hidden')) return;
+
+    document.querySelectorAll('#riwayatTab table tbody tr').forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(keyword) ? '' : 'none';
+    });
+  });
+
+
+
 </script>
 @endpush
 @endsection
