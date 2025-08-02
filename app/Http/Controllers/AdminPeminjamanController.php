@@ -122,7 +122,6 @@ class AdminPeminjamanController extends Controller
         ]);
     }
 
-
     public function store(Request $request)
     {
         // Validasi sesuai kebutuhan admin
@@ -155,17 +154,12 @@ class AdminPeminjamanController extends Controller
             'deskripsi_kegiatan' => $request->deskripsi_kegiatan,
             'gedung_id' => $gedung->id,
             'user_id' => auth()->id(),
-            'status' => 'diterima', // pastikan status diterima
             'verifikasi_bem' => 'diterima',
             'verifikasi_sarpras' => 'diterima',
             'organisasi' => $request->organisasi ?? '-',
             'penanggung_jawab' => $request->penanggung_jawab ?? '-',
-            'status_peminjaman' => 'ambil', // status_peminjaman juga langsung aktif
-            'status_pengembalian' => 'proses', // status_pengembalian default proses
-            'status_verifikasi_bem' => 'disetujui',
-            'status_verifikasi_sarpras' => 'disetujui',
             'status_peminjaman' => 'diambil',
-            'status_pengembalian' => 'selesai',
+            'status_pengembalian' => 'proses',
         ]);
 
         // Jika ada barang, simpan detail peminjaman
@@ -187,4 +181,29 @@ class AdminPeminjamanController extends Controller
 
         return redirect()->route('admin.peminjaman')->with('success', 'Peminjaman berhasil diajukan.');
     }
+
+    public function tandaiDiambil($id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        if ($peminjaman->status_peminjaman !== 'diambil') {
+            $peminjaman->status_peminjaman = 'diambil';
+            $peminjaman->save();
+        }
+
+        return back()->with('success', 'Status peminjaman ditandai sudah diambil.');
+    }
+
+    public function tandaiSelesai($id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        if ($peminjaman->status_pengembalian !== 'selesai') {
+            $peminjaman->status_pengembalian = 'selesai';
+            $peminjaman->save();
+        }
+
+        return back()->with('success', 'Status pengembalian ditandai selesai.');
+    }
+
 }

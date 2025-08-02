@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?php echo $__env->yieldContent('title'); ?></title>
+  <link rel="icon" type="image/png" href="<?php echo e(asset('images/logo-sarpras-no-text.png')); ?>">
   <?php echo $__env->make('layouts.partials.head', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
   <?php echo $__env->yieldPushContent('head'); ?>
   <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">

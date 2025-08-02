@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB; 
 
 class PeminjamanController extends Controller
 {
@@ -66,13 +67,9 @@ class PeminjamanController extends Controller
             'fasilitas_tambahan.*.jumlah' => 'integer|min:1',
         ]);
 
-        //  Ambil gedung dari slug
         $gedung = Gedung::where('slug', $request->gedung)->first();
-        if (!$gedung) {
-            return back()->with('error', 'Gedung tidak ditemukan.');
-        }
+        if (!$gedung) return back()->with('error', 'Gedung tidak ditemukan.');
 
-        //  Pengecekan bentrok waktu
         $mulai = Carbon::createFromFormat('H:i', $request->waktu_mulai);
         $akhir = Carbon::createFromFormat('H:i', $request->waktu_berakhir);
 
@@ -93,81 +90,68 @@ class PeminjamanController extends Controller
             ])->withInput();
         }
 
-        // Upload file jika ada
+        // Cek stok fasilitas (utama & tambahan)
+        $allItems = array_merge($request->barang, $request->fasilitas_tambahan ?? []);
+        foreach ($allItems as $item) {
+            $available = $this->getAvailableStok($item['id'], $request->tgl_kegiatan, $request->waktu_mulai, $request->waktu_berakhir);
+            if ($item['jumlah'] > $available) {
+                $nama = Fasilitas::find($item['id'])->nama_barang ?? 'Barang tidak ditemukan';
+                return back()->with('error', "Stok tidak mencukupi untuk: $nama (tersisa $available)")->withInput();
+            }
+        }
+
+        // Upload file
         $fileProposal = $request->hasFile('proposal')
-            ? $request->file('proposal')->store('proposal', 'public')
-            : null;
+            ? $request->file('proposal')->store('proposal', 'public') : null;
 
         $fileUndangan = $request->hasFile('undangan_pembicara')
-            ? $request->file('undangan_pembicara')->store('undangan', 'public')
-            : null;
+            ? $request->file('undangan_pembicara')->store('undangan', 'public') : null;
 
-        // Simpan data peminjaman utama
-        $peminjaman = Peminjaman::create([
-            'judul_kegiatan' => $request->judul_kegiatan,
-            'tgl_kegiatan' => $request->tgl_kegiatan,
-            'tgl_kegiatan_berakhir' => $request->tgl_kegiatan_berakhir,
-            'waktu_mulai' => $request->waktu_mulai,
-            'waktu_berakhir' => $request->waktu_berakhir,
-            'aktivitas' => $request->aktivitas,
-            'organisasi' => $request->organisasi,
-            'penanggung_jawab' => $request->penanggung_jawab,
-            'deskripsi_kegiatan' => $request->deskripsi_kegiatan,
-            'status' => 'menunggu',
-            'gedung_id' => $gedung->id,
-            'user_id' => Auth::id(),
-            'jenis_kegiatan' => $request->jenis_kegiatan ?? null,
-            'proposal' => $fileProposal,
-            'undangan_pembicara' => $fileUndangan,
-            'verifikasi_bem' => 'diajukan',
-            'verifikasi_sarpras' => null,
-            'status_peminjaman' => null,
-            'status_pengembalian' => null,
-        ]);
+        DB::beginTransaction();
 
-        // Simpan fasilitas utama hanya jika role mahasiswa
-        if (auth()->user()->role === 'mahasiswa') {
-            foreach ($request->barang as $item) {
+        try {
+            $peminjaman = Peminjaman::create([
+                'judul_kegiatan' => $request->judul_kegiatan,
+                'tgl_kegiatan' => $request->tgl_kegiatan,
+                'tgl_kegiatan_berakhir' => $request->tgl_kegiatan_berakhir,
+                'waktu_mulai' => $request->waktu_mulai,
+                'waktu_berakhir' => $request->waktu_berakhir,
+                'aktivitas' => $request->aktivitas,
+                'organisasi' => $request->organisasi,
+                'penanggung_jawab' => $request->penanggung_jawab,
+                'deskripsi_kegiatan' => $request->deskripsi_kegiatan,
+                'status' => 'menunggu',
+                'gedung_id' => $gedung->id,
+                'user_id' => Auth::id(),
+                'jenis_kegiatan' => $request->jenis_kegiatan ?? null,
+                'proposal' => $fileProposal,
+                'undangan_pembicara' => $fileUndangan,
+                'verifikasi_bem' => 'diajukan',
+            ]);
+
+            foreach ($allItems as $item) {
                 DetailPeminjaman::create([
                     'peminjaman_id' => $peminjaman->id,
                     'fasilitas_id' => $item['id'],
                     'jumlah' => $item['jumlah'],
                 ]);
             }
+
+            Auth::user()->notify(new \App\Notifications\PengajuanMasuk($peminjaman));
+
+            \App\Models\User::whereIn('role', ['bem', 'admin'])->each(function ($user) use ($peminjaman) {
+                $user->notify(new \App\Notifications\PengajuanBaru($peminjaman));
+            });
+
+            \App\Helpers\NotifikasiHelper::kirimKeRoles(['bem', 'admin'], 'Pengajuan Baru', 'Pengajuan oleh ' . Auth::user()->name);
+
+            DB::commit();
+
+            return redirect()->route('mahasiswa.peminjaman')->with('success', 'Peminjaman berhasil diajukan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan saat menyimpan data.');
         }
-
-        // Simpan fasilitas tambahan jika ada
-        if ($request->has('fasilitas_tambahan')) {
-            foreach ($request->fasilitas_tambahan as $item) {
-                $fasilitas = Fasilitas::find($item['id']);
-                if ($fasilitas && $item['jumlah'] <= $fasilitas->stok) {
-                    DetailPeminjaman::create([
-                        'peminjaman_id' => $peminjaman->id,
-                        'fasilitas_id' => $fasilitas->id,
-                        'jumlah' => $item['jumlah'],
-                    ]);
-                }
-            }
-        }
-
-        // Notifikasi realtime
-        $mahasiswa = Auth::user();
-        $mahasiswa->notify(new \App\Notifications\PengajuanMasuk($peminjaman));
-
-        $bemUsers = \App\Models\User::where('role', 'bem')->get();
-        $adminUsers = \App\Models\User::where('role', 'admin')->get();
-
-        foreach ($bemUsers as $bem) {
-            $bem->notify(new \App\Notifications\PengajuanBaru($peminjaman));
-        }
-
-        // foreach ($adminUsers as $admin) {
-        //     $admin->notify(new \App\Notifications\PengajuanBaru($peminjaman));
-        // }
-
-        \App\Helpers\NotifikasiHelper::kirimKeRoles(['bem', 'admin'], 'Pengajuan Baru', 'Pengajuan oleh ' . $mahasiswa->name);
-
-        return redirect()->route('mahasiswa.peminjaman')->with('success', 'Peminjaman berhasil diajukan.');
     }
 
     /**
@@ -200,10 +184,26 @@ class PeminjamanController extends Controller
         return view('pages.mahasiswa.peminjaman', compact('pengajuans', 'riwayats'));
     }
 
+    private function getAvailableStok($fasilitasId, $tanggal, $waktuMulai, $waktuAkhir)
+    {
+        $fasilitas = Fasilitas::find($fasilitasId);
+        if (!$fasilitas) return 0;
 
-    /**
-     * Mendapatkan daftar fasilitas berdasarkan slug gedung.
-     */
+        $dipinjam = DetailPeminjaman::whereHas('peminjaman', function ($query) use ($tanggal, $waktuMulai, $waktuAkhir) {
+            $query->where('tgl_kegiatan', $tanggal)
+                ->whereIn('verifikasi_sarpras', ['diajukan', 'diterima'])
+                ->where(function ($q) use ($waktuMulai, $waktuAkhir) {
+                    $q->whereTime('waktu_mulai', '<', $waktuAkhir)
+                    ->whereTime('waktu_berakhir', '>', $waktuMulai);
+                });
+        })->where('fasilitas_id', $fasilitasId)
+        ->sum('jumlah');
+
+        return max($fasilitas->stok - $dipinjam, 0);
+    }
+
+    // Mendapatkan daftar fasilitas berdasarkan slug gedung.
+
     public function getBarangByRuangan(Request $request)
     {
         $gedung = Gedung::where('slug', strtolower($request->ruangan))->first();
@@ -219,9 +219,7 @@ class PeminjamanController extends Controller
         return response()->json($fasilitas);
     }
 
-    /**
-     * Mahasiswa mengambil barang setelah disetujui.
-     */
+    // Mahasiswa mengambil barang setelah disetujui.
     public function ambil($id)
     {
         $peminjaman = Peminjaman::with('detailPeminjaman.fasilitas')->findOrFail($id);
@@ -283,9 +281,7 @@ class PeminjamanController extends Controller
                         ->with('success', 'Peminjaman ditandai sudah dikembalikan.');
     }
 
-    /**
-     * Menampilkan detail peminjaman untuk modal (JSON).
-     */
+    // Menampilkan detail peminjaman untuk modal (JSON).
     public function show($id)
     {
         $peminjaman = Peminjaman::with([
@@ -386,4 +382,22 @@ class PeminjamanController extends Controller
         }
         return redirect()->back()->with('error', 'File undangan tidak ditemukan.');
     }
+
+    public function setujui($id)
+    {
+        try {
+            $peminjaman = Peminjaman::findOrFail($id);
+            $peminjaman->status_peminjaman = 'diterima';
+            $peminjaman->save();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            \Log::error('Error setujuiPeminjaman: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal menyetujui'], 500);
+        }
+    }
+
+
 }
+
+

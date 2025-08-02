@@ -53,4 +53,8 @@ class Peminjaman extends Model
         return $this->hasMany(Diskusi::class);
     }
 
+    public function fasilitas()
+    {
+        return $this->belongsToMany(Fasilitas::class, 'detail_peminjaman');
+    }
 }

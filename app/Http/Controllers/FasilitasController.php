@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Fasilitas;
 use Illuminate\Http\Request;
+use App\Models\Peminjaman;
 
 class FasilitasController extends Controller
 {
@@ -74,4 +75,45 @@ class FasilitasController extends Controller
 
         return redirect()->route('admin.fasilitas')->with('success', 'Fasilitas berhasil dihapus.');
     }
+
+    public function getFasilitasTerpakai(Request $request)
+    {
+        $request->validate([
+            'tgl_mulai' => 'required|date',
+            'tgl_selesai' => 'required|date|after_or_equal:tgl_mulai',
+            'gedung'     => 'required|exists:gedungs,slug',
+        ]);
+
+        $tanggalMulai = $request->tgl_mulai;
+        $tanggalSelesai = $request->tgl_selesai;
+        $slugGedung = $request->gedung;
+
+        $peminjamanBentrok = Peminjaman::with('fasilitas')
+            ->whereHas('gedung', function ($query) use ($slugGedung) {
+                $query->where('slug', $slugGedung);
+            })
+            ->where(function ($query) use ($tanggalMulai, $tanggalSelesai) {
+                $query->whereBetween('tgl_kegiatan', [$tanggalMulai, $tanggalSelesai])
+                    ->orWhereBetween('tgl_kegiatan_berakhir', [$tanggalMulai, $tanggalSelesai])
+                    ->orWhere(function ($sub) use ($tanggalMulai, $tanggalSelesai) {
+                        $sub->where('tgl_kegiatan', '<', $tanggalMulai)
+                            ->where('tgl_kegiatan_berakhir', '>', $tanggalSelesai);
+                    });
+            })
+            ->get();
+
+        // Ambil semua fasilitas yang terpakai dalam peminjaman yang bentrok
+        $fasilitasTerpakai = [];
+        foreach ($peminjamanBentrok as $peminjaman) {
+            foreach ($peminjaman->fasilitas as $fasilitas) {
+                $fasilitasTerpakai[$fasilitas->id] = ($fasilitasTerpakai[$fasilitas->id] ?? 0) + $fasilitas->pivot->jumlah;
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $fasilitasTerpakai
+        ]);
+    }
+
 }

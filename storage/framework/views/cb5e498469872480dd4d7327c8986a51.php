@@ -10,7 +10,7 @@
 <?php $component->withAttributes([]); ?>
   <table class="w-full text-sm text-left text-gray-700">
     <thead class="bg-gray-100 text-black border-b">
-      <tr class="text-sm font-semibold">
+      <tr class="text-sm text-left font-semibold">
         <th class="px-4 py-2">No.</th>
         <th class="px-4 py-2">Pengajuan</th>
         <th class="px-4 py-2">Tanggal Pengajuan</th>
@@ -18,7 +18,7 @@
         <th class="px-4 py-2">Verifikasi Sarpras</th>
         <th class="px-4 py-2">Organisasi</th>
         <th class="px-4 py-2">Status Pengembalian</th>
-        <th class="px-4 py-2 text-center">Aksi</th>
+        <th class="px-4 py-2">Aksi</th>
       </tr>
     </thead>
     <tbody>
@@ -54,36 +54,47 @@
           </span>
         </td>
         <td class="px-4 py-2"><?php echo e($item->organisasi); ?></td>
-        <td class="px-4 py-2">
+        <td class="px-4 py-2" id="status-<?php echo e($item->id); ?>">
           <?php if($item->status_peminjaman === 'ambil'): ?>
-            <form method="POST" action="<?php echo e(route('admin.peminjaman.kembalikan', $item->id)); ?>" onsubmit="return confirm('Yakin ingin menandai sebagai dikembalikan?')">
-              <?php echo csrf_field(); ?>
-              <?php echo method_field('PATCH'); ?>
-              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">Selesai</button>
-            </form>
+            <span class="text-xs text-gray-500 italic">Diambil</span>
           <?php elseif($item->status_pengembalian === 'selesai'): ?>
-            <span class="text-xs text-gray-600 italic">Selesai</span>
+            <span class="text-green-600 font-semibold text-xs">Selesai</span>
           <?php else: ?>
             <span class="text-xs text-gray-500 italic">-</span>
           <?php endif; ?>
         </td>
-        <td class="px-4 py-2 text-center">
-          <div class="flex items-center gap-2 justify-center">
-            <?php if($item->verifikasi_sarpras !== 'diterima'): ?>
-              <form method="POST" action="<?php echo e(route('admin.peminjaman.verifikasi', $item->id)); ?>">
-                <?php echo csrf_field(); ?>
-                <input type="hidden" name="verifikasi_sarpras" value="diterima">
-                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded">Terima</button>
-              </form>
-            <?php endif; ?>
+        <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap" id="aksi-<?php echo e($item->id); ?>">
+          <button onclick="showDetail(<?php echo e($item->id); ?>)"
+            class="bg-indigo-500 text-white px-3 py-1 rounded text-xs hover:bg-indigo-600">
+            Diskusi
+          </button>
 
-            <button onclick="showTangguhkanPopup(<?php echo e($item->id); ?>)"
-              class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded">
-              Tangguhkan
+          <?php if($item->status_peminjaman === 'diterima' && auth()->user()->role === 'admin'): ?>
+            <button onclick="ambilBarang(<?php echo e($item->id); ?>)"
+              class="bg-yellow-500 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600" id="btn-ambil-<?php echo e($item->id); ?>">
+              Ambil
             </button>
+          <?php endif; ?>
 
-            <button onclick="showDetail(<?php echo e($item->id); ?>)" class="text-gray-600 hover:text-blue-700" title="Detail">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>            </button>
+          <?php if($item->verifikasi_bem === 'diterima' && auth()->user()->role === 'admin' && $item->status_peminjaman === null): ?>
+            <button onclick="setujuiPeminjaman(<?php echo e($item->id); ?>)"
+              class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700" id="btn-setujui-<?php echo e($item->id); ?>">
+              Diterima
+            </button>
+          <?php endif; ?>
+
+          <?php if($item->status_peminjaman === 'diambil' && auth()->user()->role === 'admin'): ?>
+            <button onclick="showChecklistModal(<?php echo e($item->id); ?>)"
+              class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
+              Selesai
+            </button>
+          <?php endif; ?>
+
+          <button onclick="showDetail(<?php echo e($item->id); ?>)"
+            class="text-blue-600 hover:text-blue-800 text-sm"
+            title="Lihat Detail">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          </button>
         </td>
       </tr>
       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -103,6 +114,24 @@
 <?php $component = $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997; ?>
 <?php unset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997); ?>
 <?php endif; ?>
+
+<!-- Checklist Modal -->
+<div id="showChecklistModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-30 flex justify-center items-center">
+  <div class="w-[90%] max-w-md bg-white p-6 rounded shadow-md">
+    <h2 class="text-lg font-semibold mb-4">Checklist Pengembalian Barang</h2>
+    <div id="checklistContent" class="space-y-2"></div>
+    <div class="mt-6 flex justify-end gap-2">
+      <button onclick="document.getElementById('showChecklistModal').classList.add('hidden')"
+        class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 transition">
+        Tutup
+      </button>
+      <button onclick="submitChecklist(window.currentPeminjamanId)"
+        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+        Submit
+      </button>
+    </div>
+  </div>
+</div>
 
 <?php $__env->startPush('scripts'); ?>
 <script>
@@ -126,22 +155,22 @@
       }
 
       fetch('/diskusi', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrf,
-          },
-          body: JSON.stringify({
-            peminjaman_id: currentPeminjamanId,
-            pesan
-          })
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrf,
+        },
+        body: JSON.stringify({
+          peminjaman_id: currentPeminjamanId,
+          pesan
         })
-        .then(res => res.json())
-        .then(resp => {
-          if (resp.success) showDetail(currentPeminjamanId);
-          else alert(resp.error || 'Gagal mengirim pesan.');
-        })
-        .catch(() => alert('Gagal mengirim pesan.'));
+      })
+      .then(res => res.json())
+      .then(resp => {
+        if (resp.success) showDetail(currentPeminjamanId);
+        else alert(resp.error || 'Gagal mengirim pesan.');
+      })
+      .catch(() => alert('Gagal mengirim pesan.'));
     };
   }
 
@@ -151,13 +180,11 @@
       .then(res => res.json())
       .then(data => {
         const el = id => document.getElementById(id);
-
         const formatTanggal = (tgl) => {
           const d = new Date(tgl);
-          const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+          const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
           return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
         };
-
         const formatJam = (jam) => jam?.substring(0, 5) || '-';
 
         el('judulKegiatan').textContent = data.judul_kegiatan || '-';
@@ -168,18 +195,14 @@
         el('keterangan').textContent = data.deskripsi_kegiatan || '-';
         el('ruangan').textContent = data.nama_ruangan || '-';
 
-        // Update dokumen link to use secure download route if dokumen exists
         if (data.link_dokumen === 'ada') {
           let prefix = window.location.pathname.split('/')[1];
-          if (!['admin', 'mahasiswa', 'bem', 'dosen', 'staff'].includes(prefix)) prefix = '';
+          if (!['admin','mahasiswa','bem','dosen','staff'].includes(prefix)) prefix = '';
           let downloadUrl = prefix ? `/${prefix}/peminjaman/download-proposal/${data.id}` : `/peminjaman/download-proposal/${data.id}`;
           el('linkDokumen').href = downloadUrl;
           el('linkDokumen').onclick = function(e) {
             e.preventDefault();
-            fetch(downloadUrl, {
-                method: 'GET',
-                credentials: 'same-origin',
-              })
+            fetch(downloadUrl, { method: 'GET', credentials: 'same-origin' })
               .then(response => {
                 if (!response.ok) throw new Error('Gagal download dokumen');
                 return response.blob();
@@ -220,7 +243,6 @@
           perlengkapanList.appendChild(li);
         }
 
-        // Diskusi
         let diskusiHtml = 'belum ada diskusi';
         if (Array.isArray(data.diskusi) && data.diskusi.length > 0) {
           diskusiHtml = '';
@@ -235,7 +257,7 @@
         document.getElementById('btnKirimDiskusi').classList.remove('bg-gray-300', 'cursor-not-allowed');
         document.getElementById('btnKirimDiskusi').classList.add('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
         document.getElementById('detailModal').classList.remove('hidden');
-        bindDiskusiHandler(); // <--- re-bind setiap modal dibuka
+        bindDiskusiHandler();
       })
       .catch(err => {
         console.error(err);
@@ -247,61 +269,96 @@
     document.getElementById('detailModal')?.classList.add('hidden');
   }
 
-  let tangguhPeminjamanId = null;
+  function setujuiPeminjaman(id) {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '<?php echo e(csrf_token()); ?>';
 
-  function showTangguhkanPopup(id) {
-    tangguhPeminjamanId = id;
-    document.getElementById('alasanTangguh').value = '';
-    document.getElementById('tangguhkanModal').classList.remove('hidden');
-  }
-
-  function closeTangguhkan() {
-    document.getElementById('tangguhkanModal').classList.add('hidden');
-  }
-
-  function submitTangguhkan() {
-    const alasan = document.getElementById('alasanTangguh').value.trim();
-    if (!alasan || !tangguhPeminjamanId) return alert('Alasan tidak boleh kosong.');
-
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-    fetch('/diskusi', {
+    fetch(`/admin/peminjaman/${id}/setujui`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrf
-      },
-      body: JSON.stringify({
-        peminjaman_id: tangguhPeminjamanId,
-        pesan: `<span class="text-red-600 font-semibold">DITANGGUHKAN:</span> ${alasan}`
-      })
+      headers: { 'X-CSRF-TOKEN': csrf }
     })
-    .then(res => res.json())
-    .then(resp => {
-      if (resp.success) {
-        closeTangguhkan();
-        showDetail(tangguhPeminjamanId); // refresh diskusi
-      } else {
-        alert(resp.error || 'Gagal mengirim alasan.');
+    .then(() => {
+      const aksiCell = document.getElementById(`aksi-${id}`);
+      const statusCell = document.getElementById(`status-${id}`);
+
+      if (aksiCell) {
+        const btnAmbil = document.createElement('button');
+        btnAmbil.className = 'bg-yellow-500 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600';
+        btnAmbil.textContent = 'Ambil';
+        btnAmbil.setAttribute('onclick', `ambilBarang(${id})`);
+        aksiCell.querySelector(`#btn-setujui-${id}`)?.remove();
+        aksiCell.appendChild(btnAmbil);
+      }
+
+      if (statusCell) {
+        statusCell.innerHTML = `<span class="text-xs text-gray-500 italic">-</span>`;
       }
     })
-    .catch(() => alert('Terjadi kesalahan saat mengirim alasan.'));
+    .catch(err => {
+      console.error(err);
+      alert('Gagal menyetujui peminjaman.');
+    });
   }
 
+  function ambilBarang(id) {
+    fetch(`/admin/peminjaman/${id}/ambil`, {
+      method: 'POST',
+      headers: {'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'}
+    })
+    .then(() => {
+      const aksiCell = document.getElementById(`aksi-${id}`);
+      const statusCell = document.getElementById(`status-${id}`);
+
+      if (aksiCell) {
+        aksiCell.querySelector(`[onclick="ambilBarang(${id})"]`)?.remove();
+        const btnSelesai = document.createElement('button');
+        btnSelesai.className = 'bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700';
+        btnSelesai.textContent = 'Selesai';
+        btnSelesai.setAttribute('onclick', `showChecklistModal(${id})`);
+        aksiCell.appendChild(btnSelesai);
+      }
+
+      if (statusCell) {
+        statusCell.innerHTML = `<span class="text-xs text-gray-500 italic">Diambil</span>`;
+      }
+    });
+  }
+
+  function showChecklistModal(peminjamanId) {
+    // Simpan ID global jika dibutuhkan submit nanti
+    window.currentPeminjamanId = peminjamanId;
+
+    fetch(`/api/peminjaman/${peminjamanId}/checklist`)
+      .then(response => response.json())
+      .then(data => {
+        let content = '';
+        data.fasilitas.forEach(item => {
+          content += `<p>${item.nama} - Jumlah: ${item.jumlah}</p>`;
+        });
+        document.getElementById('checklistContent').innerHTML = content;
+        document.getElementById('checklistModal').classList.remove('hidden');
+        document.getElementById('checklistModal').classList.add('flex');
+      });
+  }
+
+  function submitChecklist(id) {
+    const checkedItems = [...document.querySelectorAll('input[name="barang[]"]:checked')].map(el => el.value);
+    fetch(`/admin/peminjaman/${id}/selesai`, {
+      method: 'POST',
+      headers: {'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>', 'Content-Type': 'application/json'},
+      body: JSON.stringify({ barang: checkedItems })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'selesai') {
+        const aksiCell = document.getElementById(`aksi-${id}`);
+        const statusCell = document.getElementById(`status-${id}`);
+        if (aksiCell) aksiCell.innerHTML = '';
+        if (statusCell) statusCell.innerHTML = `<span class="text-green-600 font-semibold text-xs">Selesai</span>`;
+        document.getElementById('checklistModal').classList.add('hidden');
+      } else {
+        alert('Belum semua barang dikembalikan!');
+      }
+    });
+  }
 </script>
-<?php $__env->stopPush(); ?>
-
-<!-- Modal Popup Tangguhkan -->
-<div id="tangguhkanModal" class="fixed inset-0 z-[999] hidden bg-black/40 px-4 flex items-center justify-center">
-  <div class="bg-white rounded-lg p-6 w-full max-w-md shadow" onclick="event.stopPropagation()">
-    <h2 class="text-md font-semibold mb-3 text-gray-800">Berikan alasan menangguhkan peminjaman</h2>
-    <textarea id="alasanTangguh" class="w-full border border-gray-300 rounded px-3 py-2 text-sm mb-4" rows="3" placeholder="Tulis alasan Anda..."></textarea>
-    <div class="flex justify-end gap-2">
-      <button onclick="closeTangguhkan()" class="text-gray-500 hover:underline text-sm">Batal</button>
-      <button onclick="submitTangguhkan()" class="bg-green-600 hover:bg-green-800 text-white px-4 py-1 text-sm rounded">Kirim</button>
-    </div>
-  </div>
-</div>
-
-
-<?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/components/pengajuan/table-pengajuan-admin.blade.php ENDPATH**/ ?>
+<?php $__env->stopPush(); ?><?php /**PATH C:\Users\User\Documents\Proyek-Akhir\resources\views/components/pengajuan/table-pengajuan-admin.blade.php ENDPATH**/ ?>

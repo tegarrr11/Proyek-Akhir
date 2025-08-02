@@ -10,7 +10,7 @@
 <?php $component->withAttributes([]); ?>
   <table class="w-full text-sm">
     <thead class="bg-gray-100">
-      <tr>
+      <tr class="text-left">
         <th class="px-4 py-2">No.</th>
         <th class="px-4 py-2">Pengajuan</th>
         <th class="px-4 py-2">Tanggal Pengajuan</th>
@@ -42,15 +42,24 @@
         </td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full
-            <?php if($item->verifikasi_sarpras === 'diterima'): ?>
-              bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full font-medium
-            <?php elseif($item->verifikasi_sarpras === 'proses'): ?>
-              bg-gray-200 text-grey-700 text-xs px-3 py-1 rounded-full font-medium
-            <?php else: ?>
-              bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium
-            <?php endif; ?>">
-            <?php echo e(ucfirst($item->verifikasi_sarpras)); ?>
+          <?php
+            // Jika verifikasi BEM sudah diterima tapi sarpras belum diisi, maka anggap "diajukan"
+            $sarpras = $item->verifikasi_sarpras;
+            if ($item->verifikasi_bem === 'diterima' && is_null($sarpras)) {
+              $sarpras = 'diajukan';
+            }
+
+            $sarprasClass = match($sarpras) {
+              'diterima' => 'bg-green-100 text-green-700',
+              'ditolak' => 'bg-red-100 text-red-600',
+              'diajukan' => 'bg-gray-200 text-gray-600 font-medium',
+              null => 'bg-gray-100 text-gray-500',
+              default => 'bg-gray-200 text-gray-700'
+            };
+          ?>
+
+          <span class="px-3 py-1 text-xs rounded-full <?php echo e($sarprasClass); ?>">
+            <?php echo e($sarpras ? ucfirst($sarpras) : '-'); ?>
 
           </span>
         </td>

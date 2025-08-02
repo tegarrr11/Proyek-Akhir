@@ -15,6 +15,50 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
 @endphp
 
 <div id="step1" class="bg-white border-t p-4 space-y-4 active-step">
+  {{-- Waktu Kegiatan --}}
+  <div class="mb-4">
+    <label class="block text-sm font-medium mb-1">Waktu Kegiatan *</label>
+
+    {{-- Baris Tanggal --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Tanggal Mulai</label>
+        <input type="date" name="tgl_kegiatan" value="{{ old('tgl_kegiatan') }}"
+          class="w-full border border-gray-500 rounded px-3 py-2" required>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Tanggal Berakhir</label>
+        <input type="date" name="tgl_kegiatan_berakhir" value="{{ old('tgl_kegiatan_berakhir') }}"
+          class="w-full border border-gray-500 rounded px-3 py-2" required>
+      </div>
+    </div>
+
+    {{-- Baris Jam --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Jam Mulai</label>
+        <input type="time" name="waktu_mulai" value="{{ old('waktu_mulai') }}"
+          class="w-full border border-gray-500 rounded px-3 py-2" required>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Jam Berakhir</label>
+        <input type="time" name="waktu_berakhir" value="{{ old('waktu_berakhir') }}"
+          class="w-full border border-gray-500 rounded px-3 py-2" required>
+      </div>
+    </div>
+
+    {{-- Error Message --}}
+    @error('tgl_kegiatan')
+      <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+    @enderror
+    @error('waktu_mulai')
+      <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+    @enderror
+    @error('waktu_berakhir')
+      <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+    @enderror
+  </div>
+
   {{-- Pilih Gedung --}}
   <div>
     <label class="block mb-1 text-sm font-medium">Ruangan *</label>
@@ -171,17 +215,38 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
 
 <script>
   const fasilitasData = {};
+  document.getElementById('tanggal_mulai')?.addEventListener('change', ambilFasilitasTersedia);
+  document.getElementById('tanggal_selesai')?.addEventListener('change', ambilFasilitasTersedia);
+  document.getElementById('gedung-select')?.addEventListener('change', ambilFasilitasTersedia);
 
   function showFasilitasModal() {
     document.getElementById('fasilitasModal').classList.remove('hidden');
     document.getElementById('fasilitasModal').classList.add('flex');
-    tampilkanFasilitas(); 
+    ambilFasilitasTersedia(); // ambil data terbaru berdasarkan tanggal
   }
-
 
   function hideFasilitasModal() {
     document.getElementById('fasilitasModal')?.classList.add('hidden');
   }
+
+  async function ambilFasilitasTersedia() {
+  const tanggalMulai = document.getElementById('tanggal_mulai').value;
+  const tanggalSelesai = document.getElementById('tanggal_selesai').value;
+  const gedung = document.getElementById('gedung-select').value;
+
+  if (!tanggalMulai || !tanggalSelesai || !gedung) return;
+
+  try {
+      const res = await fetch(`/fasilitas/tersedia?tanggal_mulai=${tanggalMulai}&tanggal_selesai=${tanggalSelesai}&gedung=${gedung}`);
+      const data = await res.json();
+      semuaFasilitas = data; // Ganti isi fasilitas yang tersedia
+      halaman = 1;
+      tampilkanFasilitas(); // Refresh tampilan modal
+    } catch (error) {
+      console.error('Gagal mengambil fasilitas:', error);
+    }
+  }
+
 
   function tambahKeFasilitas(id, nama, stok) {
     const tbody = document.getElementById('fasilitas-tambahan-body');
@@ -264,7 +329,10 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
       const jenisList = jenisByGedung[gedung] || [];
 
       jenisWrapper.classList.add('hidden');
-      radioContainer.innerHTML = '';
+      while (radioContainer.firstChild) {
+        radioContainer.removeChild(radioContainer.firstChild);
+      }
+
       if (undanganSection) undanganSection.classList.add('hidden');
 
       if (!jenisList.length) return;
@@ -478,58 +546,58 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
     document.getElementById('fasilitasModal').classList.remove('flex');
   }
 
-function lanjutKeTahap2() {
-  const selectGedung = document.getElementById('gedung-select');
-  const errorMsg = document.getElementById('gedungErrorMsg');
-  const jenisErrorMsg = document.getElementById('jenisErrorMsg');
-  const jumlahInputs = document.querySelectorAll('.jumlah-barang');
-  const peringatan = document.getElementById('peringatan');
-  const jenisKegiatanInputs = document.querySelectorAll('input[name="jenis_kegiatan"]');
-  const step1 = document.getElementById('step1');
-  const step2 = document.getElementById('step2');
+  function lanjutKeTahap2() {
+    const selectGedung = document.getElementById('gedung-select');
+    const errorMsg = document.getElementById('gedungErrorMsg');
+    const jenisErrorMsg = document.getElementById('jenisErrorMsg');
+    const jumlahInputs = document.querySelectorAll('.jumlah-barang');
+    const peringatan = document.getElementById('peringatan');
+    const jenisKegiatanInputs = document.querySelectorAll('input[name="jenis_kegiatan"]');
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
 
-  let stokValid = true;
-  let jenisKegiatanValid = true;
+    let stokValid = true;
+    let jenisKegiatanValid = true;
 
-  // Validasi stok
-  jumlahInputs.forEach(input => {
-    const max = parseInt(input.max);
-    const value = parseInt(input.value);
-    if (value > max) stokValid = false;
-  });
+    // Validasi stok
+    jumlahInputs.forEach(input => {
+      const max = parseInt(input.max);
+      const value = parseInt(input.value);
+      if (value > max) stokValid = false;
+    });
 
-  // Menampilkan peringatan jika stok tidak valid
-  if (!stokValid) {
-    peringatan.classList.remove('hidden');
-    peringatan.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  } else {
-    peringatan.classList.add('hidden');
+    // Menampilkan peringatan jika stok tidak valid
+    if (!stokValid) {
+      peringatan.classList.remove('hidden');
+      peringatan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    } else {
+      peringatan.classList.add('hidden');
+    }
+
+    // Validasi ruangan (gedung)
+    if (!selectGedung.value) {
+      errorMsg.classList.remove('hidden');
+      return;
+    } else {
+      errorMsg.classList.add('hidden');
+    }
+
+    // Validasi jenis kegiatan
+    const selectedJenis = document.querySelector('input[name="jenis_kegiatan"]:checked');
+    if (!selectedJenis) {
+      jenisErrorMsg.classList.remove('hidden');
+      jenisKegiatanValid = false;
+    } else {
+      jenisErrorMsg.classList.add('hidden');
+    }
+
+    // Jika semua valid, lanjutkan ke langkah 2
+    if (stokValid && jenisKegiatanValid) {
+      step1.classList.remove('active-step');
+      step2.classList.add('active-step');
+      toggleStep(2);
+    }
   }
-
-  // Validasi ruangan (gedung)
-  if (!selectGedung.value) {
-    errorMsg.classList.remove('hidden');
-    return;
-  } else {
-    errorMsg.classList.add('hidden');
-  }
-
-  // Validasi jenis kegiatan
-  const selectedJenis = document.querySelector('input[name="jenis_kegiatan"]:checked');
-  if (!selectedJenis) {
-    jenisErrorMsg.classList.remove('hidden');
-    jenisKegiatanValid = false;
-  } else {
-    jenisErrorMsg.classList.add('hidden');
-  }
-
-  // Jika semua valid, lanjutkan ke langkah 2
-  if (stokValid && jenisKegiatanValid) {
-    step1.classList.remove('active-step');
-    step2.classList.add('active-step');
-    toggleStep(2);
-  }
-}
 
 </script>

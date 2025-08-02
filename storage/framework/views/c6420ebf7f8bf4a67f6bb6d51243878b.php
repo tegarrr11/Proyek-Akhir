@@ -20,7 +20,7 @@
 <?php $component->withAttributes([]); ?>
   <table class="w-full text-sm">
     <thead class="bg-gray-100">
-      <tr class="font-semibold">
+      <tr class="font-semibold text-left">
         <th class="px-4 py-2 text-left">No.</th>
         <th class="px-4 py-2">Judul Kegiatan</th>
         <th class="px-4 py-2">Tanggal Pengajuan</th>
@@ -45,7 +45,7 @@
           <?php elseif($item->verifikasi_sarpras === 'ditolak'): ?>
           <span class="bg-green-100 text-red-800 text-xs font-semibold px-3 py-1 rounded hover:bg-red-200 transition">Ditolak</span>
           <?php else: ?>
-          <span class="bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600">Proses</span>
+          <span class="bg-yellow-100 text-yellow-600 text-xs px-3 py-1 rounded-full font-medium">Proses</span>
           <?php endif; ?>
         </td>
         <td class="px-4 py-2"><?php echo e($item->organisasi); ?></td>

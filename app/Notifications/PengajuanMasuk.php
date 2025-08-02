@@ -36,7 +36,7 @@ class PengajuanMasuk extends Notification
     {
         return (new MailMessage)
         ->subject('Pengajuan Telah Dikirim')
-        ->greeting('Halo ' . $notifiable->name)
+        ->greeting('Halo, ' . $notifiable->name)
         ->line('Pengajuan Anda telah berhasil dikirim.')
         ->action('Lihat Detail', url('/mahasiswa/peminjaman'))
         ->line('Terima kasih telah menggunakan layanan kami.');

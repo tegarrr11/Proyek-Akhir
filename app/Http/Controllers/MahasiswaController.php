@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Gedung;
 use App\Models\Peminjaman;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\DetailPeminjaman;
 
 class MahasiswaController extends Controller
 {
@@ -86,5 +88,58 @@ class MahasiswaController extends Controller
             ->get();
 
         return view('pages.mahasiswa.peminjaman', compact('pengajuans', 'riwayats'));
+    }
+
+    public function storePengajuan(Request $request)
+    {
+        $request->validate([
+            'judul_kegiatan' => 'required|string|max:255',
+            'organisasi' => 'required|string|max:255',
+            'penanggung_jawab' => 'required|string|max:255',
+            'tgl_kegiatan' => 'required|date',
+            'tgl_kegiatan_berakhir' => 'required|date|after_or_equal:tgl_kegiatan',
+            'waktu_mulai' => 'required',
+            'waktu_berakhir' => 'required|after:waktu_mulai',
+            'gedung_id' => 'required|exists:gedungs,id',
+            'detail_peminjaman' => 'array',
+            'detail_peminjaman.*.fasilitas_id' => 'exists:fasilitas,id',
+            'detail_peminjaman.*.jumlah' => 'integer|min:1',
+            // tambahkan validasi file jika upload dokumen
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $peminjaman = Peminjaman::create([
+                'user_id' => auth()->id(),
+                'judul_kegiatan' => $request->judul_kegiatan,
+                'organisasi' => $request->organisasi,
+                'penanggung_jawab' => $request->penanggung_jawab,
+                'tgl_kegiatan' => $request->tgl_kegiatan,
+                'tgl_kegiatan_berakhir' => $request->tgl_kegiatan_berakhir,
+                'waktu_mulai' => $request->waktu_mulai,
+                'waktu_berakhir' => $request->waktu_berakhir,
+                'gedung_id' => $request->gedung_id,
+                'status_verifikasi_bem' => 'diajukan',
+                'status_verifikasi_sarpras' => null,
+                'status_peminjaman' => '-',
+                'status_pengembalian' => null,
+                // 'proposal' => 'file_path' // jika upload
+            ]);
+
+            // Simpan detail fasilitas yang dipinjam
+            foreach ($request->detail_peminjaman ?? [] as $detail) {
+                DetailPeminjaman::create([
+                    'peminjaman_id' => $peminjaman->id,
+                    'fasilitas_id' => $detail['fasilitas_id'],
+                    'jumlah' => $detail['jumlah'],
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Pengajuan berhasil dikirim');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan pengajuan');
+        }
     }
 }

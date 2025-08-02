@@ -96,7 +96,7 @@ Route::get('pegawai/list', function () {
 Route::get('/sarpras/peminjaman/{id}/detail', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.detail');
 Route::get('/kalender', [KalenderController::class, 'index'])->middleware('auth')->name('kalender.index');
 Route::get('/mahasiswa/peminjaman/{id}', [MahasiswaController::class, 'show']);
-Route::get('/admin/dashboard', [AdminPeminjamanController::class, 'dashboard'])->name('admin.dashboard'); // ✅ PERBAIKAN DISINI
+Route::get('/admin/dashboard', [AdminPeminjamanController::class, 'dashboard'])->name('admin.dashboard'); 
 Route::get('/bem/dashboard', [BemController::class, 'dashboard'])->name('bem.dashboard');
 Route::get('/dosen/dashboard', [BemController::class, 'dashboard']);
 Route::get('/dosen/peminjaman/create', [DosenPeminjamanController::class, 'create']);
@@ -106,6 +106,9 @@ Route::get('/api/fasilitas-tambahan', function () {
 });
 Route::post('/admin/fasilitas/import', [AdminController::class, 'importFasilitas'])->name('admin.fasilitas.import');
 Route::patch('/admin/peminjaman/kembalikan/{id}', [PeminjamanController::class, 'adminKembalikan'])->name('admin.peminjaman.kembalikan');
+Route::get('/fasilitas/tersedia', [PeminjamanController::class, 'getAvailableFasilitas']);
+Route::post('/mahasiswa/peminjaman', [MahasiswaController::class, 'storePengajuan'])->name('mahasiswa.peminjaman.store');
+
 
 // ========== AUTH GROUP ==========
 Route::middleware(['auth'])->group(function () {
@@ -263,3 +266,28 @@ Route::patch('/mahasiswa/peminjaman/{id}/ambil', [MahasiswaController::class, 'a
 Route::middleware(['auth'])->group(function () {
     Route::post('/diskusi', [DiskusiController::class, 'store'])->name('diskusi.store');
 });
+
+Route::patch('/admin/peminjaman/{id}/diambil', [AdminPeminjamanController::class, 'tandaiDiambil'])->name('admin.peminjaman.ambil');
+Route::patch('/admin/peminjaman/{id}/selesai', [AdminPeminjamanController::class, 'tandaiSelesai'])->name('admin.peminjaman.selesai');
+Route::get('/api/fasilitas-terpakai', [FasilitasController::class, 'cekTerpakai']);
+Route::post('/admin/peminjaman/{id}/setujui', [PeminjamanController::class, 'setujui']);
+Route::post('/admin/peminjaman/{id}/ambil', [PeminjamanController::class, 'ambil']);
+Route::get('/admin/peminjaman/{id}/checklist', [PeminjamanController::class, 'checklist']);
+Route::post('/admin/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesaikan']);
+
+Route::get('/api/peminjaman/{id}/checklist', function ($id) {
+    $peminjaman = App\Models\Peminjaman::with('fasilitas')->findOrFail($id);
+
+    $fasilitas = $peminjaman->fasilitas->map(function ($item) {
+        return [
+            'nama' => $item->nama,
+            'jumlah' => $item->pivot->jumlah
+        ];
+    });
+
+    return response()->json([
+        'fasilitas' => $fasilitas
+    ]);
+});
+
+
