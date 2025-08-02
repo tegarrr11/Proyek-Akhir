@@ -36,10 +36,10 @@ class PengajuanDiterimaSarpras extends Notification
     {
         return (new MailMessage)
         ->subject('Pengajuan Disetujui Sarpras')
-        ->greeting('Halo ' . $notifiable->name)
+        ->greeting('Halo, ' . $notifiable->name)
         ->line('Pengajuan Anda telah disetujui oleh Sarpras.')
         ->action('Lihat Detail', url('/mahasiswa/peminjaman'))
-        ->line('Silahkan gunakan fasilitas dengan bijak, Terimakasih:).');
+        ->line('Segera lakukan konfirmasi pengambilan fasilitas. Silahkan gunakan fasilitas dengan bijak, Terimakasih:).');
     }
 
     /**

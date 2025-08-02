@@ -30,50 +30,6 @@
       class="w-full border border-gray-500 rounded px-3 py-2" required>
   </div>
 
-  {{-- Waktu Kegiatan --}}
-  <div class="mb-4">
-    <label class="block text-sm font-medium mb-1">Waktu Kegiatan *</label>
-
-    {{-- Baris Tanggal --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
-      <div>
-        <label class="block text-xs text-gray-600 mb-1">Tanggal Mulai</label>
-        <input type="date" name="tgl_kegiatan" value="{{ old('tgl_kegiatan') }}"
-          class="w-full border border-gray-500 rounded px-3 py-2" required>
-      </div>
-      <div>
-        <label class="block text-xs text-gray-600 mb-1">Tanggal Berakhir</label>
-        <input type="date" name="tgl_kegiatan_berakhir" value="{{ old('tgl_kegiatan_berakhir') }}"
-          class="w-full border border-gray-500 rounded px-3 py-2" required>
-      </div>
-    </div>
-
-    {{-- Baris Jam --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
-      <div>
-        <label class="block text-xs text-gray-600 mb-1">Jam Mulai</label>
-        <input type="time" name="waktu_mulai" value="{{ old('waktu_mulai') }}"
-          class="w-full border border-gray-500 rounded px-3 py-2" required>
-      </div>
-      <div>
-        <label class="block text-xs text-gray-600 mb-1">Jam Berakhir</label>
-        <input type="time" name="waktu_berakhir" value="{{ old('waktu_berakhir') }}"
-          class="w-full border border-gray-500 rounded px-3 py-2" required>
-      </div>
-    </div>
-
-    {{-- Error Message --}}
-    @error('tgl_kegiatan')
-      <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-    @enderror
-    @error('waktu_mulai')
-      <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-    @enderror
-    @error('waktu_berakhir')
-      <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-    @enderror
-  </div>
-
   {{-- Aktivitas --}}
   <div>
     <label class="block text-sm font-medium mb-1">Aktivitas *</label>

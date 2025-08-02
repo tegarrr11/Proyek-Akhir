@@ -49,22 +49,25 @@ class SocialiteController extends Controller
 
             Auth::login($registeredUser, true);
         } else {
-            // Panggil API untuk mendapatkan data user
-            // $mahasiswaData = url
-            // $mahasiswa = array_filter($mahasiswaData, function ($item) use ($email) {
-            //     return $item['email'] === $email;
-            // });
+            // Tentukan role & ambil data dari API
             if ($email === 'bem@pcr.ac.id') {
                 $role = 'bem';
+                $check = null;
             } elseif (Str::endsWith($email, '@pcr.ac.id')) {
                 $check = $this->checkEmailDosen($email);
+                if (!$check) {
+                    return redirect()->route('login')->with('error', 'Email pegawai tidak ditemukan.');
+                }
+                $role = $check->role; // admin atau dosen
             } elseif (Str::endsWith($email, '@mahasiswa.pcr.ac.id')) {
                 $check = $this->checkEmail($email);
+                if (!$check) {
+                    return redirect()->route('login')->with('error', 'Email mahasiswa tidak ditemukan.');
+                }
                 $role = 'mahasiswa';
             }
 
             // dd($check);
-
 
             $user = User::create([
                 'name' => ucwords(strtolower($check?->name ?? $socialUser->name,)),
@@ -84,62 +87,103 @@ class SocialiteController extends Controller
         }
 
         Cookie::queue('user_session', Auth::user()->id, 120);
-        return redirect()->intended('mahasiswa/dashboard');
+        return redirect()->intended("{$role}/dashboard");
     }
 
     public function checkEmailDosen(string $email)
     {
         $url = "https://v2.api.pcr.ac.id/api/pegawai?collection=pegawai-aktif";
         $response = Http::withHeaders([
-            'apikey' => env('API_KEY_PCR'),
+            'apikey' => ('Ovk9PikyPmncW649C0vzEMmRWoOz20Ng'),
         ])->post($url);
 
         $data = $response->json();
-        $check = array_filter($data['items'], function ($item) use ($email) {
-            return $item['email'] === $email;
-        });
 
+        $check = array_filter($data['items'], fn($item) => $item['email'] === $email);
 
-        if (count($check) === 0 || $check['posisi'] !== 'Dosen') {
-            return "Email tidak ditemukan.";
+        if (empty($check)) {
+            return null;
         }
 
-        $dosen = reset($check);
+        $pegawai = reset($check);
+        $posisi = strtolower($pegawai['posisi'] ?? '');
+
+        // Tentukan role
+        $role = (str_contains($posisi, 'sarana dan prasarana')) ? 'admin' : 'dosen';
 
         return (object) [
-            'prodi' => $dosen['prodi'] ?? null,
-            'inisial' => $dosen['inisial'] ?? null,
-        ];
-        $url = "https://v2.api.pcr.ac.id/api/pegawai?collection=pegawai-aktif";
-        $response = Http::withHeaders([
-            'apikey' => env('API_KEY_PCR'),
-        ])->post($url);
-
-        $data = $response->json();
-        $check = array_filter($data['items'], function ($item) use ($email) {
-            return $item['email'] === $email;
-        });
-
-        $dosen = reset($check);
-
-        // Set role berdasarkan posisi
-        $posisi = $dosen['posisi'] ?? null;
-        $role = null;
-
-        if ($posisi) {
-            if (strtolower($posisi) === 'dosen') {
-                $role = 'dosen';
-            } elseif (strtolower($posisi) === 'Staf Saran dan Prasarana') { //pastiin posisi di API 
-                $role = 'admin';
-            }
-        }
-
-        return (object) [
-            'prodi' => $dosen['prodi'] ?? null,
-            'inisial' => $dosen['inisial'] ?? null,
+            'prodi' => $pegawai['prodi'] ?? null,
+            'inisial' => $pegawai['inisial'] ?? null,
             'posisi' => $posisi,
             'role' => $role,
         ];
+
+        // $data = $response->json();
+        // $check = array_filter($data['items'], function ($item) use ($email) {
+        //     return $item['email'] === $email;
+        // });
+
+
+        // if (count($check) === 0 || $check['posisi'] !== 'Dosen') {
+        //     return "Email tidak ditemukan.";
+        // }
+
+        // $dosen = reset($check);
+
+        // return (object) [
+        //     'prodi' => $dosen['prodi'] ?? null,
+        //     'inisial' => $dosen['inisial'] ?? null,
+        // ];
+        // $url = "https://v2.api.pcr.ac.id/api/pegawai?collection=pegawai-aktif";
+        // $response = Http::withHeaders([
+        //     'apikey' => ('Ovk9PikyPmncW649C0vzEMmRWoOz20Ng'),
+        // ])->post($url);
+
+        // $data = $response->json();
+        // $check = array_filter($data['items'], fn($item) => $item['email'] === $email);
+
+        // if (empty($check)) {
+        //     return null;
+        // }
+
+        // $pegawai = reset($check);
+        // $posisi = strtolower($pegawai['posisi'] ?? '');
+
+        // // Logika role sederhana
+        // $role = (str_contains($posisi, 'sarana dan prasarana')) ? 'admin' : 'dosen';
+
+        // return (object) [
+        //     'prodi' => $pegawai['prodi'] ?? null,
+        //     'inisial' => $pegawai['inisial'] ?? null,
+        //     'posisi' => $posisi,
+        //     'role' => $role,
+        // ];
+
+        // $data = $response->json();
+        // $check = array_filter($data['items'], function ($item) use ($email) {
+        //     return $item['email'] === $email;
+        // });
+
+        // $dosen = reset($check);
+
+        // // Set role berdasarkan posisi
+        // $posisi = $dosen['posisi'] ?? null;
+        // $role = null;
+
+        // if ($posisi) {
+        //     if (strtolower($posisi) === 'dosen') {
+        //         $role = 'dosen';
+        //     } elseif (strtolower($posisi) === 'Staf Saran dan Prasarana') { //pastiin posisi di API 
+        //         $role = 'admin';
+        //     }
+        // }
+
+        // return (object) [
+        //     'prodi' => $dosen['prodi'] ?? null,
+        //     'inisial' => $dosen['inisial'] ?? null,
+        //     'posisi' => $posisi,
+        //     'role' => $role,
+        // ];
     }
 
     public static function checkEmail(string $email)

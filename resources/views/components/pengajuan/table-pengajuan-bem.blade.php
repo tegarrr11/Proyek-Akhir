@@ -29,14 +29,12 @@
 
         <td class="px-4 py-2">
           <div class="flex items-center gap-2 justify-center">
-            <form method="POST" action="{{ route('bem.peminjaman.verifikasi', $pengajuan->id) }}">
+            <form method="POST" action="{{ route('bem.peminjaman.approve', $pengajuan->id) }}">
               @csrf
-              <input type="hidden" name="verifikasi_bem" value="diterima">
               <button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded">
                 Terima
               </button>
             </form>
-
             <button onclick="showDetail({{ $pengajuan->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>            </button>
           </div>

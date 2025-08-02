@@ -26,9 +26,21 @@ class PengajuanKeAdmin extends Notification
     {
         return (new MailMessage)
             ->subject('Pengajuan Menunggu Persetujuan Anda')
-            ->greeting('Halo ' . $notifiable->name)
+            ->greeting('Halo, ' . $notifiable->name)
             ->line('Pengajuan dari mahasiswa ' . $this->peminjaman->user->name . ' telah disetujui oleh BEM.')
             ->action('Lihat Detail Pengajuan', url('/admin/peminjaman'))
             ->line('Segera lakukan verifikasi akhir sebagai admin.');
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            //
+        ];
     }
 }

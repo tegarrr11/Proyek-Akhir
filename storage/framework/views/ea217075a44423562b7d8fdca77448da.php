@@ -24,7 +24,7 @@
 <?php $component->withAttributes([]); ?>
   <table class="w-full text-sm">
     <thead class="bg-gray-100">
-      <tr class="font-semibold">
+      <tr class="font-semibold text-left">
         <th class="px-4 py-2 text-left">No.</th>
         <th class="px-4 py-2">Judul Kegiatan</th>
         <th class="px-4 py-2">Tanggal Pengajuan</th>
