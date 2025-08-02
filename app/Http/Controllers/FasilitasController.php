@@ -17,16 +17,26 @@ class FasilitasController extends Controller
     {
         $request->validate([
             'gedung_id' => 'required|exists:gedungs,id',
-            'nama_barang' => 'required|string',
-            'stok' => 'required|integer|min:0',
+            'nama_barang' => 'required|string|max:255',
+            'stok' => 'required|integer|min:1',
         ]);
 
-        Fasilitas::create([
-            'gedung_id' => $request->gedung_id,
-            'nama_barang' => $request->nama_barang,
-            'stok' => $request->stok,
-            'is_available' => true // kalau ada kolom ini
-        ]);
+        $existing = Fasilitas::where('gedung_id', $request->gedung_id)
+            ->whereRaw('LOWER(nama_barang) = ?', [strtolower($request->nama_barang)])
+            ->first();
+
+        if ($existing) {
+            // Jika sudah ada, tambahkan stoknya saja
+            $existing->stok += $request->stok;
+            $existing->save();
+        } else {
+            // Jika belum ada, buat fasilitas baru
+            Fasilitas::create([
+                'gedung_id' => $request->gedung_id,
+                'nama_barang' => $request->nama_barang,
+                'stok' => $request->stok,
+            ]);
+        }
 
         return redirect()->route('admin.fasilitas')->with('success', 'Fasilitas berhasil ditambahkan.');
     }

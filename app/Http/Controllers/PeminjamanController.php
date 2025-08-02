@@ -120,7 +120,7 @@ class PeminjamanController extends Controller
             'proposal' => $fileProposal,
             'undangan_pembicara' => $fileUndangan,
             'verifikasi_bem' => 'diajukan',
-            'verifikasi_sarpras' => 'diajukan',
+            'verifikasi_sarpras' => null,
             'status_peminjaman' => null,
             'status_pengembalian' => null,
         ]);
