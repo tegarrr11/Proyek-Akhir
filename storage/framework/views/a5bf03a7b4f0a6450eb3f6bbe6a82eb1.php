@@ -2,7 +2,6 @@
   id="successToast"
   x-data="{ show: false, message: '' }"
   x-show="show"
-  x-init=""
   x-transition:leave="transition ease-in duration-500"
   x-transition:leave-start="opacity-100 scale-100"
   x-transition:leave-end="opacity-0 scale-90"
@@ -24,7 +23,8 @@
 </div>
 
 
-<div class="bg-white rounded-md shadow !p-6" x-data="{ tab: '<?php echo e(request('tab') ?? $gedungs->first()->id); ?>' }">
+<div class="bg-white rounded-md shadow !p-6" 
+     x-data="{ tab: '<?php echo e(request('tab') ?? $gedungs->first()->id); ?>', confirmDeleteOpen: false, deleteFormId: '' }">
   <h2 class="text-xl font-semibold mb-4">Daftar Fasilitas per Gedung</h2>
 
   
@@ -92,7 +92,6 @@
                   </tr>
                 </form>
                 <?php else: ?>
-                <?php $editingId = request('edit'); ?>
                 <tr 
                   x-data="{
                     editing: false,
@@ -138,10 +137,12 @@
                       </template>
 
                       
-                      <form action="<?php echo e(route('admin.fasilitas.destroy', $item->id)); ?>" method="POST" data-action="delete" x-show="!editing">
+                      <form id="deleteForm-<?php echo e($item->id); ?>" action="<?php echo e(route('admin.fasilitas.destroy', $item->id)); ?>" method="POST" data-action="delete" x-show="!editing">
                         <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                         <input type="hidden" name="tab" value="<?php echo e($tabId); ?>">
-                        <button type="submit" onclick="return confirm('Yakin ingin menghapus?')" class="text-red-500 hover:text-red-700">
+                        <button type="button" 
+                          @click="confirmDeleteOpen = true; deleteFormId = 'deleteForm-<?php echo e($item->id); ?>'" 
+                          class="text-red-500 hover:text-red-700">
                           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current text-red-500" viewBox="0 0 24 24">
                             <path d="M9 3h6a1 1 0 011 1v1h5v2H4V5h5V4a1 1 0 011-1zm-4 6h14l-1.5 13.5a1 1 0 01-1 .5H7.5a1 1 0 01-1-.5L5 9z"/>
                           </svg>
@@ -173,6 +174,24 @@
       <?php endif; ?>
     </div>
   <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+  
+  <div x-show="confirmDeleteOpen" style="display: none;" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 text-center">
+      <div class="flex justify-center mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h2 class="text-lg font-semibold mb-2">Anda yakin ingin menghapus barang default dari ruangan ini?</h2>
+      <p class="text-gray-600 mb-6 text-sm">Data akan dihapus secara permanen dan tidak dapat dikembalikan. Yakin ingin melanjutkan?</p>
+      <div class="flex justify-center gap-4">
+        <button @click="document.getElementById(deleteFormId).dispatchEvent(new Event('submit', {cancelable: true})); confirmDeleteOpen = false;" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Ya</button>
+        <button @click="confirmDeleteOpen = false" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Tidak</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <?php $__env->startPush('scripts'); ?>
@@ -232,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-  // Form delete
+    // Form delete AJAX
     document.querySelectorAll('form[data-action="delete"]').forEach(form => {
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -251,10 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
           });
 
           if (res.ok) {
-            // Hapus baris dari tabel tanpa reload
             if (row) row.remove();
-
-            // Tampilkan toast sukses
             showSuccessToast('Fasilitas berhasil dihapus');
           } else {
             showSuccessToast('Gagal menghapus data!');
@@ -285,8 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
           if (newTabContent && currentTabContent) {
             currentTabContent.innerHTML = newTabContent.innerHTML;
             history.pushState({}, '', url);
-
-            // ⬅️ Wajib: bind ulang semua event
             bindAllEvents();
           }
         } catch {
@@ -296,12 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  
-
-  // Jalankan pertama kali
   bindAllEvents();
-
-  
 });
 
 window.submitEdit = async function (el, url, nama, stok, gedungId) {
@@ -335,7 +344,6 @@ window.submitEdit = async function (el, url, nama, stok, gedungId) {
   }
 };
 
-
 window.showSuccessToast = function (message) {
   const toast = document.getElementById('successToast');
   if (!toast) return;
@@ -347,9 +355,6 @@ window.showSuccessToast = function (message) {
     setTimeout(() => alpineComponent.show = false, 2000);
   }
 };
-
-
 </script>
 <?php $__env->stopPush(); ?>
-
 <?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/table-fasilitas.blade.php ENDPATH**/ ?>

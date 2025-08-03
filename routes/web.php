@@ -130,6 +130,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/ruangan/update', [AdminController::class, 'update'])->name('admin.ruangan.update');
         Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('admin.peminjaman.downloadProposal');
         Route::get('/peminjaman/download-undangan/{id}', [PeminjamanController::class, 'downloadUndangan']);
+        Route::get('/peminjaman/{id}/checklist-html', [AdminController::class, 'getChecklist'])->name('admin.peminjaman.checklist');;
+        Route::post('/peminjaman/{id}/selesai', [AdminController::class, 'selesai'])->name('admin.peminjaman.selesai');
+        Route::post('/peminjaman/{id}/setujui', [AdminController::class, 'setujuiPeminjaman'])->name('admin.peminjaman.setujui');
+
+
     });
 
     // === MAHASISWA ===

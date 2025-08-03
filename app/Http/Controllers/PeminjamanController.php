@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
@@ -79,7 +79,7 @@ class PeminjamanController extends Controller
             ->where(function ($query) use ($mulai, $akhir) {
                 $query->where(function ($q) use ($mulai, $akhir) {
                     $q->whereTime('waktu_mulai', '<', $akhir)
-                    ->whereTime('waktu_berakhir', '>', $mulai);
+                        ->whereTime('waktu_berakhir', '>', $mulai);
                 });
             })
             ->exists();
@@ -194,10 +194,10 @@ class PeminjamanController extends Controller
                 ->whereIn('verifikasi_sarpras', ['diajukan', 'diterima'])
                 ->where(function ($q) use ($waktuMulai, $waktuAkhir) {
                     $q->whereTime('waktu_mulai', '<', $waktuAkhir)
-                    ->whereTime('waktu_berakhir', '>', $waktuMulai);
+                        ->whereTime('waktu_berakhir', '>', $waktuMulai);
                 });
         })->where('fasilitas_id', $fasilitasId)
-        ->sum('jumlah');
+            ->sum('jumlah');
 
         return max($fasilitas->stok - $dipinjam, 0);
     }
@@ -220,35 +220,35 @@ class PeminjamanController extends Controller
     }
 
     // Mahasiswa mengambil barang setelah disetujui.
-    public function ambil($id)
-    {
-        $peminjaman = Peminjaman::with('detailPeminjaman.fasilitas')->findOrFail($id);
+    // public function ambil($id)
+    // {
+    //     $peminjaman = Peminjaman::with('detailPeminjaman.fasilitas')->findOrFail($id);
 
-        // Validasi: hanya bisa ambil jika disetujui dan belum diambil
-        if ($peminjaman->verifikasi_sarpras === 'diterima' && is_null($peminjaman->status_peminjaman)) {
-            foreach ($peminjaman->detailPeminjaman as $detail) {
-                $fasilitas = $detail->fasilitas;
+    //     // Validasi: hanya bisa ambil jika disetujui dan belum diambil
+    //     if ($peminjaman->verifikasi_sarpras === 'diterima' && is_null($peminjaman->status_peminjaman)) {
+    //         foreach ($peminjaman->detailPeminjaman as $detail) {
+    //             $fasilitas = $detail->fasilitas;
 
-                if ($fasilitas && $fasilitas->stok >= $detail->jumlah) {
-                    $fasilitas->stok -= $detail->jumlah;
-                    $fasilitas->is_available = $fasilitas->stok > 0;
-                    $fasilitas->save();
-                } else {
-                    return back()->with('error', 'Stok tidak mencukupi untuk: ' . $fasilitas->nama_barang);
-                }
-            }
+    //             if ($fasilitas && $fasilitas->stok >= $detail->jumlah) {
+    //                 $fasilitas->stok -= $detail->jumlah;
+    //                 $fasilitas->is_available = $fasilitas->stok > 0;
+    //                 $fasilitas->save();
+    //             } else {
+    //                 return back()->with('error', 'Stok tidak mencukupi untuk: ' . $fasilitas->nama_barang);
+    //             }
+    //         }
 
-            // Simpan status sebagai 'diambil' untuk mencocokkan dengan ENUM
-            $peminjaman->update([
-                'status_peminjaman' => 'ambil',
-                'status_pengembalian' => 'proses',
-            ]);
+    //         // Simpan status sebagai 'diambil' untuk mencocokkan dengan ENUM
+    //         $peminjaman->update([
+    //             'status_peminjaman' => 'ambil',
+    //             'status_pengembalian' => 'proses',
+    //         ]);
 
-            return back()->with('success', 'Barang berhasil diambil.');
-        }
+    //         return back()->with('success', 'Barang berhasil diambil.');
+    //     }
 
-        return back()->with('error', 'Peminjaman tidak valid atau sudah diambil.');
-    }
+    //     return back()->with('error', 'Peminjaman tidak valid atau sudah diambil.');
+    // }
 
     public function adminKembalikan($id)
     {
@@ -278,7 +278,7 @@ class PeminjamanController extends Controller
 
         // Redirect langsung ke tab riwayat
         return redirect()->route('admin.peminjaman', ['tab' => 'riwayat'])
-                        ->with('success', 'Peminjaman ditandai sudah dikembalikan.');
+            ->with('success', 'Peminjaman ditandai sudah dikembalikan.');
     }
 
     // Menampilkan detail peminjaman untuk modal (JSON).
@@ -383,21 +383,13 @@ class PeminjamanController extends Controller
         return redirect()->back()->with('error', 'File undangan tidak ditemukan.');
     }
 
-    public function setujui($id)
-    {
-        try {
-            $peminjaman = Peminjaman::findOrFail($id);
-            $peminjaman->status_peminjaman = 'diterima';
-            $peminjaman->save();
+    // public function setujui($id)
+    // {
+    //     $peminjaman = Peminjaman::findOrFail($id);
+    //     $peminjaman->status_peminjaman = 'diterima';
+    //     $peminjaman->verifikasi_sarpras = 'diterima';
+    //     $peminjaman->save();
 
-            return response()->json(['success' => true]);
-        } catch (\Exception $e) {
-            \Log::error('Error setujuiPeminjaman: ' . $e->getMessage());
-            return response()->json(['error' => 'Gagal menyetujui'], 500);
-        }
-    }
-
-
+    //     return response()->json(['success' => true]);
+    // }
 }
-
-

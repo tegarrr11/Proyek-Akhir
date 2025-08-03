@@ -121,7 +121,7 @@ class MahasiswaController extends Controller
                 'gedung_id' => $request->gedung_id,
                 'status_verifikasi_bem' => 'diajukan',
                 'status_verifikasi_sarpras' => null,
-                'status_peminjaman' => '-',
+                'status_peminjaman' => null,
                 'status_pengembalian' => null,
                 // 'proposal' => 'file_path' // jika upload
             ]);

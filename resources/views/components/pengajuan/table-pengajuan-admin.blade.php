@@ -45,11 +45,11 @@
         <td class="px-4 py-2">{{ $item->organisasi }}</td>
         <td class="px-4 py-2" id="status-{{ $item->id }}">
           @if($item->status_peminjaman === 'ambil')
-            <span class="text-xs text-gray-500 italic">Diambil</span>
+          <span class="text-xs text-gray-500 italic">Diambil</span>
           @elseif($item->status_pengembalian === 'selesai')
-            <span class="text-green-600 font-semibold text-xs">Selesai</span>
+          <span class="text-green-600 font-semibold text-xs">Selesai</span>
           @else
-            <span class="text-xs text-gray-500 italic">-</span>
+          <span class="text-xs text-gray-500 italic">-</span>
           @endif
         </td>
         <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap" id="aksi-{{ $item->id }}">
@@ -59,30 +59,34 @@
           </button>
 
           @if ($item->status_peminjaman === 'diterima' && auth()->user()->role === 'admin')
-            <button onclick="ambilBarang({{ $item->id }})"
-              class="bg-yellow-500 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600" id="btn-ambil-{{ $item->id }}">
-              Ambil
-            </button>
+          <button onclick="ambilBarang({{ $item->id }})"
+            class="bg-yellow-500 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600" id="btn-ambil-{{ $item->id }}">
+            Ambil
+          </button>
           @endif
 
           @if ($item->verifikasi_bem === 'diterima' && auth()->user()->role === 'admin' && $item->status_peminjaman === null)
-            <button onclick="setujuiPeminjaman({{ $item->id }})"
-              class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700" id="btn-setujui-{{ $item->id }}">
-              Diterima
-            </button>
+          <button onclick="setujuiPeminjaman({{ $item->id }})"
+            class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700" id="btn-setujui-{{ $item->id }}">
+            Diterima
+          </button>
           @endif
 
           @if ($item->status_peminjaman === 'diambil' && auth()->user()->role === 'admin')
-            <button onclick="showChecklistModal({{ $item->id }})"
-              class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
-              Selesai
-            </button>
+          <button onclick="showChecklistModal({{ $item->id }}, @json($item->detailPeminjaman))"
+            class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
+            Selesai
+          </button>
           @endif
 
           <button onclick="showDetail({{ $item->id }})"
             class="text-blue-600 hover:text-blue-800 text-sm"
             title="Lihat Detail">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4" />
+              <path d="M12 8h.01" />
+            </svg>
           </button>
         </td>
       </tr>
@@ -96,17 +100,15 @@
 </x-table-wrapper>
 
 <!-- Checklist Modal -->
-<div id="showChecklistModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-30 flex justify-center items-center">
+<div id="showChecklistModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-30 justify-center items-center">
   <div class="w-[90%] max-w-md bg-white p-6 rounded shadow-md">
     <h2 class="text-lg font-semibold mb-4">Checklist Pengembalian Barang</h2>
     <div id="checklistContent" class="space-y-2"></div>
     <div class="mt-6 flex justify-end gap-2">
-      <button onclick="document.getElementById('showChecklistModal').classList.add('hidden')"
-        class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 transition">
+      <button onclick="closeChecklistModal()" class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 transition">
         Tutup
       </button>
-      <button onclick="submitChecklist(window.currentPeminjamanId)"
-        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+      <button onclick="submitChecklist()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
         Submit
       </button>
     </div>
@@ -135,22 +137,22 @@
       }
 
       fetch('/diskusi', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': csrf,
-        },
-        body: JSON.stringify({
-          peminjaman_id: currentPeminjamanId,
-          pesan
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrf,
+          },
+          body: JSON.stringify({
+            peminjaman_id: currentPeminjamanId,
+            pesan
+          })
         })
-      })
-      .then(res => res.json())
-      .then(resp => {
-        if (resp.success) showDetail(currentPeminjamanId);
-        else alert(resp.error || 'Gagal mengirim pesan.');
-      })
-      .catch(() => alert('Gagal mengirim pesan.'));
+        .then(res => res.json())
+        .then(resp => {
+          if (resp.success) showDetail(currentPeminjamanId);
+          else alert(resp.error || 'Gagal mengirim pesan.');
+        })
+        .catch(() => alert('Gagal mengirim pesan.'));
     };
   }
 
@@ -162,7 +164,7 @@
         const el = id => document.getElementById(id);
         const formatTanggal = (tgl) => {
           const d = new Date(tgl);
-          const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+          const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
           return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
         };
         const formatJam = (jam) => jam?.substring(0, 5) || '-';
@@ -177,12 +179,15 @@
 
         if (data.link_dokumen === 'ada') {
           let prefix = window.location.pathname.split('/')[1];
-          if (!['admin','mahasiswa','bem','dosen','staff'].includes(prefix)) prefix = '';
+          if (!['admin', 'mahasiswa', 'bem', 'dosen', 'staff'].includes(prefix)) prefix = '';
           let downloadUrl = prefix ? `/${prefix}/peminjaman/download-proposal/${data.id}` : `/peminjaman/download-proposal/${data.id}`;
           el('linkDokumen').href = downloadUrl;
           el('linkDokumen').onclick = function(e) {
             e.preventDefault();
-            fetch(downloadUrl, { method: 'GET', credentials: 'same-origin' })
+            fetch(downloadUrl, {
+                method: 'GET',
+                credentials: 'same-origin'
+              })
               .then(response => {
                 if (!response.ok) throw new Error('Gagal download dokumen');
                 return response.blob();
@@ -253,92 +258,134 @@
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
     fetch(`/admin/peminjaman/${id}/setujui`, {
-      method: 'POST',
-      headers: { 'X-CSRF-TOKEN': csrf }
-    })
-    .then(() => {
-      const aksiCell = document.getElementById(`aksi-${id}`);
-      const statusCell = document.getElementById(`status-${id}`);
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': csrf
+        }
+      })
+      .then(() => {
+        const aksiCell = document.getElementById(`aksi-${id}`);
+        const statusCell = document.getElementById(`status-${id}`);
 
-      if (aksiCell) {
-        const btnAmbil = document.createElement('button');
-        btnAmbil.className = 'bg-yellow-500 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600';
-        btnAmbil.textContent = 'Ambil';
-        btnAmbil.setAttribute('onclick', `ambilBarang(${id})`);
-        aksiCell.querySelector(`#btn-setujui-${id}`)?.remove();
-        aksiCell.appendChild(btnAmbil);
-      }
+        if (aksiCell) {
+          const btnAmbil = document.createElement('button');
+          btnAmbil.className = 'bg-yellow-500 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600';
+          btnAmbil.textContent = 'Ambil';
+          btnAmbil.setAttribute('onclick', `ambilBarang(${id})`);
+          aksiCell.querySelector(`#btn-setujui-${id}`)?.remove();
+          aksiCell.appendChild(btnAmbil);
+        }
 
-      if (statusCell) {
-        statusCell.innerHTML = `<span class="text-xs text-gray-500 italic">-</span>`;
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      alert('Gagal menyetujui peminjaman.');
-    });
+        if (statusCell) {
+          statusCell.innerHTML = `<span class="text-xs text-gray-500 italic">-</span>`;
+        }
+
+        // ✅ Update kolom Verifikasi Sarpras
+        const row = aksiCell.closest('tr');
+        if (row) {
+          const verifikasiSarprasCell = row.querySelector('td:nth-child(5)');
+          if (verifikasiSarprasCell) {
+            verifikasiSarprasCell.innerHTML = `
+              <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">
+                Diterima
+              </span>`;
+          }
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Gagal menyetujui peminjaman.');
+      });
   }
 
   function ambilBarang(id) {
     fetch(`/admin/peminjaman/${id}/ambil`, {
-      method: 'POST',
-      headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
-    })
-    .then(() => {
-      const aksiCell = document.getElementById(`aksi-${id}`);
-      const statusCell = document.getElementById(`status-${id}`);
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+      })
+      .then(() => {
+        const aksiCell = document.getElementById(`aksi-${id}`);
+        const statusCell = document.getElementById(`status-${id}`);
 
-      if (aksiCell) {
-        aksiCell.querySelector(`[onclick="ambilBarang(${id})"]`)?.remove();
-        const btnSelesai = document.createElement('button');
-        btnSelesai.className = 'bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700';
-        btnSelesai.textContent = 'Selesai';
-        btnSelesai.setAttribute('onclick', `showChecklistModal(${id})`);
-        aksiCell.appendChild(btnSelesai);
-      }
+        if (aksiCell) {
+          aksiCell.querySelector(`[onclick="ambilBarang(${id})"]`)?.remove();
+          const btnSelesai = document.createElement('button');
+          btnSelesai.className = 'bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700';
+          btnSelesai.textContent = 'Selesai';
+          btnSelesai.setAttribute('onclick', `showChecklistModal(${id})`);
+          aksiCell.appendChild(btnSelesai);
+        }
 
-      if (statusCell) {
-        statusCell.innerHTML = `<span class="text-xs text-gray-500 italic">Diambil</span>`;
-      }
-    });
-  }
-
-  function showChecklistModal(peminjamanId) {
-    // Simpan ID global jika dibutuhkan submit nanti
-    window.currentPeminjamanId = peminjamanId;
-
-    fetch(`/api/peminjaman/${peminjamanId}/checklist`)
-      .then(response => response.json())
-      .then(data => {
-        let content = '';
-        data.fasilitas.forEach(item => {
-          content += `<p>${item.nama} - Jumlah: ${item.jumlah}</p>`;
-        });
-        document.getElementById('checklistContent').innerHTML = content;
-        document.getElementById('checklistModal').classList.remove('hidden');
-        document.getElementById('checklistModal').classList.add('flex');
+        if (statusCell) {
+          statusCell.innerHTML = `<span class="text-xs text-gray-500 italic">Diambil</span>`;
+        }
       });
   }
 
-  function submitChecklist(id) {
+  function showChecklistModal(id) {
+    window.currentPeminjamanId = id;
+
+    fetch(`{{ url('admin/peminjaman') }}/${id}/checklist-html`)
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('checklistContent').innerHTML = data.html;
+
+        const modal = document.getElementById('showChecklistModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Gagal memuat checklist.');
+      });
+  }
+
+  function closeChecklistModal() {
+    const modal = document.getElementById('showChecklistModal');
+    modal.classList.add('hidden'); // sembunyikan kembali
+    modal.classList.remove('flex'); // hapus flex
+  }
+
+  function submitChecklist() {
+    if (!window.currentPeminjamanId) {
+      alert('ID peminjaman tidak ditemukan!');
+      return;
+    }
+
     const checkedItems = [...document.querySelectorAll('input[name="barang[]"]:checked')].map(el => el.value);
-    fetch(`/admin/peminjaman/${id}/selesai`, {
-      method: 'POST',
-      headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json'},
-      body: JSON.stringify({ barang: checkedItems })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === 'selesai') {
-        const aksiCell = document.getElementById(`aksi-${id}`);
-        const statusCell = document.getElementById(`status-${id}`);
-        if (aksiCell) aksiCell.innerHTML = '';
-        if (statusCell) statusCell.innerHTML = `<span class="text-green-600 font-semibold text-xs">Selesai</span>`;
-        document.getElementById('checklistModal').classList.add('hidden');
-      } else {
-        alert('Belum semua barang dikembalikan!');
-      }
-    });
+
+    const formData = new FormData();
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+    checkedItems.forEach(item => formData.append('barang[]', item));
+
+    fetch(`/admin/peminjaman/${window.currentPeminjamanId}/selesai`, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (data.status === 'selesai') {
+          const aksiCell = document.getElementById(`aksi-${window.currentPeminjamanId}`);
+          const statusCell = document.getElementById(`status-${window.currentPeminjamanId}`);
+          if (aksiCell) aksiCell.innerHTML = '';
+          if (statusCell) statusCell.innerHTML = `<span class="text-green-600 font-semibold text-xs">Selesai</span>`;
+          closeChecklistModal();
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Gagal mengirim data.');
+      });
   }
 </script>
 @endpush
