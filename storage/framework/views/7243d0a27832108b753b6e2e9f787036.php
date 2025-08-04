@@ -1,4 +1,13 @@
-<x-table-wrapper>
+<?php if (isset($component)) { $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table-wrapper','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('table-wrapper'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
   <table class="w-full text-sm">
     <thead class="bg-gray-100">
       <tr>
@@ -14,53 +23,55 @@
       </tr>
     </thead>
     <tbody>
-      @forelse($items as $i => $item)
-      @if($item->status_pengembalian === 'selesai')
-      @continue
-      @endif
-      <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
-        <td class="px-4 py-2">{{ $i + 1 }}</td>
-        <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
-        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</td>
+      <?php $__empty_1 = true; $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+      <?php if($item->status_pengembalian === 'selesai'): ?>
+      <?php continue; ?>
+      <?php endif; ?>
+      <tr class="<?php echo e($i % 2 == 0 ? 'bg-white' : 'bg-gray-50'); ?>">
+        <td class="px-4 py-2"><?php echo e($i + 1); ?></td>
+        <td class="px-4 py-2"><?php echo e($item->judul_kegiatan); ?></td>
+        <td class="px-4 py-2"><?php echo e(\Carbon\Carbon::parse($item->created_at)->format('d/m/Y')); ?></td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-600 font-medium' : 'bg-gray-200 text-gray-600 font-medium' }}">
-            {{ ucfirst($item->verifikasi_bem) }}
+          <span class="px-3 py-1 text-xs rounded-full <?php echo e($item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-600 font-medium' : 'bg-gray-200 text-gray-600 font-medium'); ?>">
+            <?php echo e(ucfirst($item->verifikasi_bem)); ?>
+
           </span>
         </td>
 
         <td class="px-4 py-2">
           <span class="px-3 py-1 text-xs rounded-full
-            @if($item->verifikasi_sarpras === 'diterima')
+            <?php if($item->verifikasi_sarpras === 'diterima'): ?>
               bg-green-100 text-green-600 font-medium
-            @elseif(in_array($item->verifikasi_sarpras, ['proses','diajukan']))
+            <?php elseif(in_array($item->verifikasi_sarpras, ['proses','diajukan'])): ?>
               bg-gray-200 text-gray-700 font-medium
-            @else
+            <?php else: ?>
               bg-gray-200 text-gray-600 font-medium
-            @endif">
-            {{ ucfirst($item->verifikasi_sarpras) }}
+            <?php endif; ?>">
+            <?php echo e(ucfirst($item->verifikasi_sarpras)); ?>
+
           </span>
         </td>
 
-        <td class="px-4 py-2">{{ $item->organisasi }}</td>
+        <td class="px-4 py-2"><?php echo e($item->organisasi); ?></td>
         <td class="px-4 py-2">
-          @if ($item->status_peminjaman === 'diambil')
+          <?php if($item->status_peminjaman === 'diambil'): ?>
           <span class="bg-blue-100 text-blue-600 text-xs px-3 py-1 rounded-full font-medium">Sedang Dipinjam</span>
-          @else
+          <?php else: ?>
           <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full font-medium">Menunggu</span>
-          @endif
+          <?php endif; ?>
         </td>
 
         <td class="px-4 py-2">
-          @if ($item->status_pengembalian === 'selesai')
+          <?php if($item->status_pengembalian === 'selesai'): ?>
           <span class="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full font-medium">Selesai</span>
-          @else
+          <?php else: ?>
           <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full font-medium">Belum</span>
-          @endif
+          <?php endif; ?>
         </td>
 
         <td class="px-4 py-2">
-          <button onclick="showDetail({{ $item->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
+          <button onclick="showDetail(<?php echo e($item->id); ?>)" class="text-gray-600 hover:text-blue-700" title="Detail">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10" />
               <path d="M12 16v-4" />
@@ -69,16 +80,25 @@
           </button>
         </td>
       </tr>
-      @empty
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
       <tr>
         <td colspan="9" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
       </tr>
-      @endforelse
+      <?php endif; ?>
     </tbody>
   </table>
-</x-table-wrapper>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997)): ?>
+<?php $attributes = $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997; ?>
+<?php unset($__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997)): ?>
+<?php $component = $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997; ?>
+<?php unset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997); ?>
+<?php endif; ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
   console.log('[DEBUG] Script chat loaded');
 
@@ -247,7 +267,7 @@
         }
         document.getElementById('diskusiArea').innerHTML = diskusiHtml;
 
-        const userRole = "{{ auth()->user()->role }}";
+        const userRole = "<?php echo e(auth()->user()->role); ?>";
         let enableDiskusi = false;
         if (userRole !== 'dosen') {
           if (userRole === 'mahasiswa') {
@@ -285,4 +305,4 @@
     document.getElementById('detailModal')?.classList.add('hidden');
   }
 </script>
-@endpush
+<?php $__env->stopPush(); ?><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/pengajuan/table-pengajuan-mahasiswa.blade.php ENDPATH**/ ?>

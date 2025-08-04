@@ -1,4 +1,13 @@
-<x-table-wrapper>
+<?php if (isset($component)) { $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table-wrapper','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('table-wrapper'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
   <table class="w-full text-sm text-left text-gray-700">
     <thead class="bg-gray-100 text-black border-b">
       <tr class="text-sm font-semibold">
@@ -13,43 +22,43 @@
       </tr>
     </thead>
     <tbody>
-      @forelse($items as $i => $item)
-      <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
-        <td class="px-4 py-2">{{ $i + 1 }}</td>
-        <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
-        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</td>
-        <td class="px-4 py-2">{{ ucfirst($item->verifikasi_bem) }}</td>
-        <td class="px-4 py-2">{{ ucfirst($item->verifikasi_sarpras) }}</td>
-        <td class="px-4 py-2">{{ $item->status_peminjaman ?? '-' }}</td>
-        <td class="px-4 py-2">{{ $item->status_pengembalian ?? '-' }}</td>
+      <?php $__empty_1 = true; $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+      <tr class="<?php echo e($i % 2 == 0 ? 'bg-white' : 'bg-gray-50'); ?>">
+        <td class="px-4 py-2"><?php echo e($i + 1); ?></td>
+        <td class="px-4 py-2"><?php echo e($item->judul_kegiatan); ?></td>
+        <td class="px-4 py-2"><?php echo e(\Carbon\Carbon::parse($item->created_at)->format('d/m/Y')); ?></td>
+        <td class="px-4 py-2"><?php echo e(ucfirst($item->verifikasi_bem)); ?></td>
+        <td class="px-4 py-2"><?php echo e(ucfirst($item->verifikasi_sarpras)); ?></td>
+        <td class="px-4 py-2"><?php echo e($item->status_peminjaman ?? '-'); ?></td>
+        <td class="px-4 py-2"><?php echo e($item->status_pengembalian ?? '-'); ?></td>
         <td class="px-4 py-2 text-center">
           <div class="flex gap-2 justify-center">
-            <button onclick="showDetail({{ $item->id }})"
+            <button onclick="showDetail(<?php echo e($item->id); ?>)"
               class="bg-indigo-500 text-white px-3 py-1 rounded text-xs hover:bg-indigo-600">
               Diskusi
             </button>
-            {{-- BUTTON TERIMA --}}
-            @if($item->verifikasi_sarpras !== 'diterima')
-            <form method="POST" action="{{ route('admin.peminjaman.approve', $item->id) }}">
-              @csrf
-              @method('PATCH')
+            
+            <?php if($item->verifikasi_sarpras !== 'diterima'): ?>
+            <form method="POST" action="<?php echo e(route('admin.peminjaman.approve', $item->id)); ?>">
+              <?php echo csrf_field(); ?>
+              <?php echo method_field('PATCH'); ?>
               <button class="bg-yellow-500 hover:bg-blue-600 text-white px-3 py-1 text-xs rounded">Terima</button>
             </form>
-            @elseif($item->status_peminjaman !== 'diambil')
-            {{-- BUTTON AMBIL --}}
-            <form method="POST" action="{{ route('admin.peminjaman.ambil', $item->id) }}">
-              @csrf
-              @method('PATCH')
+            <?php elseif($item->status_peminjaman !== 'diambil'): ?>
+            
+            <form method="POST" action="<?php echo e(route('admin.peminjaman.ambil', $item->id)); ?>">
+              <?php echo csrf_field(); ?>
+              <?php echo method_field('PATCH'); ?>
               <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded">Ambil</button>
             </form>
-            @elseif($item->status_peminjaman === 'diambil' && $item->status_pengembalian !== 'selesai')
-            <button onclick="openModalSelesai({{ $item->id }})" class="bg-green-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded">Selesai</button>
-            @else
+            <?php elseif($item->status_peminjaman === 'diambil' && $item->status_pengembalian !== 'selesai'): ?>
+            <button onclick="openModalSelesai(<?php echo e($item->id); ?>)" class="bg-green-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded">Selesai</button>
+            <?php else: ?>
             <span class="text-gray-400 italic">Selesai</span>
-            @endif
+            <?php endif; ?>
 
-            {{-- DETAIL --}}
-            <button onclick="showDetail({{ $item->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
+            
+            <button onclick="showDetail(<?php echo e($item->id); ?>)" class="text-gray-600 hover:text-blue-700" title="Detail">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 16v-4" />
@@ -59,18 +68,27 @@
           </div>
         </td>
       </tr>
-      @empty
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
       <tr>
         <td colspan="8" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
       </tr>
-      @endforelse
+      <?php endif; ?>
     </tbody>
   </table>
-</x-table-wrapper>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997)): ?>
+<?php $attributes = $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997; ?>
+<?php unset($__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997)): ?>
+<?php $component = $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997; ?>
+<?php unset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997); ?>
+<?php endif; ?>
 
-@include('components.modal-selesai')
+<?php echo $__env->make('components.modal-selesai', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
   window.currentPeminjamanId = null;
 
@@ -210,7 +228,7 @@
   }
 
   function setujuiPeminjaman(id) {
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '<?php echo e(csrf_token()); ?>';
 
     fetch(`/admin/peminjaman/${id}/setujui`, {
         method: 'POST',
@@ -257,7 +275,7 @@
     fetch(`/admin/peminjaman/${id}/ambil`, {
         method: 'POST',
         headers: {
-          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
         }
       })
       .then(() => {
@@ -282,7 +300,7 @@
   function showChecklistModal(id) {
     window.currentPeminjamanId = id;
 
-    fetch(`{{ url('admin/peminjaman') }}/${id}/checklist-html`)
+    fetch(`<?php echo e(url('admin/peminjaman')); ?>/${id}/checklist-html`)
       .then(response => response.json())
       .then(data => {
         document.getElementById('checklistContent').innerHTML = data.html;
@@ -343,4 +361,4 @@
       });
   }
 </script>
-@endpush
+<?php $__env->stopPush(); ?><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/pengajuan/table-pengajuan-admin.blade.php ENDPATH**/ ?>

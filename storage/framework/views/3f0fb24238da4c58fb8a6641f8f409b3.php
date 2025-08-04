@@ -1,131 +1,82 @@
-<x-table-wrapper>
-  <table class="w-full text-sm">
-    <thead class="bg-gray-100">
-      <tr>
+<?php if (isset($component)) { $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table-wrapper','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('table-wrapper'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+  <table class="w-full text-sm text-left text-gray-700">
+    <thead class="bg-gray-100 text-black border-b">
+      <tr class="text-sm font-semibold">
         <th class="px-4 py-2">No.</th>
         <th class="px-4 py-2">Pengajuan</th>
         <th class="px-4 py-2">Tanggal Pengajuan</th>
         <th class="px-4 py-2">Verifikasi BEM</th>
         <th class="px-4 py-2">Verifikasi Sarpras</th>
         <th class="px-4 py-2">Organisasi</th>
-        <th class="px-4 py-2">Status Peminjaman</th>
-        <th class="px-4 py-2">Status Pengembalian</th>
-        <th class="px-4 py-2"></th>
+        <th class="px-4 py-2 text-center">Aksi</th>
       </tr>
     </thead>
     <tbody>
-      @forelse($items as $i => $item)
-      @if($item->status_pengembalian === 'selesai')
-      @continue
-      @endif
-      <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
-        <td class="px-4 py-2">{{ $i + 1 }}</td>
-        <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
-        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</td>
+      <?php $__empty_1 = true; $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $pengajuan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+      <tr class="<?php echo e($i % 2 == 0 ? 'bg-white' : 'bg-gray-50'); ?>">
+        <td class="px-4 py-2"><?php echo e($i + 1); ?></td>
+        <td class="px-4 py-2"><?php echo e($pengajuan->judul_kegiatan); ?></td>
+        <td class="px-4 py-2"><?php echo e(\Carbon\Carbon::parse($pengajuan->created_at)->format('d/m/Y')); ?></td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-600 font-medium' : 'bg-gray-200 text-gray-600 font-medium' }}">
-            {{ ucfirst($item->verifikasi_bem) }}
+          <span class="px-3 py-1 text-xs rounded-full <?php echo e($pengajuan->verifikasi_bem === 'diterima' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'); ?>">
+            <?php echo e(ucfirst($pengajuan->verifikasi_bem)); ?>
+
           </span>
         </td>
 
-        <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full
-            @if($item->verifikasi_sarpras === 'diterima')
-              bg-green-100 text-green-600 font-medium
-            @elseif(in_array($item->verifikasi_sarpras, ['proses','diajukan']))
-              bg-gray-200 text-gray-700 font-medium
-            @else
-              bg-gray-200 text-gray-600 font-medium
-            @endif">
-            {{ ucfirst($item->verifikasi_sarpras) }}
-          </span>
-        </td>
-
-        <td class="px-4 py-2">{{ $item->organisasi }}</td>
-        <td class="px-4 py-2">
-          @if ($item->status_peminjaman === 'diambil')
-          <span class="bg-blue-100 text-blue-600 text-xs px-3 py-1 rounded-full font-medium">Sedang Dipinjam</span>
-          @else
-          <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full font-medium">Menunggu</span>
-          @endif
-        </td>
+        <td class="px-4 py-2 text-gray-500 text-xs">-</td>
+        <td class="px-4 py-2"><?php echo e($pengajuan->organisasi); ?></td>
 
         <td class="px-4 py-2">
-          @if ($item->status_pengembalian === 'selesai')
-          <span class="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full font-medium">Selesai</span>
-          @else
-          <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full font-medium">Belum</span>
-          @endif
-        </td>
-
-        <td class="px-4 py-2">
-          <button onclick="showDetail({{ $item->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 16v-4" />
-              <path d="M12 8h.01" />
-            </svg>
-          </button>
+          <div class="flex items-center gap-2 justify-center">
+            <form method="POST" action="<?php echo e(route('bem.peminjaman.approve', $pengajuan->id)); ?>">
+              <?php echo csrf_field(); ?>
+              <button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded">
+                Terima
+              </button>
+            </form>
+            <button onclick="showDetail(<?php echo e($pengajuan->id); ?>)" class="text-gray-600 hover:text-blue-700" title="Detail">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>            </button>
+          </div>
         </td>
       </tr>
-      @empty
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
       <tr>
-        <td colspan="9" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
+        <td colspan="7" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>
       </tr>
-      @endforelse
+      <?php endif; ?>
     </tbody>
   </table>
-</x-table-wrapper>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997)): ?>
+<?php $attributes = $__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997; ?>
+<?php unset($__attributesOriginal4f7bc4b16f510eaf51034cbc9bd53997); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997)): ?>
+<?php $component = $__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997; ?>
+<?php unset($__componentOriginal4f7bc4b16f510eaf51034cbc9bd53997); ?>
+<?php endif; ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
-  console.log('[DEBUG] Script chat loaded');
-
-  function tampilkanKolomKembali(event) {
-    event.preventDefault();
-    const form = event.target;
-    const row = form.closest('tr');
-    row.querySelector('.status-kembali-col').classList.remove('hidden');
-    form.submit();
-  }
-
-  function showTab(tab) {
-    const tabs = ['pengajuan', 'riwayat'];
-    tabs.forEach(id => {
-      const tabEl = document.getElementById(`tab${capitalize(id)}`);
-      const underline = document.getElementById(`underline${capitalize(id)}`);
-      if (id === tab) {
-        tabEl.classList.remove('text-gray-500');
-        tabEl.classList.add('text-[#003366]');
-        underline.classList.add('scale-x-100');
-        underline.classList.remove('scale-x-0');
-        document.getElementById(`${id}Tab`).classList.remove('hidden');
-      } else {
-        tabEl.classList.add('text-gray-500');
-        tabEl.classList.remove('text-[#003366]');
-        underline.classList.add('scale-x-0');
-        underline.classList.remove('scale-x-100');
-        document.getElementById(`${id}Tab`).classList.add('hidden');
-      }
-    });
-  }
-
-  function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    showTab('pengajuan');
-  });
-
   window.currentPeminjamanId = null;
 
   function bindDiskusiHandler() {
     const modal = document.getElementById('detailModal');
     if (!modal || modal.classList.contains('hidden')) return;
-    const btn = modal.querySelector('.btnKirimDiskusi');
-    const input = modal.querySelector('.inputDiskusi');
+    const btn = modal.querySelector('#btnKirimDiskusi');
+    const input = modal.querySelector('#inputDiskusi');
     if (!btn || !input) return;
 
     btn.onclick = function() {
@@ -137,6 +88,7 @@
         const tokenInput = document.querySelector('input[name=_token]');
         if (tokenInput) csrf = tokenInput.value;
       }
+
       fetch('/diskusi', {
           method: 'POST',
           headers: {
@@ -150,11 +102,8 @@
         })
         .then(res => res.json())
         .then(resp => {
-          if (resp.success) {
-            showDetail(currentPeminjamanId); // refresh chat
-          } else {
-            alert(resp.error || 'Gagal mengirim pesan.');
-          }
+          if (resp.success) showDetail(currentPeminjamanId);
+          else alert(resp.error || 'Gagal mengirim pesan.');
         })
         .catch(() => alert('Gagal mengirim pesan.'));
     };
@@ -247,7 +196,7 @@
         }
         document.getElementById('diskusiArea').innerHTML = diskusiHtml;
 
-        const userRole = "{{ auth()->user()->role }}";
+        const userRole = "<?php echo e(auth()->user()->role); ?>";
         let enableDiskusi = false;
         if (userRole !== 'dosen') {
           if (userRole === 'mahasiswa') {
@@ -285,4 +234,4 @@
     document.getElementById('detailModal')?.classList.add('hidden');
   }
 </script>
-@endpush
+<?php $__env->stopPush(); ?><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/components/pengajuan/table-pengajuan-bem.blade.php ENDPATH**/ ?>

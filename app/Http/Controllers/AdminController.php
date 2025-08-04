@@ -31,8 +31,11 @@ class AdminController extends Controller
             ->whereHas('user', fn($q) => $q->where('role', '!=', 'admin'))
             ->count();
 
-        $jumlahPeminjamanAktif = Peminjaman::where('verifikasi_sarpras', 'diterima')
-            ->where('status_pengembalian', '!=', 'selesai')
+        $jumlahPeminjamanAktif = Peminjaman::where('status_peminjaman', 'diambil')
+            ->where(function ($q) {
+                $q->whereNull('status_pengembalian')
+                    ->orWhere('status_pengembalian', '!=', 'selesai');
+            })
             ->count();
 
         $ruanganTerbanyak = Peminjaman::select('gedung_id', \DB::raw('count(*) as total'))
@@ -152,99 +155,5 @@ class AdminController extends Controller
         }
 
         return $html;
-    }
-
-    public function getChecklistHTML($peminjamanId)
-    {
-        $peminjaman = Peminjaman::with('detailPeminjaman.fasilitas')->findOrFail($peminjamanId);
-
-        $html = '';
-        foreach ($peminjaman->detailPeminjaman as $detail) {
-            $html .= '
-        <label class="flex items-center gap-2">
-            <input type="checkbox" name="barang[]" value="' . $detail->id . '" class="form-checkbox">
-            ' . $detail->fasilitas->nama_barang . ' - Jumlah: ' . $detail->jumlah . '
-        </label>';
-        }
-
-        return response()->json(['html' => $html]);
-    }
-
-    public function getChecklist($id)
-    {
-        // Ambil peminjaman beserta detail dan fasilitas terkait
-        $peminjaman = \App\Models\Peminjaman::with(['detailPeminjaman.fasilitas'])->find($id);
-
-        if (!$peminjaman) {
-            return response()->json(['html' => '<p class="text-red-500">Data tidak ditemukan.</p>'], 404);
-        }
-
-        // Bangun HTML checklist
-        $html = '';
-        foreach ($peminjaman->detailPeminjaman as $detail) {
-            $fasilitasName = $detail->fasilitas ? $detail->fasilitas->nama_barang : 'Fasilitas tidak ditemukan';
-            $html .= '
-            <label class="flex items-center gap-2">
-                <input type="checkbox" name="barang[]" value="' . $detail->id . '" class="form-checkbox">
-                ' . $fasilitasName . ' (Jumlah: ' . $detail->jumlah . ')
-            </label>
-        ';
-        }
-
-        if ($html === '') {
-            $html = '<p class="text-gray-500 italic">Tidak ada fasilitas untuk peminjaman ini.</p>';
-        }
-
-        return response()->json(['html' => $html]);
-    }
-
-    public function selesai(Request $request, $id)
-    {
-        $peminjaman = Peminjaman::with('detailPeminjaman')->findOrFail($id);
-
-        $barangChecklist = $request->input('barang', []);
-
-        // Pastikan semua barang sudah dikembalikan
-        $semuaBarangKembali = true;
-        foreach ($peminjaman->detailPeminjaman as $detail) {
-            if (!in_array($detail->id, $barangChecklist)) {
-                $semuaBarangKembali = false;
-                break;
-            }
-        }
-
-        if ($semuaBarangKembali) {
-            $peminjaman->status_pengembalian = 'selesai';
-            $peminjaman->save();
-
-            return response()->json([
-                'status' => 'selesai',
-                'message' => 'Peminjaman selesai!'
-            ]);
-        }
-
-        return response()->json([
-            'status' => 'belum_selesai',
-            'message' => 'Belum semua barang dikembalikan!'
-        ]);
-    }
-    
-    public function setujuiPeminjaman($id)
-    {
-        $peminjaman = Peminjaman::findOrFail($id);
-        $peminjaman->verifikasi_sarpras = 'diterima';
-        $peminjaman->status_peminjaman = 'diterima';
-        $peminjaman->save();
-
-        return response()->json(['success' => true]);
-    }
-
-    public function ambil($id)
-    {
-        $peminjaman = Peminjaman::findOrFail($id);
-        $peminjaman->status_peminjaman = 'diambil';
-        $peminjaman->save();
-
-        return response()->json(['success' => true]);
     }
 }
