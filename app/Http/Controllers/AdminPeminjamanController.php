@@ -22,24 +22,23 @@ class AdminPeminjamanController extends Controller
             ->where(function ($query) {
                 $query->where('verifikasi_sarpras', 'diajukan')
                     ->orWhere(function ($q) {
-                        $q->where('verifikasi_sarpras', 'diterima')
-                            ->where('status_pengembalian', '!=', 'selesai');
+                        $q->where('status_pengembalian', '!=', 'selesai')
+                            ->orWhereNull('status_pengembalian');
                     });
             });
 
         $riwayats = Peminjaman::with('user', 'gedung')
             ->where(function ($query) {
-                $query->where(function ($q) {
-                    $q->where('verifikasi_sarpras', 'diterima')
+                $query->where('verifikasi_sarpras', 'diterima')
                     ->where('status_pengembalian', 'selesai');
-                })
-                ->orWhere(function ($q) {
-                    $q->where('verifikasi_sarpras', 'diajukan')
+            })
+            ->orWhere(function ($q) {
+                $q->where('verifikasi_sarpras', 'diajukan')
                     ->whereHas('user', function ($q2) {
                         $q2->where('role', 'admin');
                     });
-                });
             });
+
 
         if ($gedungId) {
             $pengajuans = $pengajuans->where('gedung_id', $gedungId);
@@ -77,6 +76,50 @@ class AdminPeminjamanController extends Controller
         return redirect()->back()->with('success', 'Pengajuan berhasil disetujui oleh Sarpras.');
     }
 
+    public function ambilBarang($id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+
+        if ($peminjaman->verifikasi_sarpras !== 'diterima') {
+            return back()->with('error', 'Pengajuan belum disetujui oleh sarpras.');
+        }
+
+        $peminjaman->status_peminjaman = 'diambil';
+        $peminjaman->save();
+
+        return back()->with('success', 'Barang sudah diambil. Sekarang tunggu pengembalian.');
+    }
+
+    public function selesaiPeminjaman(Request $request, $id)
+    {
+        $peminjaman = Peminjaman::with('detailPeminjaman.fasilitas')->findOrFail($id);
+
+        if ($peminjaman->status_peminjaman !== 'diambil') {
+            return back()->with('error', 'Barang belum diambil, tidak bisa diselesaikan.');
+        }
+
+        $request->validate([
+            'checklist' => 'required|array',
+        ]);
+
+        // Update stok fasilitas yang dipinjam
+        foreach ($peminjaman->detailPeminjaman as $detail) {
+            if (in_array($detail->fasilitas_id, $request->checklist)) {
+                $fasilitas = $detail->fasilitas;
+                if ($fasilitas) {
+                    $fasilitas->stok += $detail->jumlah;
+                    $fasilitas->is_available = true;
+                    $fasilitas->save();
+                }
+            }
+        }
+
+        $peminjaman->status_pengembalian = 'selesai';
+        $peminjaman->save();
+
+        return back()->with('success', 'Peminjaman selesai dan stok diperbarui.');
+    }
+
     public function verifikasi(Request $request, $id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
@@ -100,9 +143,7 @@ class AdminPeminjamanController extends Controller
             'organisasi' => $peminjaman->organisasi,
             'penanggung_jawab' => $peminjaman->penanggung_jawab,
             'deskripsi_kegiatan' => $peminjaman->deskripsi_kegiatan,
-            'proposal' => $peminjaman->proposal,
-            'undangan_pembicara' => $peminjaman->undangan_pembicara,
-            'link_undangan' => $peminjaman->undangan_pembicara ? 'ada' : null,
+            'link_dokumen' => $peminjaman->proposal ? 'ada' : null,
             'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
             'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
                 return [
@@ -110,7 +151,7 @@ class AdminPeminjamanController extends Controller
                     'jumlah' => $detail->jumlah,
                 ];
             }),
-            'diskusi' => $peminjaman->diskusi->map(function($d) {
+            'diskusi' => $peminjaman->diskusi->map(function ($d) {
                 return [
                     'id' => $d->id,
                     'role' => $d->role,
@@ -122,14 +163,12 @@ class AdminPeminjamanController extends Controller
         ]);
     }
 
-
     public function store(Request $request)
     {
         // Validasi sesuai kebutuhan admin
         $request->validate([
             'judul_kegiatan' => 'required|string|max:255',
             'tgl_kegiatan' => 'required|date',
-            'tgl_kegiatan_berakhir' => 'required|date',
             'waktu_mulai' => 'required',
             'waktu_berakhir' => 'required',
             'aktivitas' => 'required|string|max:255',
@@ -148,7 +187,6 @@ class AdminPeminjamanController extends Controller
         $peminjaman = \App\Models\Peminjaman::create([
             'judul_kegiatan' => $request->judul_kegiatan,
             'tgl_kegiatan' => $request->tgl_kegiatan,
-            'tgl_kegiatan_berakhir' => $request->tgl_kegiatan_berakhir,
             'waktu_mulai' => $request->waktu_mulai,
             'waktu_berakhir' => $request->waktu_berakhir,
             'aktivitas' => $request->aktivitas,

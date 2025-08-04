@@ -36,7 +36,7 @@ class PengajuanDisetujuiBem extends Notification
     {
         return (new MailMessage)
         ->subject('Pengajuan Disetujui BEM')
-        ->greeting('Halo ' . $notifiable->name)
+        ->greeting('Halo, ' . $notifiable->name)
         ->line('Pengajuan Anda telah disetujui oleh BEM.')
         ->action('Lihat Detail', url('/mahasiswa/peminjaman'))
         ->line('Silakan tunggu verifikasi dari Sarpras.');

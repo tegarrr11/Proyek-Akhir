@@ -104,6 +104,7 @@ Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
 Route::get('/bem/dashboard', [BemController::class, 'dashboard']);
 Route::get('/dosen/dashboard', [BemController::class, 'dashboard']);
 Route::get('/dosen/peminjaman/create', [DosenPeminjamanController::class, 'create']);
+Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('mahasiswa.peminjaman');
 Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
 Route::get('/api/fasilitas-tambahan', function () {
     return Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
@@ -128,14 +129,16 @@ Route::middleware(['auth'])->group(function () {
             return view('pages.admin.peminjaman.create');
         })->name('admin.peminjaman.create');
         Route::post('/peminjaman/store', [AdminPeminjamanController::class, 'store'])->name('admin.peminjaman.store');
-        Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'approve'])->name('admin.peminjaman.approve');
+        Route::patch('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'approve'])->name('admin.peminjaman.approve');
         Route::get('/peminjaman/{id}', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.show');
         Route::post('/peminjaman/{id}/verifikasi', [AdminPeminjamanController::class, 'verifikasi'])->name('admin.peminjaman.verifikasi');
         Route::post('/ruangan/update', [AdminController::class, 'update'])->name('admin.ruangan.update');
         Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('admin.peminjaman.downloadProposal');
-        Route::get('/peminjaman/download-undangan/{id}', [PeminjamanController::class, 'downloadUndangan']);
         Route::patch('/admin/peminjaman/kembalikan/{id}', [PeminjamanController::class, 'adminKembalikan'])->name('admin.peminjaman.kembalikan');
-
+        Route::patch('/peminjaman/{id}/ambil', [PeminjamanController::class, 'ambilBarang'])->name('admin.peminjaman.ambil');
+        Route::patch('/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesaiPeminjaman'])->name('admin.peminjaman.selesai');
+        Route::patch('/peminjaman/{id}/ambil', [AdminPeminjamanController::class, 'ambilBarang'])->name('admin.peminjaman.ambil');
+        Route::patch('/peminjaman/{id}/selesai', [AdminPeminjamanController::class, 'selesaiPeminjaman'])->name('admin.peminjaman.selesai');
     });
 
     // === MAHASISWA ===

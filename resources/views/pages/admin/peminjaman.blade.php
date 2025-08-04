@@ -41,7 +41,7 @@
         <!-- Tombol Search (hanya mobile) -->
         <button id="searchIcon" onclick="toggleSearchInput()" type="button" class="md:hidden text-gray-600">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-            <path fill="#777" d="M9.5 16q-2.725 0-4.612-1.888T3 9.5t1.888-4.612T9.5 3t4.613 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l5.6 5.6q.275.275.275.7t-.275.7t-.7.275t-.7-.275l-5.6-5.6q-.75.6-1.725.95T9.5 16m0-2q1.875 0 3.188-1.312T14 9.5t-1.312-3.187T9.5 5T6.313 6.313T5 9.5t1.313 3.188T9.5 14"/>
+            <path fill="#777" d="M9.5 16q-2.725 0-4.612-1.888T3 9.5t1.888-4.612T9.5 3t4.613 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l5.6 5.6q.275.275.275.7t-.275.7t-.7.275t-.7-.275l-5.6-5.6q-.75.6-1.725.95T9.5 16m0-2q1.875 0 3.188-1.312T14 9.5t-1.312-3.187T9.5 5T6.313 6.313T5 9.5t1.313 3.188T9.5 14" />
           </svg>
         </button>
 
@@ -52,18 +52,29 @@
           name="search"
           placeholder="Cari kegiatan..."
           value="{{ request('search') }}"
-          class="hidden md:block border border-gray-300 rounded px-3 py-1 text-sm bg-white shadow z-20 w-40 md:w-52 focus:outline-none focus:ring-0 focus:border-gray-300 transition-all"
-        />
+          class="hidden md:block border border-gray-300 rounded px-3 py-1 text-sm bg-white shadow z-20 w-40 md:w-52 focus:outline-none focus:ring-0 focus:border-gray-300 transition-all" />
 
-        <!-- Dropdown -->
+        <!-- Dropdown Gedung -->
         <select name="gedung_id" class="border rounded px-2 py-1 text-sm w-48" onchange="handleDropdownChange(this.form)">
           <option value="">Semua Ruangan</option>
-            @foreach(App\Models\Gedung::where('id', '!=', 8)->get() as $gedung)
-              <option value="{{ $gedung->id }}" {{ request('gedung_id') == $gedung->id ? 'selected' : '' }}>
-                {{ $gedung->nama }}
-              </option>
-            @endforeach
+          @foreach(App\Models\Gedung::where('id', '!=', 8)->get() as $gedung)
+          <option value="{{ $gedung->id }}" {{ request('gedung_id') == $gedung->id ? 'selected' : '' }}>
+            {{ $gedung->nama }}
+          </option>
+          @endforeach
         </select>
+
+        <!-- Filter Bulan -->
+        <input type="month" name="bulan" value="{{ request('bulan') }}"
+          class="border border-gray-300 rounded px-2 py-1 text-sm"
+          onchange="handleDropdownChange(this.form)" />
+
+        @if(request('bulan'))
+          <a href="{{ request()->fullUrlWithQuery(['bulan' => null, 'page' => 1]) }}"
+            class="text-sm text-gray-600 hover:underline">
+            Reset
+          </a>
+        @endif
 
         <input type="hidden" name="tab" id="tabInput" value="riwayat">
       </form>
@@ -114,8 +125,8 @@
   });
 
   function handleDropdownChange(form) {
-  document.getElementById('tabInput').value = 'riwayat';
-  setTimeout(() => form.submit(), 10); 
+    document.getElementById('tabInput').value = 'riwayat';
+    setTimeout(() => form.submit(), 10);
   }
 
   window.showDetail = function(id) {
@@ -162,10 +173,23 @@
         const diskusiArea = el('diskusiArea');
         if (Array.isArray(data.diskusi)) {
           let html = '';
+          let lastDate = '';
+
           data.diskusi.forEach(d => {
-            html += `<div class='mb-1'><span class='font-semibold text-xs text-blue-700'>${d.role}:</span> <span>${d.pesan}</span></div>`;
+            const tanggal = new Date(d.created_at).toLocaleDateString('id-ID', {
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric'
+            });
+
+            if (tanggal !== lastDate) {
+              html += `<div class="text-center text-gray-500 text-xs my-2">--- ${tanggal} ---</div>`;
+              lastDate = tanggal;
+            }
+
+            html += `<div class="mb-1"><span class="font-semibold text-xs text-blue-700">${d.role}:</span> ${d.pesan}</div>`;
           });
-          diskusiArea.innerHTML = html || '<p class="text-gray-400 italic">Belum ada diskusi</p>';
+
         }
 
         document.getElementById('detailModal').classList.remove('hidden');
@@ -194,7 +218,7 @@
     }
   }
 
-  document.addEventListener('click', function (e) {
+  document.addEventListener('click', function(e) {
     const input = document.getElementById('searchInput');
     const icon = document.getElementById('searchIcon');
 

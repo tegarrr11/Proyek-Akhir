@@ -57,13 +57,13 @@ class BemPeminjamanController extends Controller
         return redirect()->back()->with('success', 'Status berhasil diperbarui.');
     }
 
-
     public function approve($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        // Simpan status verifikasi BEM
+        // Simpan status verifikasi BEM & ajukan ke admin
         $peminjaman->verifikasi_bem = 'diterima';
+        $peminjaman->verifikasi_sarpras = 'diajukan';
         $peminjaman->save();
 
         // Kirim notifikasi ke Admin
@@ -71,14 +71,13 @@ class BemPeminjamanController extends Controller
         $pesan = 'Pengajuan oleh ' . $peminjaman->user->name . ' telah disetujui BEM dan menunggu verifikasi admin.';
         NotifikasiHelper::kirimKeRole('admin', $judul, $pesan);
 
-        //Kirim notif email ke Admin
+        // Kirim notif email ke Admin
         $adminUsers = User::where('role', 'admin')->get();
-
         foreach ($adminUsers as $admin) {
             $admin->notify(new PengajuanKeAdmin($peminjaman));
         }
 
-        // Kirim notifikasi email ke Mahasiswa
+        // Kirim notifikasi ke Mahasiswa
         $mahasiswa = $peminjaman->user;
         if ($mahasiswa && $mahasiswa->email) {
             $mahasiswa->notify(new PengajuanDisetujuiBem($peminjaman));
@@ -114,4 +113,5 @@ class BemPeminjamanController extends Controller
             }),
         ]);
     }
+
 }

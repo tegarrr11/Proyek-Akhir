@@ -10,7 +10,6 @@
         <th class="px-4 py-2">Organisasi</th>
         <th class="px-4 py-2">Status Peminjaman</th>
         <th class="px-4 py-2">Status Pengembalian</th>
-        <th class="px-4 py-2 hidden status-kembali-col">Status Pengembalian</th>
         <th class="px-4 py-2"></th>
       </tr>
     </thead>
@@ -19,14 +18,13 @@
       @if($item->status_pengembalian === 'selesai')
       @continue
       @endif
-
       <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
         <td class="px-4 py-2">{{ $i + 1 }}</td>
         <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
         <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</td>
 
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full font-medium' : 'bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium' }}">
+          <span class="px-3 py-1 text-xs rounded-full {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-600 font-medium' : 'bg-gray-200 text-gray-600 font-medium' }}">
             {{ ucfirst($item->verifikasi_bem) }}
           </span>
         </td>
@@ -34,11 +32,11 @@
         <td class="px-4 py-2">
           <span class="px-3 py-1 text-xs rounded-full
             @if($item->verifikasi_sarpras === 'diterima')
-              bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full font-medium
-            @elseif($item->verifikasi_sarpras === 'proses')
-              bg-gray-200 text-grey-700 text-xs px-3 py-1 rounded-full font-medium
+              bg-green-100 text-green-600 font-medium
+            @elseif(in_array($item->verifikasi_sarpras, ['proses','diajukan']))
+              bg-gray-200 text-gray-700 font-medium
             @else
-              bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-medium
+              bg-gray-200 text-gray-600 font-medium
             @endif">
             {{ ucfirst($item->verifikasi_sarpras) }}
           </span>
@@ -46,50 +44,31 @@
 
         <td class="px-4 py-2">{{ $item->organisasi }}</td>
         <td class="px-4 py-2">
-          @if ($item->verifikasi_sarpras === 'diterima')
-          @if ($item->status_peminjaman === 'kembalikan' && $item->status_pengembalian === 'proses')
-          <form method="POST" action="{{ route('mahasiswa.peminjaman.kembalikan', $item->id) }}" onsubmit="return confirm('Yakin ingin mengembalikan barang ini?')">
-            @csrf
-            @method('PATCH')
-            <button class="bg-yellow-500 text-white px-3 py-1 text-xs rounded-full hover:bg-yellow-600 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
-              Kembalikan
-          </form>
-          @elseif (is_null($item->status_peminjaman))
-
           @if ($item->status_peminjaman === 'diambil')
-            <button class="bg-gray-300 text-gray-600 px-3 py-1 text-xs rounded-full cursor-not-allowed" disabled>Ambil</button>
+          <span class="bg-blue-100 text-blue-600 text-xs px-3 py-1 rounded-full font-medium">Sedang Dipinjam</span>
           @else
-            <form method="POST" action="{{ route('mahasiswa.peminjaman.ambil', $item->id) }}">
-              @csrf
-              @method('PATCH')
-              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700">Ambil</button>
-            </form>
-          @endif
-
-          @else
-          {{ ucfirst($item->status_peminjaman) }}
-          @endif
-          @else
-          <span class="text-gray-400 text-xs italic">-</span>
+          <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full font-medium">Menunggu</span>
           @endif
         </td>
 
         <td class="px-4 py-2">
-          @if (in_array($item->status_pengembalian, ['proses', 'belum']))
-            <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full font-medium">Belum</span>
+          @if ($item->status_pengembalian === 'selesai')
+          <span class="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full font-medium">Selesai</span>
           @else
-            <span class="text-gray-400 text-xs italic">-</span>
+          <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full font-medium">Belum</span>
           @endif
         </td>
-        <td class="px-4 py-2 hidden status-kembali-col">{{ ucfirst($item->status_pengembalian ?? '-') }}</td>
 
         <td class="px-4 py-2">
-          <div class="flex items-center gap-2">
-            <button onclick="showDetail({{ $item->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>      </tr>
+          <button onclick="showDetail({{ $item->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4" />
+              <path d="M12 8h.01" />
+            </svg>
+          </button>
+        </td>
+      </tr>
       @empty
       <tr>
         <td colspan="9" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>

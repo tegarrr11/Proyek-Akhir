@@ -4,10 +4,10 @@
       <tr class="text-sm font-semibold">
         <th class="px-4 py-2">No.</th>
         <th class="px-4 py-2">Pengajuan</th>
-        <th class="px-4 py-2">Tanggal Pengajuan</th>
+        <th class="px-4 py-2">Tanggal</th>
         <th class="px-4 py-2">Verifikasi BEM</th>
         <th class="px-4 py-2">Verifikasi Sarpras</th>
-        <th class="px-4 py-2">Organisasi</th>
+        <th class="px-4 py-2">Status Peminjaman</th>
         <th class="px-4 py-2">Status Pengembalian</th>
         <th class="px-4 py-2 text-center">Aksi</th>
       </tr>
@@ -17,62 +17,46 @@
       <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
         <td class="px-4 py-2">{{ $i + 1 }}</td>
         <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
-        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->tgl_kegiatan)->format('d/m/Y') }}</td>
-        <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full
-            @if($item->verifikasi_bem === 'diterima')
-              bg-green-100 text-green-700 font-medium
-            @elseif($item->verifikasi_bem === 'ditolak')
-              bg-red-100 text-red-600
-            @else
-              bg-yellow-500 text-white
-            @endif">
-            {{ ucfirst($item->verifikasi_bem) }}
-          </span>
-        </td>
-        <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full
-            @if($item->verifikasi_sarpras === 'diterima')
-              bg-green-100 text-green-700 font-medium
-            @elseif($item->verifikasi_sarpras === 'ditolak')
-              bg-red-100 text-red-600
-            @else
-              bg-grey-100 text-grey-500 font-medium
-            @endif">
-            {{ ucfirst($item->verifikasi_sarpras) }}
-          </span>
-        </td>
-        <td class="px-4 py-2">{{ $item->organisasi }}</td>
-        <td class="px-4 py-2">
-          @if($item->status_peminjaman === 'ambil')
-            <form method="POST" action="{{ route('admin.peminjaman.kembalikan', $item->id) }}" onsubmit="return confirm('Yakin ingin menandai sebagai dikembalikan?')">
+        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</td>
+        <td class="px-4 py-2">{{ ucfirst($item->verifikasi_bem) }}</td>
+        <td class="px-4 py-2">{{ ucfirst($item->verifikasi_sarpras) }}</td>
+        <td class="px-4 py-2">{{ $item->status_peminjaman ?? '-' }}</td>
+        <td class="px-4 py-2">{{ $item->status_pengembalian ?? '-' }}</td>
+        <td class="px-4 py-2 text-center">
+          <div class="flex gap-2 justify-center">
+            <button onclick="showDetail({{ $item->id }})"
+              class="bg-indigo-500 text-white px-3 py-1 rounded text-xs hover:bg-indigo-600">
+              Diskusi
+            </button>
+            {{-- BUTTON TERIMA --}}
+            @if($item->verifikasi_sarpras !== 'diterima')
+            <form method="POST" action="{{ route('admin.peminjaman.approve', $item->id) }}">
               @csrf
               @method('PATCH')
-              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">Selesai</button>
+              <button class="bg-yellow-500 hover:bg-blue-600 text-white px-3 py-1 text-xs rounded">Terima</button>
             </form>
-          @elseif($item->status_pengembalian === 'selesai')
-            <span class="text-xs text-gray-600 italic">Selesai</span>
-          @else
-            <span class="text-xs text-gray-500 italic">-</span>
-          @endif
-        </td>
-        <td class="px-4 py-2 text-center">
-          <div class="flex items-center gap-2 justify-center">
-            @if ($item->verifikasi_sarpras !== 'diterima')
-              <form method="POST" action="{{ route('admin.peminjaman.verifikasi', $item->id) }}">
-                @csrf
-                <input type="hidden" name="verifikasi_sarpras" value="diterima">
-                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded">Terima</button>
-              </form>
+            @elseif($item->status_peminjaman !== 'diambil')
+            {{-- BUTTON AMBIL --}}
+            <form method="POST" action="{{ route('admin.peminjaman.ambil', $item->id) }}">
+              @csrf
+              @method('PATCH')
+              <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded">Ambil</button>
+            </form>
+            @elseif($item->status_peminjaman === 'diambil' && $item->status_pengembalian !== 'selesai')
+            <button onclick="openModalSelesai({{ $item->id }})" class="bg-green-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded">Selesai</button>
+            @else
+            <span class="text-gray-400 italic">Selesai</span>
             @endif
 
-            <button onclick="showTangguhkanPopup({{ $item->id }})"
-              class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded">
-              Tangguhkan
-            </button>
-
+            {{-- DETAIL --}}
             <button onclick="showDetail({{ $item->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>            </button>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0084db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4" />
+                <path d="M12 8h.01" />
+              </svg>
+            </button>
+          </div>
         </td>
       </tr>
       @empty
@@ -83,6 +67,8 @@
     </tbody>
   </table>
 </x-table-wrapper>
+
+@include('components.modal-selesai')
 
 @push('scripts')
 <script>
@@ -131,13 +117,11 @@
       .then(res => res.json())
       .then(data => {
         const el = id => document.getElementById(id);
-
         const formatTanggal = (tgl) => {
           const d = new Date(tgl);
           const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
           return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
         };
-
         const formatJam = (jam) => jam?.substring(0, 5) || '-';
 
         el('judulKegiatan').textContent = data.judul_kegiatan || '-';
@@ -148,7 +132,6 @@
         el('keterangan').textContent = data.deskripsi_kegiatan || '-';
         el('ruangan').textContent = data.nama_ruangan || '-';
 
-        // Update dokumen link to use secure download route if dokumen exists
         if (data.link_dokumen === 'ada') {
           let prefix = window.location.pathname.split('/')[1];
           if (!['admin', 'mahasiswa', 'bem', 'dosen', 'staff'].includes(prefix)) prefix = '';
@@ -158,7 +141,7 @@
             e.preventDefault();
             fetch(downloadUrl, {
                 method: 'GET',
-                credentials: 'same-origin',
+                credentials: 'same-origin'
               })
               .then(response => {
                 if (!response.ok) throw new Error('Gagal download dokumen');
@@ -200,7 +183,6 @@
           perlengkapanList.appendChild(li);
         }
 
-        // Diskusi
         let diskusiHtml = 'belum ada diskusi';
         if (Array.isArray(data.diskusi) && data.diskusi.length > 0) {
           diskusiHtml = '';
@@ -215,7 +197,7 @@
         document.getElementById('btnKirimDiskusi').classList.remove('bg-gray-300', 'cursor-not-allowed');
         document.getElementById('btnKirimDiskusi').classList.add('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
         document.getElementById('detailModal').classList.remove('hidden');
-        bindDiskusiHandler(); // <--- re-bind setiap modal dibuka
+        bindDiskusiHandler();
       })
       .catch(err => {
         console.error(err);
@@ -227,60 +209,138 @@
     document.getElementById('detailModal')?.classList.add('hidden');
   }
 
-  let tangguhPeminjamanId = null;
+  function setujuiPeminjaman(id) {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
-  function showTangguhkanPopup(id) {
-    tangguhPeminjamanId = id;
-    document.getElementById('alasanTangguh').value = '';
-    document.getElementById('tangguhkanModal').classList.remove('hidden');
-  }
-
-  function closeTangguhkan() {
-    document.getElementById('tangguhkanModal').classList.add('hidden');
-  }
-
-  function submitTangguhkan() {
-    const alasan = document.getElementById('alasanTangguh').value.trim();
-    if (!alasan || !tangguhPeminjamanId) return alert('Alasan tidak boleh kosong.');
-
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-    fetch('/diskusi', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrf
-      },
-      body: JSON.stringify({
-        peminjaman_id: tangguhPeminjamanId,
-        pesan: `<span class="text-red-600 font-semibold">DITANGGUHKAN:</span> ${alasan}`
+    fetch(`/admin/peminjaman/${id}/setujui`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': csrf
+        }
       })
-    })
-    .then(res => res.json())
-    .then(resp => {
-      if (resp.success) {
-        closeTangguhkan();
-        showDetail(tangguhPeminjamanId); // refresh diskusi
-      } else {
-        alert(resp.error || 'Gagal mengirim alasan.');
-      }
-    })
-    .catch(() => alert('Terjadi kesalahan saat mengirim alasan.'));
+      .then(() => {
+        const aksiCell = document.getElementById(`aksi-${id}`);
+        const statusCell = document.getElementById(`status-${id}`);
+
+        if (aksiCell) {
+          const btnAmbil = document.createElement('button');
+          btnAmbil.className = 'bg-yellow-500 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600';
+          btnAmbil.textContent = 'Ambil';
+          btnAmbil.setAttribute('onclick', `ambilBarang(${id})`);
+          aksiCell.querySelector(`#btn-setujui-${id}`)?.remove();
+          aksiCell.appendChild(btnAmbil);
+        }
+
+        if (statusCell) {
+          statusCell.innerHTML = `<span class="text-xs text-gray-500 italic">-</span>`;
+        }
+
+        // ✅ Update kolom Verifikasi Sarpras
+        const row = aksiCell.closest('tr');
+        if (row) {
+          const verifikasiSarprasCell = row.querySelector('td:nth-child(5)');
+          if (verifikasiSarprasCell) {
+            verifikasiSarprasCell.innerHTML = `
+              <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">
+                Diterima
+              </span>`;
+          }
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Gagal menyetujui peminjaman.');
+      });
   }
 
+  function ambilBarang(id) {
+    fetch(`/admin/peminjaman/${id}/ambil`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+      })
+      .then(() => {
+        const aksiCell = document.getElementById(`aksi-${id}`);
+        const statusCell = document.getElementById(`status-${id}`);
+
+        if (aksiCell) {
+          aksiCell.querySelector(`[onclick="ambilBarang(${id})"]`)?.remove();
+          const btnSelesai = document.createElement('button');
+          btnSelesai.className = 'bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700';
+          btnSelesai.textContent = 'Selesai';
+          btnSelesai.setAttribute('onclick', `showChecklistModal(${id})`);
+          aksiCell.appendChild(btnSelesai);
+        }
+
+        if (statusCell) {
+          statusCell.innerHTML = `<span class="text-xs text-gray-500 italic">Diambil</span>`;
+        }
+      });
+  }
+
+  function showChecklistModal(id) {
+    window.currentPeminjamanId = id;
+
+    fetch(`{{ url('admin/peminjaman') }}/${id}/checklist-html`)
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('checklistContent').innerHTML = data.html;
+
+        const modal = document.getElementById('showChecklistModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Gagal memuat checklist.');
+      });
+  }
+
+  function closeChecklistModal() {
+    const modal = document.getElementById('showChecklistModal');
+    modal.classList.add('hidden'); // sembunyikan kembali
+    modal.classList.remove('flex'); // hapus flex
+  }
+
+  function submitChecklist() {
+    if (!window.currentPeminjamanId) {
+      alert('ID peminjaman tidak ditemukan!');
+      return;
+    }
+
+    const checkedItems = [...document.querySelectorAll('input[name="barang[]"]:checked')].map(el => el.value);
+
+    const formData = new FormData();
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+    checkedItems.forEach(item => formData.append('barang[]', item));
+
+    fetch(`/admin/peminjaman/${window.currentPeminjamanId}/selesai`, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (data.status === 'selesai') {
+          const aksiCell = document.getElementById(`aksi-${window.currentPeminjamanId}`);
+          const statusCell = document.getElementById(`status-${window.currentPeminjamanId}`);
+          if (aksiCell) aksiCell.innerHTML = '';
+          if (statusCell) statusCell.innerHTML = `<span class="text-green-600 font-semibold text-xs">Selesai</span>`;
+          closeChecklistModal();
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Gagal mengirim data.');
+      });
+  }
 </script>
 @endpush
-
-<!-- Modal Popup Tangguhkan -->
-<div id="tangguhkanModal" class="fixed inset-0 z-[999] hidden bg-black/40 px-4 flex items-center justify-center">
-  <div class="bg-white rounded-lg p-6 w-full max-w-md shadow" onclick="event.stopPropagation()">
-    <h2 class="text-md font-semibold mb-3 text-gray-800">Berikan alasan menangguhkan peminjaman</h2>
-    <textarea id="alasanTangguh" class="w-full border border-gray-300 rounded px-3 py-2 text-sm mb-4" rows="3" placeholder="Tulis alasan Anda..."></textarea>
-    <div class="flex justify-end gap-2">
-      <button onclick="closeTangguhkan()" class="text-gray-500 hover:underline text-sm">Batal</button>
-      <button onclick="submitTangguhkan()" class="bg-green-600 hover:bg-green-800 text-white px-4 py-1 text-sm rounded">Kirim</button>
-    </div>
-  </div>
-</div>
-
-

@@ -3,15 +3,27 @@
   $currentPage = request()->get('page', 1);
   $offset = ($currentPage - 1) * $perPage;
 
+  // Filter search
   $filtered = $items->filter(function ($item) {
     $search = strtolower(request()->get('search', ''));
     return str_contains(strtolower($item->judul_kegiatan), $search);
   });
 
+  // Filter gedung
+  if (request('gedung_id')) {
+    $filtered = $filtered->where('gedung_id', request('gedung_id'));
+  }
+
+  // Filter bulan (berdasarkan created_at)
+  if (request('bulan')) {
+    $filtered = $filtered->filter(function ($item) {
+        return $item->created_at && $item->created_at->format('Y-m') === request('bulan');
+    });
+  }
+
   $paginatedItems = $filtered->slice($offset, $perPage)->values();
   $totalPages = ceil($filtered->count() / $perPage);
 @endphp
-
 
 <x-table-wrapper>
   <table class="w-full text-sm">

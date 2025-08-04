@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Gedung;
-use App\Http\Controllers\PeminjamanController;
 use App\Models\Peminjaman;
+use App\Models\DetailPeminjaman;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\FasilitasImport;
 
@@ -25,7 +25,39 @@ class AdminController extends Controller
             ];
         });
 
-        return view('pages.admin.dashboard', compact('gedungs', 'selectedGedungId', 'events'));
+        // Tambahan 3 card statistik
+        $jumlahPengajuanAktif = Peminjaman::where('verifikasi_bem', 'diterima')
+            ->where('verifikasi_sarpras', 'diajukan')
+            ->whereHas('user', fn($q) => $q->where('role', '!=', 'admin'))
+            ->count();
+
+        $jumlahPeminjamanAktif = Peminjaman::where('status_peminjaman', 'diambil')
+            ->where(function ($q) {
+                $q->whereNull('status_pengembalian')
+                    ->orWhere('status_pengembalian', '!=', 'selesai');
+            })
+            ->count();
+
+        $ruanganTerbanyak = Peminjaman::select('gedung_id', \DB::raw('count(*) as total'))
+            ->groupBy('gedung_id')
+            ->with('gedung:id,nama')
+            ->get()
+            ->map(function ($item) {
+                return (object)[
+                    'gedung_id' => $item->gedung_id,
+                    'nama_gedung' => optional($item->gedung)->nama ?? '-',
+                    'total' => $item->total
+                ];
+            });
+
+        return view('pages.admin.dashboard', compact(
+            'gedungs',
+            'selectedGedungId',
+            'events',
+            'jumlahPengajuanAktif',
+            'jumlahPeminjamanAktif',
+            'ruanganTerbanyak'
+        ));
     }
 
     public function update(Request $request)
@@ -103,28 +135,25 @@ class AdminController extends Controller
         foreach ($items as $index => $item) {
             $rowClass = $index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
             $html .= '
-            <tr class="'.$rowClass.'">
-            <td class="px-4 py-2">'.(($page - 1) * $perPage + $index + 1).'</td>
-            <td class="px-4 py-2">'.$item->nama_barang.'</td>
-            <td class="px-4 py-2">'.$item->stok.'</td>
+            <tr class="' . $rowClass . '">
+            <td class="px-4 py-2">' . (($page - 1) * $perPage + $index + 1) . '</td>
+            <td class="px-4 py-2">' . $item->nama_barang . '</td>
+            <td class="px-4 py-2">' . $item->stok . '</td>
             <td class="px-4 py-2 text-sm text-blue-600">Edit | Hapus</td>
             </tr>';
         }
 
         $html .= '</tbody></table>';
 
-        // Pagination
         if ($totalPages > 1) {
             $html .= '<div class="mt-4 flex justify-center space-x-2">';
             for ($i = 1; $i <= $totalPages; $i++) {
                 $active = $i == $page ? 'bg-[#003366] text-white' : 'text-gray-600 hover:bg-gray-100';
-                $html .= '<button onclick="document.querySelector(\'[x-data]\').__x.$data.changePage('.$i.')" class="px-3 py-1 border rounded text-sm '.$active.'">'.$i.'</button>';
+                $html .= '<button onclick="document.querySelector(\'[x-data]\').__x.$data.changePage(' . $i . ')" class="px-3 py-1 border rounded text-sm ' . $active . '">' . $i . '</button>';
             }
             $html .= '</div>';
         }
 
         return $html;
     }
-
-    
 }
