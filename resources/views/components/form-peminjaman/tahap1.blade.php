@@ -23,12 +23,12 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
       <div>
         <label class="block text-xs text-gray-600 mb-1">Tanggal Mulai</label>
-        <input type="date" name="tgl_kegiatan" value="{{ old('tgl_kegiatan') }}"
+        <input type="date" name="tgl_kegiatan" id="tgl_kegiatan" value="{{ old('tgl_kegiatan', request('tgl_kegiatan')) }}"
           class="w-full border border-gray-500 rounded px-3 py-2" required>
       </div>
       <div>
         <label class="block text-xs text-gray-600 mb-1">Tanggal Berakhir</label>
-        <input type="date" name="tgl_kegiatan_berakhir" value="{{ old('tgl_kegiatan_berakhir') }}"
+        <input type="date" name="tgl_kegiatan_berakhir" id="tgl_kegiatan_berakhir" value="{{ old('tgl_kegiatan_berakhir', request('tgl_kegiatan_berakhir')) }}"
           class="w-full border border-gray-500 rounded px-3 py-2" required>
       </div>
     </div>
@@ -37,12 +37,12 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
       <div>
         <label class="block text-xs text-gray-600 mb-1">Jam Mulai</label>
-        <input type="time" name="waktu_mulai" value="{{ old('waktu_mulai') }}"
+        <input type="time" name="waktu_mulai" id="waktu_mulai" value="{{ old('waktu_mulai', request('waktu_mulai')) }}"
           class="w-full border border-gray-500 rounded px-3 py-2" required>
       </div>
       <div>
         <label class="block text-xs text-gray-600 mb-1">Jam Berakhir</label>
-        <input type="time" name="waktu_berakhir" value="{{ old('waktu_berakhir') }}"
+        <input type="time" name="waktu_berakhir" id="waktu_berakhir" value="{{ old('waktu_berakhir', request('waktu_berakhir')) }}"
           class="w-full border border-gray-500 rounded px-3 py-2" required>
       </div>
     </div>
@@ -62,8 +62,7 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
   {{-- Pilih Gedung --}}
   <div>
     <label class="block mb-1 text-sm font-medium">Ruangan *</label>
-    <select class="w-full border rounded px-3 py-2" name="gedung" id="gedung-select"
-      onchange="window.location.href='?gedung=' + this.value; document.getElementById('gedung-hidden').value = this.value;">
+    <select class="w-full border rounded px-3 py-2" name="gedung" id="gedung-select">
       <option value="">-- Pilih Ruangan --</option>
       <option value="gsg" {{ request('gedung') == 'gsg' ? 'selected' : '' }}>Main Hall GSG</option>
       <option value="gor" {{ request('gedung') == 'gor' ? 'selected' : '' }}>GOR</option>
@@ -71,9 +70,27 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
       <option value="r361" {{ request('gedung') == 'r361' ? 'selected' : '' }}>R. 361</option>
     </select>
     <input type="hidden" name="gedung" id="gedung-hidden" value="{{ request('gedung') }}">
+
     <script>
       document.getElementById('gedung-select').addEventListener('change', function () {
+        const params = new URLSearchParams(window.location.search);
+
+        // ambil nilai tanggal dan jam dari form input
+        const tglMulai = document.getElementById('tgl_kegiatan')?.value;
+        const tglAkhir = document.getElementById('tgl_kegiatan_berakhir')?.value;
+        const waktuMulai = document.getElementById('waktu_mulai')?.value;
+        const waktuAkhir = document.getElementById('waktu_berakhir')?.value;
+
+        if (tglMulai) params.set('tgl_kegiatan', tglMulai);
+        if (tglAkhir) params.set('tgl_kegiatan_berakhir', tglAkhir);
+        if (waktuMulai) params.set('waktu_mulai', waktuMulai);
+        if (waktuAkhir) params.set('waktu_berakhir', waktuAkhir);
+
+        // ganti nilai gedung di param
+        params.set('gedung', this.value);
         document.getElementById('gedung-hidden').value = this.value;
+
+        window.location.search = params.toString(); // reload halaman dgn param baru
       });
     </script>
   </div>
@@ -247,7 +264,6 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
     }
   }
 
-
   function tambahKeFasilitas(id, nama, stok) {
     const tbody = document.getElementById('fasilitas-tambahan-body');
     const section = document.getElementById('fasilitas-tambahan-section');
@@ -377,7 +393,6 @@ $isMahasiswa = auth()->user()->role === 'mahasiswa';
     toggleStep(1);
   });
 
-  // Search filter fasilitas tambahan
   document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchFasilitasLainnya');
     const items = document.querySelectorAll('.fasilitas-item');

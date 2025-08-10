@@ -30,4 +30,9 @@ class Fasilitas extends Model
         return $this->belongsTo(Gedung::class, 'gedung_id');
     }
 
+    public function detailPeminjaman()
+    {
+        return $this->hasMany(DetailPeminjaman::class);
+    }
+
 }
