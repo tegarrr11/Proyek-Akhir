@@ -105,109 +105,109 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    // Load pegawai dari endpoint Laravel (proxy ke API PCR)
-    $.getJSON('/pegawai/list', function(data) {
-        if (!data.items) {
-            alert("Gagal memuat data pegawai dari API.");
-            return;
-        }
+    $(document).ready(function() {
+        // Load pegawai dari endpoint Laravel (proxy ke API PCR)
+        $.getJSON('/pegawai/list', function(data) {
+            if (!data.items) {
+                alert("Gagal memuat data pegawai dari API.");
+                return;
+            }
 
-        data.items.forEach(function(peg) {
-            $('#penanggungSelect').append(
-                $('<option>', {
-                    value: peg.inisial + ' - ' + peg.nama,
-                    text: peg.inisial + ' - ' + peg.nama
-                })
-            );
-        });
+            data.items.forEach(function(peg) {
+                $('#penanggungSelect').append(
+                    $('<option>', {
+                        value: peg.inisial + ' - ' + peg.nama,
+                        text: peg.inisial + ' - ' + peg.nama
+                    })
+                );
+            });
 
-        $('#penanggungSelect').select2({
-            width: '100%',
-            placeholder: "Pilih atau cari penanggung jawab...",
-            dropdownAutoWidth: true
-        });
+            $('#penanggungSelect').select2({
+                width: '100%',
+                placeholder: "Pilih atau cari penanggung jawab...",
+                dropdownAutoWidth: true
+            });
 
-        $('#organisasiSelect').select2({
-            width: '100%',
-            placeholder: "Pilih organisasi",
-            dropdownAutoWidth: true
+            $('#organisasiSelect').select2({
+                width: '100%',
+                placeholder: "Pilih organisasi",
+                dropdownAutoWidth: true
+            });
         });
     });
-});
 
-  const organisasiData = [
-    "AET", "ITSA", "HIMASISTIFO", "HIMATRIK", "HMM", "HIMAKSI", "HIMATEL", "HIMIKA", "HIMAKOM", "HIMATRON",
-    "UKM Basket", "UKM Futsal", "UKM Volly", "UKM Badminton", "PCR-Rohil", "PCR-Sumbar","BEM","BLM"
-  ];
+    const organisasiData = [
+      "AET", "ITSA", "HIMASISTIFO", "HIMATRIK", "HMM", "HIMAKSI", "HIMATEL", "HIMIKA", "HIMAKOM", "HIMATRON",
+      "UKM Basket", "UKM Futsal", "UKM Volly", "UKM Badminton", "PCR-Rohil", "PCR-Sumbar","BEM","BLM"
+    ];
 
-  const organisasiInput = document.getElementById('organisasiInput');
-  const organisasiList = document.getElementById('organisasiList');
+    const organisasiInput = document.getElementById('organisasiInput');
+    const organisasiList = document.getElementById('organisasiList');
 
-  organisasiInput.addEventListener('focus', showOrganisasiList);
-  organisasiInput.addEventListener('input', showOrganisasiList);
+    organisasiInput.addEventListener('focus', showOrganisasiList);
+    organisasiInput.addEventListener('input', showOrganisasiList);
 
-  function showOrganisasiList() {
-    const keyword = organisasiInput.value.toLowerCase();
-    const filtered = organisasiData.filter(name => name.toLowerCase().includes(keyword));
+    function showOrganisasiList() {
+      const keyword = organisasiInput.value.toLowerCase();
+      const filtered = organisasiData.filter(name => name.toLowerCase().includes(keyword));
 
-    organisasiList.innerHTML = '';
-    filtered.slice(0, 50).forEach((name, i) => {
-      const div = document.createElement('div');
-      div.textContent = name;
-      div.className = 'cursor-pointer px-3 py-1 hover:bg-gray-100';
-      div.onclick = () => {
-        organisasiInput.value = name;
+      organisasiList.innerHTML = '';
+      filtered.slice(0, 50).forEach((name, i) => {
+        const div = document.createElement('div');
+        div.textContent = name;
+        div.className = 'cursor-pointer px-3 py-1 hover:bg-gray-100';
+        div.onclick = () => {
+          organisasiInput.value = name;
+          organisasiList.classList.add('hidden');
+        };
+        organisasiList.appendChild(div);
+      });
+
+      organisasiList.classList.toggle('hidden', filtered.length === 0);
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!organisasiInput.contains(e.target) && !organisasiList.contains(e.target)) {
         organisasiList.classList.add('hidden');
-      };
-      organisasiList.appendChild(div);
+      }
     });
 
-    organisasiList.classList.toggle('hidden', filtered.length === 0);
-  }
+    // Penanggung jawab
+    const penanggungInput = document.getElementById('penanggungInput');
+    const penanggungList = document.getElementById('penanggungList');
+    let allPegawai = [];
 
-  document.addEventListener('click', function(e) {
-    if (!organisasiInput.contains(e.target) && !organisasiList.contains(e.target)) {
-      organisasiList.classList.add('hidden');
+    fetch('/pegawai/list')
+      .then(res => res.json())
+      .then(data => {
+        allPegawai = data.items.map(d => `${d.inisial} - ${d.nama}`);
+      });
+
+    penanggungInput.addEventListener('focus', showPenanggungList);
+    penanggungInput.addEventListener('input', showPenanggungList);
+
+    function showPenanggungList() {
+      const keyword = penanggungInput.value.toLowerCase();
+      const filtered = allPegawai.filter(name => name.toLowerCase().includes(keyword));
+
+      penanggungList.innerHTML = '';
+      filtered.slice(0, 50).forEach(name => {
+        const div = document.createElement('div');
+        div.textContent = name;
+        div.className = 'cursor-pointer px-3 py-1 hover:bg-gray-100';
+        div.onclick = () => {
+          penanggungInput.value = name;
+          penanggungList.classList.add('hidden');
+        };
+        penanggungList.appendChild(div);
+      });
+
+      penanggungList.classList.toggle('hidden', filtered.length === 0);
     }
-  });
 
-  // Penanggung jawab
-  const penanggungInput = document.getElementById('penanggungInput');
-  const penanggungList = document.getElementById('penanggungList');
-  let allPegawai = [];
-
-  fetch('/pegawai/list')
-    .then(res => res.json())
-    .then(data => {
-      allPegawai = data.items.map(d => `${d.inisial} - ${d.nama}`);
-    });
-
-  penanggungInput.addEventListener('focus', showPenanggungList);
-  penanggungInput.addEventListener('input', showPenanggungList);
-
-  function showPenanggungList() {
-    const keyword = penanggungInput.value.toLowerCase();
-    const filtered = allPegawai.filter(name => name.toLowerCase().includes(keyword));
-
-    penanggungList.innerHTML = '';
-    filtered.slice(0, 50).forEach(name => {
-      const div = document.createElement('div');
-      div.textContent = name;
-      div.className = 'cursor-pointer px-3 py-1 hover:bg-gray-100';
-      div.onclick = () => {
-        penanggungInput.value = name;
+    document.addEventListener('click', function(e) {
+      if (!penanggungInput.contains(e.target) && !penanggungList.contains(e.target)) {
         penanggungList.classList.add('hidden');
-      };
-      penanggungList.appendChild(div);
+      }
     });
-
-    penanggungList.classList.toggle('hidden', filtered.length === 0);
-  }
-
-  document.addEventListener('click', function(e) {
-    if (!penanggungInput.contains(e.target) && !penanggungList.contains(e.target)) {
-      penanggungList.classList.add('hidden');
-    }
-  });
 </script>

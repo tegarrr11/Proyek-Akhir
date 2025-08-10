@@ -35,14 +35,17 @@
           <span class="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">Diterima</span>
         </td>
         <td class="px-4 py-2">
-          @if ($item->verifikasi_sarpras === 'diterima')
-          <span class="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">Diterima</span>
-          @elseif ($item->verifikasi_sarpras === 'ditolak')
-          <span class="bg-green-100 text-red-800 text-xs font-semibold px-3 py-1 rounded hover:bg-red-200 transition">Ditolak</span>
-          @else
-          <span class="bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yello-600">Proses</span>
-          @endif
-        </td>
+          <span class="px-3 py-1 text-xs rounded-full
+            @if($item->verifikasi_sarpras === 'diterima')
+              bg-green-100 text-green-600 font-medium
+            @elseif(in_array($item->verifikasi_sarpras, ['proses','diajukan']))
+              bg-gray-200 text-gray-700 font-medium
+            @else
+              bg-gray-200 text-gray-600 font-medium
+            @endif">
+            {{ in_array($item->verifikasi_sarpras, ['diajukan', null, '']) ? '-' : ucfirst($item->verifikasi_sarpras) }}
+          </span>
+        </td>
         <td class="px-4 py-2">{{ $item->organisasi }}</td>
         <td class="px-4 py-2">
           <button onclick="showDetail({{ $item->id }})" class="text-blue-600 hover:text-blue-800 text-sm">

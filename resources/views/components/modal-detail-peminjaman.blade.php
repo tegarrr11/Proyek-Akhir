@@ -55,8 +55,12 @@
         <div>
           <p class="font-semibold text-[#1e2d5e]">Dokumen</p>
           <div class="flex flex-col gap-1">
-            <a id="linkDokumen" href="#" class="text-blue-600 underline text-sm hidden" target="_blank" rel="noopener noreferrer">Lihat Proposal</a>
-            <a id="linkUndangan" href="#" class="text-blue-600 underline text-sm hidden" target="_blank" rel="noopener noreferrer">Lihat Undangan</a>
+          <a id="linkDokumen" href="#" class="text-blue-600 underline text-sm hidden" target="_blank" rel="noopener noreferrer">
+            Lihat Proposal
+          </a>
+          <a id="linkUndangan" href="#" class="text-blue-600 underline text-sm hidden" target="_blank" rel="noopener noreferrer">
+            Lihat Undangan
+          </a>
           </div>
           <span id="dokumenNotFound" class="text-gray-400 italic">Tidak ada dokumen</span>
         </div>
@@ -87,7 +91,7 @@
     currentPeminjamanId = id;
     console.log('📌 showDetail dipanggil dengan id:', id);
 
-    fetch(`/admin/peminjaman/${id}`)
+    fetch(`/peminjaman/${id}`)
       .then(res => res.json())
       .then(data => {
         console.log('✅ proposal:', data.proposal);
@@ -131,6 +135,9 @@
           dokumen.href = `/storage/${data.proposal}`;
           dokumen.target = '_blank';
           dokumen.rel = 'noopener noreferrer';
+          console.log("📂 proposal:", data.proposal);
+          console.log("🔗 dibuat link:", `/storage/${data.proposal}`);
+          console.log("🧩 elemen ada:", document.getElementById('linkDokumen'));
           dokumen.classList.remove('hidden');
         } else {
           el('linkDokumen').classList.add('hidden');
@@ -230,5 +237,4 @@
     };
   }
 </script>
-
 @endpush

@@ -107,6 +107,7 @@ class BemPeminjamanController extends Controller
             'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
             'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
                 return [
+                    'id' => $detail->fasilitas_id,
                     'nama' => $detail->fasilitas->nama_barang ?? 'N/A',
                     'jumlah' => $detail->jumlah,
                 ];

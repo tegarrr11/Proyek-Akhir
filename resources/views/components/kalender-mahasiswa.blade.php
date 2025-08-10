@@ -127,7 +127,7 @@ h2.text-2xl {
         <form method="GET" action="{{ Request::url() }}">
           <select name="gedung_id"
             onchange="this.form.submit()"
-            class="border border-grey-500 text-sm px-4 py-2 h-10 rounded w-52">
+            class="border border-[#3389CA] text-[#3389CA] text-sm px-4 py-2 h-10 rounded w-52">
             @foreach($gedungs->where('id', '!=', 8) as $gedung)
               <option value="{{ $gedung->id }}" {{ $gedung->id == $selectedGedungId ? 'selected' : '' }}>
                 {{ $gedung->nama }}
@@ -139,7 +139,7 @@ h2.text-2xl {
       @php $user = auth()->user(); @endphp
       @if($user && $user->role === 'admin')
       <a href="{{ route('admin.peminjaman.create') }}"
-        class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
+        class="inline-flex items-center gap-1 bg-[#3389CA] text-white text-sm px-4 py-2 h-10 rounded">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
         </svg>
@@ -147,7 +147,7 @@ h2.text-2xl {
       </a>
       @elseif($user && $user->role === 'dosen')
       <a href="{{ route('dosen.peminjaman.create') }}"
-        class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
+        class="inline-flex items-center gap-1 bg-[#3389CA] text-white text-sm px-4 py-2 h-10 rounded">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
         </svg>
@@ -155,7 +155,7 @@ h2.text-2xl {
       </a>
       @elseif($user && $user->role === 'mahasiswa')
       <a href="{{ route('peminjaman.create') }}"
-        class="inline-flex items-center gap-1 bg-[#003366] text-white text-sm px-4 py-2 h-10 rounded">
+        class="inline-flex items-center gap-1 bg-[#3389CA] text-white text-sm px-4 py-2 h-10 rounded">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
         </svg>

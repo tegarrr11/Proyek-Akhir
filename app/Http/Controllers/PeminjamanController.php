@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\PenggunaanFasilitas;
+use Carbon\CarbonPeriod;
 
 class PeminjamanController extends Controller
 {
@@ -40,7 +42,6 @@ class PeminjamanController extends Controller
             'fasilitasLainnya'
         ));
     }
-
     /**
      * Menyimpan data pengajuan peminjaman ke database.
      */
@@ -135,6 +136,18 @@ class PeminjamanController extends Controller
                     'fasilitas_id' => $item['id'],
                     'jumlah' => $item['jumlah'],
                 ]);
+
+                // Buat log penggunaan berdasarkan tanggal kegiatan
+                $periode = CarbonPeriod::create($request->tgl_kegiatan, $request->tgl_kegiatan_berakhir);
+                foreach ($periode as $tanggal) {
+                    $penggunaan = PenggunaanFasilitas::firstOrNew([
+                        'fasilitas_id' => $item['id'],
+                        'tanggal' => $tanggal->format('Y-m-d'),
+                    ]);
+
+                    $penggunaan->jumlah = ($penggunaan->exists ? $penggunaan->jumlah : 0) + $item['jumlah'];
+                    $penggunaan->save();
+                }
             }
 
             Auth::user()->notify(new \App\Notifications\PengajuanMasuk($peminjaman));
@@ -184,22 +197,27 @@ class PeminjamanController extends Controller
         return view('pages.mahasiswa.peminjaman', compact('pengajuans', 'riwayats'));
     }
 
-    private function getAvailableStok($fasilitasId, $tanggal, $waktuMulai, $waktuAkhir)
+    public function getAvailableStok($fasilitasId, $tglMulai, $waktuMulai, $waktuBerakhir)
     {
         $fasilitas = Fasilitas::find($fasilitasId);
         if (!$fasilitas) return 0;
 
-        $dipinjam = DetailPeminjaman::whereHas('peminjaman', function ($query) use ($tanggal, $waktuMulai, $waktuAkhir) {
-            $query->where('tgl_kegiatan', $tanggal)
-                ->whereIn('verifikasi_sarpras', ['diajukan', 'diterima'])
-                ->where(function ($q) use ($waktuMulai, $waktuAkhir) {
-                    $q->whereTime('waktu_mulai', '<', $waktuAkhir)
-                        ->whereTime('waktu_berakhir', '>', $waktuMulai);
-                });
-        })->where('fasilitas_id', $fasilitasId)
-            ->sum('jumlah');
+        $tglSelesai = request('tgl_kegiatan_berakhir') ?? $tglMulai;
+        $periode = CarbonPeriod::create($tglMulai, $tglSelesai);
 
-        return max($fasilitas->stok - $dipinjam, 0);
+        $stokTersedia = $fasilitas->stok;
+
+        // Ambil jumlah maksimum penggunaan dari seluruh tanggal
+        $maxPenggunaan = 0;
+        foreach ($periode as $tanggal) {
+            $terpakai = PenggunaanFasilitas::where('fasilitas_id', $fasilitasId)
+                ->where('tanggal', $tanggal->format('Y-m-d'))
+                ->sum('jumlah');
+            $tersisa = $stokTersedia - $terpakai;
+            $maxPenggunaan = $maxPenggunaan === 0 ? $tersisa : min($maxPenggunaan, $tersisa);
+        }
+
+        return $maxPenggunaan;
     }
 
     // Mendapatkan daftar fasilitas berdasarkan slug gedung.
@@ -218,37 +236,6 @@ class PeminjamanController extends Controller
 
         return response()->json($fasilitas);
     }
-
-    // Mahasiswa mengambil barang setelah disetujui.
-    // public function ambil($id)
-    // {
-    //     $peminjaman = Peminjaman::with('detailPeminjaman.fasilitas')->findOrFail($id);
-
-    //     // Validasi: hanya bisa ambil jika disetujui dan belum diambil
-    //     if ($peminjaman->verifikasi_sarpras === 'diterima' && is_null($peminjaman->status_peminjaman)) {
-    //         foreach ($peminjaman->detailPeminjaman as $detail) {
-    //             $fasilitas = $detail->fasilitas;
-
-    //             if ($fasilitas && $fasilitas->stok >= $detail->jumlah) {
-    //                 $fasilitas->stok -= $detail->jumlah;
-    //                 $fasilitas->is_available = $fasilitas->stok > 0;
-    //                 $fasilitas->save();
-    //             } else {
-    //                 return back()->with('error', 'Stok tidak mencukupi untuk: ' . $fasilitas->nama_barang);
-    //             }
-    //         }
-
-    //         // Simpan status sebagai 'diambil' untuk mencocokkan dengan ENUM
-    //         $peminjaman->update([
-    //             'status_peminjaman' => 'ambil',
-    //             'status_pengembalian' => 'proses',
-    //         ]);
-
-    //         return back()->with('success', 'Barang berhasil diambil.');
-    //     }
-
-    //     return back()->with('error', 'Peminjaman tidak valid atau sudah diambil.');
-    // }
 
     public function adminKembalikan($id)
     {
@@ -304,6 +291,7 @@ class PeminjamanController extends Controller
             'nama_ruangan' => $peminjaman->gedung->nama ?? '-',
             'perlengkapan' => $peminjaman->detailPeminjaman->map(function ($detail) {
                 return [
+                    'id' => $detail->fasilitas_id,
                     'nama' => optional($detail->fasilitas)->nama_barang ?? '-',
                     'jumlah' => $detail->jumlah ?? 0,
                 ];
@@ -383,13 +371,114 @@ class PeminjamanController extends Controller
         return redirect()->back()->with('error', 'File undangan tidak ditemukan.');
     }
 
-    // public function setujui($id)
-    // {
-    //     $peminjaman = Peminjaman::findOrFail($id);
-    //     $peminjaman->status_peminjaman = 'diterima';
-    //     $peminjaman->verifikasi_sarpras = 'diterima';
-    //     $peminjaman->save();
+    public function update(Request $request, $id)
+    {
+        \Log::debug($request->all());
+        if (!$request->ajax()) {
+            return response()->json(['error' => 'Invalid request.'], 400);
+        }
 
-    //     return response()->json(['success' => true]);
-    // }
+        $request->validate([
+            'tgl_kegiatan' => 'required|date',
+            'tgl_kegiatan_berakhir' => 'required|date|after_or_equal:tgl_kegiatan',
+            'waktu_mulai' => 'required',
+            'waktu_berakhir' => 'required',
+            'proposal' => 'nullable|file|mimes:pdf|max:3072',
+            'undangan_pembicara' => 'nullable|file|mimes:pdf|max:3072',
+        ]);
+
+        $peminjaman = Peminjaman::findOrFail($id);
+        $peminjaman->tgl_kegiatan = $request->tgl_kegiatan;
+        $peminjaman->tgl_kegiatan_berakhir = $request->tgl_kegiatan_berakhir;
+        $peminjaman->waktu_mulai = $request->waktu_mulai;
+        $peminjaman->waktu_berakhir = $request->waktu_berakhir;
+
+        // Handle dokumen
+        if ($request->hasFile('proposal')) {
+            if ($peminjaman->proposal && file_exists(public_path('storage/' . $peminjaman->proposal))) {
+                unlink(public_path('storage/' . $peminjaman->proposal));
+            }
+            $file = $request->file('proposal')->store('dokumen', 'public');
+            $peminjaman->proposal = $file;
+        }
+
+        if ($request->hasFile('undangan_pembicara')) {
+            if ($peminjaman->undangan_pembicara && file_exists(public_path('storage/' . $peminjaman->undangan_pembicara))) {
+                unlink(public_path('storage/' . $peminjaman->undangan_pembicara));
+            }
+            $file = $request->file('undangan_pembicara')->store('dokumen', 'public');
+            $peminjaman->undangan_pembicara = $file;
+        }
+
+        $peminjaman->save();
+
+        // Simpan ulang perlengkapan
+        $peminjaman->detailPeminjaman()->delete();
+        if ($request->has('perlengkapan')) {
+            foreach ($request->perlengkapan as $item) {
+                $peminjaman->detailPeminjaman()->create([
+                    'fasilitas_id' => $item['id'],
+                    'jumlah' => $item['jumlah'],
+                ]);
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function pending($id)
+    {
+        $peminjaman = Peminjaman::findOrFail($id);
+        $peminjaman->verifikasi_sarpras = 'pending';
+        $peminjaman->save();
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function ajukan(Peminjaman $peminjaman)
+    {
+        $peminjaman->verifikasi_sarpras = 'diajukan';
+        $peminjaman->save();
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function selesai(Request $request, $id)
+    {
+        $peminjaman = Peminjaman::with('detailPeminjaman')->findOrFail($id);
+
+        \Log::info('🟡 [SELESAI] Proses pengembalian dimulai untuk ID ' . $id);
+
+        $checklist = $request->input('checklist', []);
+
+        \Log::info('Checklist fasilitas yang diterima:', $checklist);
+
+        if (empty($checklist)) {
+            \Log::info('❌ Tidak ada fasilitas yang dichecklist, batalkan proses.');
+            return redirect()->back()->with('info', 'Tidak ada perlengkapan yang dipilih.');
+        }
+
+        // Hapus fasilitas yang dichecklist
+        $deleted = DetailPeminjaman::where('peminjaman_id', $peminjaman->id)
+            ->whereIn('fasilitas_id', $checklist)
+            ->delete();
+
+        \Log::info('✔️ Jumlah detail_peminjaman yang dihapus: ' . $deleted);
+
+        // Cek sisa fasilitas langsung via query (lebih akurat)
+        $sisa = DetailPeminjaman::where('peminjaman_id', $peminjaman->id)->count();
+
+        \Log::info('🔎 Jumlah fasilitas tersisa setelah hapus: ' . $sisa);
+
+        if ($sisa === 0) {
+            $peminjaman->status_pengembalian = 'selesai';
+            $peminjaman->save();
+            \Log::info('✅ Peminjaman ' . $id . ' ditandai SELESAI karena tidak ada fasilitas tersisa.');
+        } else {
+            \Log::info('🕗 Peminjaman ' . $id . ' masih BELUM selesai, masih ada fasilitas tersisa.');
+        }
+
+        return redirect()->back()->with('success', 'Checklist berhasil diproses.');
+    }
+
 }

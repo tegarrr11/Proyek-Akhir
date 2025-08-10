@@ -98,8 +98,6 @@ Route::get('pegawai/list', function () {
 
 // ========== NON-AUTH ROUTES (untuk popup/detail yang tidak masuk prefix auth) ==========
 Route::get('/sarpras/peminjaman/{id}/detail', [AdminPeminjamanController::class, 'show'])->name('admin.peminjaman.detail');
-Route::get('/kalender', [KalenderController::class, 'index'])->middleware('auth')->name('kalender.index');
-Route::get('/mahasiswa/peminjaman/{id}', [MahasiswaController::class, 'show']);
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
 Route::get('/bem/dashboard', [BemController::class, 'dashboard']);
 Route::get('/dosen/dashboard', [BemController::class, 'dashboard']);
@@ -110,6 +108,18 @@ Route::get('/api/fasilitas-tambahan', function () {
     return Fasilitas::where('gedung_id', 4)->where('stok', '>', 0)->get();
 });
 Route::post('/admin/fasilitas/import', [AdminController::class, 'importFasilitas'])->name('admin.fasilitas.import');
+Route::patch('/mahasiswa/peminjaman/{id}', [App\Http\Controllers\PeminjamanController::class, 'update'])->name('mahasiswa.peminjaman.update');
+Route::patch('/admin/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesai'])->name('admin.peminjaman.selesai');
+Route::patch('/admin/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesai']);
+Route::prefix('admin')->name('admin.')->group(function () {
+  Route::patch('peminjaman/{peminjaman}/pending', [\App\Http\Controllers\PeminjamanController::class, 'pending'])
+    ->name('peminjaman.pending');
+});
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::patch('peminjaman/{peminjaman}/ajukan', [PeminjamanController::class, 'ajukan'])
+        ->name('peminjaman.ajukan');
+});
+
 
 
 
@@ -276,3 +286,17 @@ Route::patch('/mahasiswa/peminjaman/{id}/ambil', [MahasiswaController::class, 'a
 Route::middleware(['auth'])->group(function () {
     Route::post('/diskusi', [DiskusiController::class, 'store'])->name('diskusi.store');
 });
+
+Route::get('/ajax/fasilitas', function () {
+    $slug = request('gedung');
+    $gedung = \App\Models\Gedung::where('slug', $slug)->first();
+
+    if (!$gedung) return response()->json([], 404);
+
+    $fasilitas = \App\Models\Fasilitas::where('gedung_id', $gedung->id)
+        ->where('stok', '>', 0)
+        ->get(['id', 'nama_barang', 'stok']);
+
+    return response()->json($fasilitas);
+});
+

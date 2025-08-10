@@ -14,33 +14,73 @@
     </thead>
     <tbody>
       @forelse($items as $i => $item)
-      <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
+      @if($item->status_pengembalian === 'selesai') @continue @endif
+      @if($item->verifikasi_sarpras === 'pending') @continue @endif
+      <tr class="{{ $i % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}" data-row-id="row-{{ $item->id }}">
         <td class="px-4 py-2">{{ $i + 1 }}</td>
         <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
         <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</td>
-        <td class="px-4 py-2">{{ ucfirst($item->verifikasi_bem) }}</td>
-        <td class="px-4 py-2">{{ ucfirst($item->verifikasi_sarpras) }}</td>
-        <td class="px-4 py-2">{{ $item->status_peminjaman ?? '-' }}</td>
-        <td class="px-4 py-2">{{ $item->status_pengembalian ?? '-' }}</td>
+        <td class="px-4 py-2">
+          <span class="px-3 py-1 text-xs rounded-full {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-600 font-medium' : 'bg-gray-200 text-gray-600 font-medium' }}">
+            {{ ucfirst($item->verifikasi_bem) }}
+          </span>
+        </td>
+        <td class="px-4 py-2">
+          <span class="px-3 py-1 text-xs rounded-full
+            @if($item->verifikasi_sarpras === 'diterima')
+              bg-green-100 text-green-600 font-medium
+            @elseif(in_array($item->verifikasi_sarpras, ['proses','diajukan']))
+              bg-gray-200 text-gray-700 font-medium
+            @elseif($item->verifikasi_sarpras === 'pending')
+              bg-yellow-100 text-yellow-600 font-medium
+            @else
+              bg-gray-200 text-gray-600 font-medium
+            @endif">
+            {{ ucfirst($item->verifikasi_sarpras) }}
+          </span>
+        </td>
+        <td class="px-4 py-2">
+          @if ($item->status_peminjaman === 'diambil')
+          <span class="bg-blue-100 text-blue-600 text-xs px-3 py-1 rounded-full font-medium">Sedang Dipinjam</span>
+          @else
+          <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full font-medium">Menunggu</span>
+          @endif
+        </td>
+
+        <td class="px-4 py-2">
+          @if ($item->status_pengembalian === 'selesai')
+          <span class="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full font-medium">Selesai</span>
+          @else
+          <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full font-medium">Belum</span>
+          @endif
+        </td>
         <td class="px-4 py-2 text-center">
           <div class="flex gap-2 justify-center">
+            {{-- BUTTON TERIMA --}}
             <button onclick="showDetail({{ $item->id }})"
-              class="bg-indigo-500 text-white px-3 py-1 rounded text-xs hover:bg-indigo-600">
+              class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600">
               Diskusi
             </button>
+
+            <button type="button"
+              onclick="markPending('{{ route('admin.peminjaman.pending', $item->id) }}', {{ $item->id }})"
+              class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 text-xs rounded">
+              Pending
+            </button>
+
             {{-- BUTTON TERIMA --}}
             @if($item->verifikasi_sarpras !== 'diterima')
             <form method="POST" action="{{ route('admin.peminjaman.approve', $item->id) }}">
               @csrf
               @method('PATCH')
-              <button class="bg-yellow-500 hover:bg-blue-600 text-white px-3 py-1 text-xs rounded">Terima</button>
+              <button class="bg-green-500 text-white px-3 py-1 text-xs rounded">Terima</button>
             </form>
             @elseif($item->status_peminjaman !== 'diambil')
             {{-- BUTTON AMBIL --}}
             <form method="POST" action="{{ route('admin.peminjaman.ambil', $item->id) }}">
               @csrf
               @method('PATCH')
-              <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded">Ambil</button>
+              <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded">Ambil</button>
             </form>
             @elseif($item->status_peminjaman === 'diambil' && $item->status_pengembalian !== 'selesai')
             <button onclick="openModalSelesai({{ $item->id }})" class="bg-green-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded">Selesai</button>
@@ -251,6 +291,54 @@
         console.error(err);
         alert('Gagal menyetujui peminjaman.');
       });
+  }
+
+  async function markPending(url, id) {
+    if (!confirm('Tandai pengajuan ini sebagai "pending"?')) return;
+
+    // ambil CSRF dari meta atau input hidden (fallback)
+    let csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (!csrf) {
+      const tokenInput = document.querySelector('input[name=_token]');
+      if (tokenInput) csrf = tokenInput.value;
+    }
+
+    try {
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'X-CSRF-TOKEN': csrf,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error('Gagal set pending:', err);
+        alert('Gagal memproses.');
+        return;
+      }
+
+      // Hapus baris dari DOM
+      const row = document.querySelector(`tr[data-row-id="row-${id}"]`);
+      if (row) {
+        const tbody = row.parentNode;
+        row.remove();
+
+        // jika tbody kosong, tampilkan baris "Tidak ada pengajuan."
+        const masihAda = tbody.querySelectorAll('tr').length > 0;
+        if (!masihAda) {
+          const empty = document.createElement('tr');
+          empty.innerHTML = `<td colspan="10" class="text-center py-4 text-gray-500">Tidak ada pengajuan.</td>`;
+          tbody.appendChild(empty);
+        }
+      }
+
+      console.log(`Pengajuan ${id} dipending & dihapus dari tabel.`);
+    } catch (e) {
+      console.error('Network error:', e);
+      alert('Terjadi kesalahan jaringan.');
+    }
   }
 
   function ambilBarang(id) {
