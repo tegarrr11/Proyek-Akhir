@@ -1,18 +1,36 @@
-@extends('layouts.sidebar-admin')
+<?php $__env->startSection('title', 'Peminjaman'); ?>
 
-@section('title', 'Peminjaman')
+<?php $__env->startSection('content'); ?>
+<?php if (isset($component)) { $__componentOriginalfd1f218809a441e923395fcbf03e4272 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalfd1f218809a441e923395fcbf03e4272 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.header','data' => ['title' => 'Peminjaman','breadcrumb' => 'Peminjaman > Pengajuan']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('header'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => 'Peminjaman','breadcrumb' => 'Peminjaman > Pengajuan']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalfd1f218809a441e923395fcbf03e4272)): ?>
+<?php $attributes = $__attributesOriginalfd1f218809a441e923395fcbf03e4272; ?>
+<?php unset($__attributesOriginalfd1f218809a441e923395fcbf03e4272); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalfd1f218809a441e923395fcbf03e4272)): ?>
+<?php $component = $__componentOriginalfd1f218809a441e923395fcbf03e4272; ?>
+<?php unset($__componentOriginalfd1f218809a441e923395fcbf03e4272); ?>
+<?php endif; ?>
 
-@section('content')
-<x-header title="Peminjaman" breadcrumb="Peminjaman > Pengajuan" />
-
-@if(session('success'))
+<?php if(session('success')): ?>
 <div class="mb-4 bg-green-100 text-green-700 px-4 py-2 rounded">
-  {{ session('success') }}
+  <?php echo e(session('success')); ?>
+
 </div>
-@endif
+<?php endif; ?>
 
 <div class="bg-white rounded-lg shadow p-6">
-  {{-- Tabs --}}
+  
   <div class="flex items-center justify-between mb-6">
     <div class="flex gap-6 relative">
       <button onclick="showTab('pengajuan')" id="tabPengajuan"
@@ -35,17 +53,36 @@
     </div>
   </div>
 
-  {{-- Tab Pengajuan --}}
+  
   <div id="pengajuanTab">
-    <x-pengajuan.table-pengajuan-admin :items="$pengajuans" />
+    <?php if (isset($component)) { $__componentOriginal191be32db1a77a3a45a47b7ee89f9c0a = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal191be32db1a77a3a45a47b7ee89f9c0a = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pengajuan.table-pengajuan-admin','data' => ['items' => $pengajuans]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('pengajuan.table-pengajuan-admin'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['items' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pengajuans)]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal191be32db1a77a3a45a47b7ee89f9c0a)): ?>
+<?php $attributes = $__attributesOriginal191be32db1a77a3a45a47b7ee89f9c0a; ?>
+<?php unset($__attributesOriginal191be32db1a77a3a45a47b7ee89f9c0a); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal191be32db1a77a3a45a47b7ee89f9c0a)): ?>
+<?php $component = $__componentOriginal191be32db1a77a3a45a47b7ee89f9c0a; ?>
+<?php unset($__componentOriginal191be32db1a77a3a45a47b7ee89f9c0a); ?>
+<?php endif; ?>
   </div>
 
-  {{-- Tab Aktif --}}
+  
   <div id="aktifTab" class="hidden">
-    @include('components.aktif.table-pengajuanaktif-admin', ['items' => $aktif])
+    <?php echo $__env->make('components.aktif.table-pengajuanaktif-admin', ['items' => $aktif], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
   </div>
 
-  {{-- Tab Riwayat --}}
+  
   <div id="riwayatTab" class="hidden">
     <div class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
       <form method="GET" action="" class="flex gap-2 items-center w-full md:w-auto" onsubmit="setRiwayatTabFlag()">
@@ -62,36 +99,37 @@
           id="searchInput"
           name="search"
           placeholder="Cari kegiatan..."
-          value="{{ request('search') }}"
+          value="<?php echo e(request('search')); ?>"
           class="hidden md:block border border-gray-300 rounded px-3 py-1 text-sm bg-white shadow z-20 w-40 md:w-52 focus:outline-none focus:ring-0 focus:border-gray-300 transition-all" />
 
         <!-- Dropdown Gedung -->
         <select name="gedung_id" class="border rounded px-2 py-1 text-sm w-48" onchange="handleDropdownChange(this.form)">
           <option value="">Semua Ruangan</option>
-          @foreach(App\Models\Gedung::where('id', '!=', 8)->get() as $gedung)
-          <option value="{{ $gedung->id }}" {{ request('gedung_id') == $gedung->id ? 'selected' : '' }}>
-            {{ $gedung->nama }}
+          <?php $__currentLoopData = App\Models\Gedung::where('id', '!=', 8)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gedung): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+          <option value="<?php echo e($gedung->id); ?>" <?php echo e(request('gedung_id') == $gedung->id ? 'selected' : ''); ?>>
+            <?php echo e($gedung->nama); ?>
+
           </option>
-          @endforeach
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </select>
 
         <!-- Filter Bulan -->
-        <input type="month" name="bulan" value="{{ request('bulan') }}"
+        <input type="month" name="bulan" value="<?php echo e(request('bulan')); ?>"
           class="border border-gray-300 rounded px-2 py-1 text-sm"
           onchange="handleDropdownChange(this.form)" />
 
-        @if(request('bulan'))
-        <a href="{{ request()->fullUrlWithQuery(['bulan' => null, 'page' => 1]) }}"
+        <?php if(request('bulan')): ?>
+        <a href="<?php echo e(request()->fullUrlWithQuery(['bulan' => null, 'page' => 1])); ?>"
           class="text-sm text-gray-600 hover:underline">
           Reset
         </a>
-        @endif
+        <?php endif; ?>
 
         <input type="hidden" name="tab" id="tabInput" value="riwayat">
       </form>
 
       <!-- Tombol Download -->
-      <a href="{{ route('download.riwayat.admin') }}"
+      <a href="<?php echo e(route('download.riwayat.admin')); ?>"
         class="inline-flex items-center gap-2 border rounded px-2 py-1 text-sm bg-blue-900 hover:bg-blue-950 text-white font-regular shadow transition duration-200">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -101,15 +139,34 @@
       </a>
     </div>
 
-    @include('components.riwayat.table-riwayat-admin', ['items' => $riwayats])
+    <?php echo $__env->make('components.riwayat.table-riwayat-admin', ['items' => $riwayats], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
   </div>
 </div>
 
-{{-- MODAL DETAIL GLOBAL --}}
-<x-modal-detail-peminjaman />
-@endsection
 
-@push('scripts')
+<?php if (isset($component)) { $__componentOriginal7a9d86cd1f97d28e5afda3793042d89d = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-detail-peminjaman','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('modal-detail-peminjaman'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d)): ?>
+<?php $attributes = $__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d; ?>
+<?php unset($__attributesOriginal7a9d86cd1f97d28e5afda3793042d89d); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal7a9d86cd1f97d28e5afda3793042d89d)): ?>
+<?php $component = $__componentOriginal7a9d86cd1f97d28e5afda3793042d89d; ?>
+<?php unset($__componentOriginal7a9d86cd1f97d28e5afda3793042d89d); ?>
+<?php endif; ?>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startPush('scripts'); ?>
 <script>
   function setRiwayatTabFlag() {
     document.getElementById('tabInput').value = 'riwayat';
@@ -243,4 +300,5 @@
     }
   });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.sidebar-admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Acer\Documents\SIMFasilitas\Proyek-Akhir\resources\views/pages/admin/peminjaman.blade.php ENDPATH**/ ?>

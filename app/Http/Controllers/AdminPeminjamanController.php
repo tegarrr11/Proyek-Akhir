@@ -14,6 +14,7 @@ class AdminPeminjamanController extends Controller
     {
         $gedungId = $request->get('gedung_id');
 
+        // Tab Pengajuan
         $pengajuans = Peminjaman::with('user')
             ->where('verifikasi_bem', 'diterima')
             ->whereHas('user', function ($q) {
@@ -22,11 +23,12 @@ class AdminPeminjamanController extends Controller
             ->where(function ($query) {
                 $query->where('verifikasi_sarpras', 'diajukan')
                     ->orWhere(function ($q) {
-                        $q->where('status_pengembalian', '!=', 'selesai')
-                            ->orWhereNull('status_pengembalian');
+                        $q->where('status_peminjaman', '!=', 'diambil')
+                            ->orWhereNull('status_peminjaman');
                     });
             });
 
+        // Tab Riwayat
         $riwayats = Peminjaman::with('user', 'gedung')
             ->where(function ($query) {
                 $query->where('verifikasi_sarpras', 'diterima')
@@ -39,16 +41,26 @@ class AdminPeminjamanController extends Controller
                     });
             });
 
+        // Tab Aktif → khusus status_peminjaman = diambil
+        $aktif = Peminjaman::with('user', 'gedung')
+            ->where('status_peminjaman', 'diambil')
+            ->where(function ($q) {
+                $q->where('status_pengembalian', '!=', 'selesai')
+                    ->orWhereNull('status_pengembalian');
+            });
 
+        // Filter gedung jika dipilih
         if ($gedungId) {
             $pengajuans = $pengajuans->where('gedung_id', $gedungId);
             $riwayats   = $riwayats->where('gedung_id', $gedungId);
+            $aktif      = $aktif->where('gedung_id', $gedungId);
         }
 
         $pengajuans = $pengajuans->latest()->get();
         $riwayats   = $riwayats->latest()->get();
+        $aktif      = $aktif->latest()->get();
 
-        return view('pages.admin.peminjaman', compact('pengajuans', 'riwayats'));
+        return view('pages.admin.peminjaman', compact('pengajuans', 'riwayats', 'aktif'));
     }
 
     public function approve($id)
@@ -68,7 +80,7 @@ class AdminPeminjamanController extends Controller
         $pesan = 'Pengajuan "' . $peminjaman->judul_kegiatan . '" telah disetujui oleh Admin.';
         NotifikasiHelper::kirimKeUser($mahasiswa, $judul, $pesan);
 
-        //  Notifikasi email ke mahasiswa
+        // Notifikasi email ke mahasiswa
         if ($mahasiswa && $mahasiswa->email) {
             $mahasiswa->notify(new PengajuanDiterimaSarpras($peminjaman));
         }
@@ -176,8 +188,6 @@ class AdminPeminjamanController extends Controller
             'deskripsi_kegiatan' => 'nullable|string',
             'gedung' => 'required|string',
             'penanggung_jawab'   => 'required|string|max:255',
-
-            // Untuk admin, barang tidak wajib
         ]);
 
         $gedung = \App\Models\Gedung::where('slug', $request->gedung)->first();
@@ -194,17 +204,15 @@ class AdminPeminjamanController extends Controller
             'deskripsi_kegiatan' => $request->deskripsi_kegiatan,
             'gedung_id' => $gedung->id,
             'user_id' => auth()->id(),
-            'status' => 'diterima', // pastikan status diterima
+            'status' => 'diterima',
             'verifikasi_bem' => 'diterima',
             'verifikasi_sarpras' => 'diterima',
             'organisasi' => $request->organisasi ?? '-',
             'penanggung_jawab' => $request->penanggung_jawab ?? '-',
-            'status_peminjaman' => 'ambil', // status_peminjaman juga langsung aktif
-            'status_pengembalian' => 'proses', // status_pengembalian default proses
+            'status_peminjaman' => 'diambil',
+            'status_pengembalian' => 'proses',
             'status_verifikasi_bem' => 'disetujui',
             'status_verifikasi_sarpras' => 'disetujui',
-            'status_peminjaman' => 'diambil',
-            'status_pengembalian' => 'selesai',
         ]);
 
         // Jika ada barang, simpan detail peminjaman

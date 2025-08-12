@@ -120,9 +120,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         ->name('peminjaman.ajukan');
 });
 
-
-
-
 // ========== AUTH GROUP ==========
 Route::middleware(['auth'])->group(function () {
 

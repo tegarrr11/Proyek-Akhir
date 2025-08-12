@@ -1,14 +1,13 @@
 <x-table-wrapper>
-  <table class="w-full text-sm text-left text-gray-700">
-    <thead class="bg-gray-100 text-black border-b">
-      <tr class="text-sm font-semibold">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-100">
+      <tr class="font-semibold text-left">
         <th class="px-4 py-2">No.</th>
-        <th class="px-4 py-2">Pengajuan</th>
+        <th class="px-4 py-2">Nama Peminjaman</th>
         <th class="px-4 py-2">Tanggal Kegiatan</th>
-        <th class="px-4 py-2">Verifikasi BEM</th>
-        <th class="px-4 py-2">Verifikasi Sarpras</th>
         <th class="px-4 py-2">Status Peminjaman</th>
-        <th class="px-4 py-2 text-center">Aksi</th>
+        <th class="px-4 py-2">Status Pengembalian</th>
+        <th class="px-4 py-2">Aksi</th>
       </tr>
     </thead>
     <tbody>
@@ -20,25 +19,6 @@
         <td class="px-4 py-2">{{ $item->judul_kegiatan }}</td>
         <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</td>
         <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full {{ $item->verifikasi_bem === 'diterima' ? 'bg-green-100 text-green-600 font-medium' : 'bg-gray-200 text-gray-600 font-medium' }}">
-            {{ ucfirst($item->verifikasi_bem) }}
-          </span>
-        </td>
-        <td class="px-4 py-2">
-          <span class="px-3 py-1 text-xs rounded-full
-            @if($item->verifikasi_sarpras === 'diterima')
-              bg-green-100 text-green-600 font-medium
-            @elseif(in_array($item->verifikasi_sarpras, ['proses','diajukan']))
-              bg-gray-200 text-gray-700 font-medium
-            @elseif($item->verifikasi_sarpras === 'pending')
-              bg-yellow-100 text-yellow-600 font-medium
-            @else
-              bg-gray-200 text-gray-600 font-medium
-            @endif">
-            {{ ucfirst($item->verifikasi_sarpras) }}
-          </span>
-        </td>
-        <td class="px-4 py-2">
           @if ($item->status_peminjaman === 'diambil')
           <span class="bg-blue-100 text-blue-600 text-xs px-3 py-1 rounded-full font-medium">Sedang Dipinjam</span>
           @else
@@ -46,18 +26,19 @@
           @endif
         </td>
 
+        <td class="px-4 py-2">
+          @if ($item->status_pengembalian === 'selesai')
+          <span class="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full font-medium">Selesai</span>
+          @else
+          <span class="bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full font-medium">Belum</span>
+          @endif
+        </td>
         <td class="px-4 py-2 text-center">
           <div class="flex gap-2 justify-center">
             {{-- BUTTON TERIMA --}}
             <button onclick="showDetail({{ $item->id }})"
               class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600">
               Diskusi
-            </button>
-
-            <button type="button"
-              onclick="markPending('{{ route('admin.peminjaman.pending', $item->id) }}', {{ $item->id }})"
-              class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 text-xs rounded">
-              Pending
             </button>
 
             {{-- BUTTON TERIMA --}}
@@ -74,6 +55,10 @@
               @method('PATCH')
               <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded">Ambil</button>
             </form>
+            @elseif($item->status_peminjaman === 'diambil' && $item->status_pengembalian !== 'selesai')
+            <button onclick="openModalSelesai({{ $item->id }})" class="bg-green-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded">Selesai</button>
+            @else
+            <span class="text-gray-400 italic">Selesai</span>
             @endif
 
             {{-- DETAIL --}}
@@ -95,6 +80,8 @@
     </tbody>
   </table>
 </x-table-wrapper>
+
+@include('components.modal-selesai')
 
 @push('scripts')
 <script>
