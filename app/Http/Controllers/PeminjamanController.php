@@ -152,20 +152,26 @@ class PeminjamanController extends Controller
 
             Auth::user()->notify(new \App\Notifications\PengajuanMasuk($peminjaman));
 
-            \App\Models\User::whereIn('role', ['bem', 'admin'])->each(function ($user) use ($peminjaman) {
+            // 🔹 Kirim notifikasi ke semua user dengan role BEM
+            \App\Models\User::where('role', 'bem')->each(function ($user) use ($peminjaman) {
                 $user->notify(new \App\Notifications\PengajuanBaru($peminjaman));
             });
 
-            \App\Helpers\NotifikasiHelper::kirimKeRoles(['bem', 'admin'], 'Pengajuan Baru', 'Pengajuan oleh ' . Auth::user()->name);
+            // 🔹 Kirim broadcast notifikasi juga
+            \App\Helpers\NotifikasiHelper::kirimKeRoles(['bem'], 'Pengajuan Baru', 'Pengajuan oleh ' . Auth::user()->name);
 
             DB::commit();
 
             return redirect()->route('mahasiswa.peminjaman')->with('success', 'Peminjaman berhasil diajukan.');
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Peminjaman store error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             return back()->with('error', 'Terjadi kesalahan saat menyimpan data.');
         }
     }
+
 
     /**
      * Menampilkan daftar pengajuan dan riwayat peminjaman mahasiswa.
@@ -481,4 +487,15 @@ class PeminjamanController extends Controller
         return redirect()->back()->with('success', 'Checklist berhasil diproses.');
     }
 
+    public function approveBem($token)
+    {
+        $peminjaman = Peminjaman::where('verification_token', $token)->firstOrFail();
+
+        // Update status verifikasi BEM
+        $peminjaman->verifikasi_bem = 'diterima';
+        $peminjaman->save();
+
+        return redirect()->route('mahasiswa.peminjaman')
+            ->with('success', 'Pengajuan telah diverifikasi oleh BEM.');
+    }
 }

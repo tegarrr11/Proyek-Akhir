@@ -112,8 +112,8 @@ Route::patch('/mahasiswa/peminjaman/{id}', [App\Http\Controllers\PeminjamanContr
 Route::patch('/admin/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesai'])->name('admin.peminjaman.selesai');
 Route::patch('/admin/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesai']);
 Route::prefix('admin')->name('admin.')->group(function () {
-  Route::patch('peminjaman/{peminjaman}/pending', [\App\Http\Controllers\PeminjamanController::class, 'pending'])
-    ->name('peminjaman.pending');
+    Route::patch('peminjaman/{peminjaman}/pending', [\App\Http\Controllers\PeminjamanController::class, 'pending'])
+        ->name('peminjaman.pending');
 });
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::patch('peminjaman/{peminjaman}/ajukan', [PeminjamanController::class, 'ajukan'])
@@ -146,6 +146,8 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesaiPeminjaman'])->name('admin.peminjaman.selesai');
         Route::patch('/peminjaman/{id}/ambil', [AdminPeminjamanController::class, 'ambilBarang'])->name('admin.peminjaman.ambil');
         Route::patch('/peminjaman/{id}/selesai', [AdminPeminjamanController::class, 'selesaiPeminjaman'])->name('admin.peminjaman.selesai');
+        Route::get('/admin/peminjaman/approve/{token}', [AdminPeminjamanController::class, 'approveFromEmail'])
+            ->name('admin.peminjaman.approve.email');
     });
 
     // === MAHASISWA ===
@@ -187,6 +189,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/peminjaman/{id}/verifikasi', [BemPeminjamanController::class, 'verifikasi'])->name('bem.peminjaman.verifikasi');
         Route::patch('/bem/peminjaman/{id}/terima', [BEMPeminjamanController::class, 'terima'])->name('bem.peminjaman.terima');
         Route::get('/peminjaman/download-proposal/{id}', [PeminjamanController::class, 'downloadProposal'])->middleware('auth')->name('bem.peminjaman.downloadProposal');
+        Route::get('/peminjaman/approve-bem/{token}', [PeminjamanController::class, 'approveBem'])->name('peminjaman.approve.bem');
     });
 
     // === DOSEN ===
@@ -296,4 +299,3 @@ Route::get('/ajax/fasilitas', function () {
 
     return response()->json($fasilitas);
 });
-

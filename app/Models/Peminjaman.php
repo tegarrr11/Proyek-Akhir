@@ -31,7 +31,10 @@ class Peminjaman extends Model
     'verifikasi_bem',
     'verifikasi_sarpras', 
     'status',
+    'verification_token',
     ];
+
+    protected $dates = ['tgl_kegiatan', 'tgl_kegiatan_berakhir'];
 
     public function detailPeminjaman()
     {

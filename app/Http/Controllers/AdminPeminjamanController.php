@@ -234,4 +234,26 @@ class AdminPeminjamanController extends Controller
 
         return redirect()->route('admin.peminjaman')->with('success', 'Peminjaman berhasil diajukan.');
     }
+
+    public function approveFromEmail($token)
+    {
+        $peminjaman = Peminjaman::where('verification_token', $token)->first();
+
+        if (!$peminjaman) {
+            return redirect()->route('admin.peminjaman.index')
+                ->with('error', 'Token tidak valid atau peminjaman tidak ditemukan.');
+        }
+
+        // if (!$peminjaman) {
+        //     dd("Token tidak cocok: ", $token);
+        // }
+
+        $peminjaman->verifikasi_sarpras = 'diterima';
+        $peminjaman->save();
+
+        // dd("Status baru: ", $peminjaman->status);
+
+        return redirect()->route('admin.peminjaman')
+            ->with('success', 'Peminjaman berhasil disetujui melalui email.');
+    }
 }

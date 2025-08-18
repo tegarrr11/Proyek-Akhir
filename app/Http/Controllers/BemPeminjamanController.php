@@ -12,6 +12,7 @@ use App\Helpers\NotifikasiHelper;
 use App\Notifications\PengajuanDisetujuiBem;
 use App\Models\User;
 use App\Notifications\PengajuanKeAdmin;
+use Illuminate\Support\Str;
 
 
 class BemPeminjamanController extends Controller
@@ -66,6 +67,9 @@ class BemPeminjamanController extends Controller
         $peminjaman->verifikasi_sarpras = 'diajukan';
         $peminjaman->save();
 
+        $peminjaman->verification_token = Str::uuid();
+        $peminjaman->save();
+
         // Kirim notifikasi ke Admin
         $judul = 'Pengajuan Menunggu Persetujuan Admin';
         $pesan = 'Pengajuan oleh ' . $peminjaman->user->name . ' telah disetujui BEM dan menunggu verifikasi admin.';
@@ -114,5 +118,16 @@ class BemPeminjamanController extends Controller
             }),
         ]);
     }
+
+    // public function approveEmail($id, Request $request)
+    // {
+    //     $peminjaman = Peminjaman::findOrFail($id);
+
+    //     // Update status
+    //     $peminjaman->status = 'diterima';
+    //     $peminjaman->save();
+
+    //     return redirect('/bem/peminjaman')->with('success', 'Pengajuan berhasil diterima melalui email!');
+    // }
 
 }
