@@ -240,7 +240,7 @@ class AdminPeminjamanController extends Controller
         $peminjaman = Peminjaman::where('verification_token', $token)->first();
 
         if (!$peminjaman) {
-            return redirect()->route('admin.peminjaman.index')
+            return redirect()->route('admin.peminjaman')
                 ->with('error', 'Token tidak valid atau peminjaman tidak ditemukan.');
         }
 
@@ -253,7 +253,9 @@ class AdminPeminjamanController extends Controller
 
         // dd("Status baru: ", $peminjaman->status);
 
-        return redirect()->route('admin.peminjaman')
-            ->with('success', 'Peminjaman berhasil disetujui melalui email.');
+        // return redirect()->route('admin.peminjaman')
+        //     ->with('success', 'Peminjaman berhasil disetujui melalui email.');
+        return response("✅ Peminjaman berhasil disetujui melalui email.", 200);
+        
     }
 }

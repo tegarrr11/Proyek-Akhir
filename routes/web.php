@@ -119,6 +119,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::patch('peminjaman/{peminjaman}/ajukan', [PeminjamanController::class, 'ajukan'])
         ->name('peminjaman.ajukan');
 });
+Route::get('/admin/peminjaman/approve/{token}', [AdminPeminjamanController::class, 'approveFromEmail'])
+    ->name('admin.peminjaman.approve.email');
 
 // ========== AUTH GROUP ==========
 Route::middleware(['auth'])->group(function () {
@@ -146,8 +148,6 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesaiPeminjaman'])->name('admin.peminjaman.selesai');
         Route::patch('/peminjaman/{id}/ambil', [AdminPeminjamanController::class, 'ambilBarang'])->name('admin.peminjaman.ambil');
         Route::patch('/peminjaman/{id}/selesai', [AdminPeminjamanController::class, 'selesaiPeminjaman'])->name('admin.peminjaman.selesai');
-        Route::get('/admin/peminjaman/approve/{token}', [AdminPeminjamanController::class, 'approveFromEmail'])
-            ->name('admin.peminjaman.approve.email');
     });
 
     // === MAHASISWA ===
