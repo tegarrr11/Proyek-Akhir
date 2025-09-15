@@ -55,11 +55,11 @@
               @method('PATCH')
               <button class="bg-blue-600 text-white px-3 py-1 text-xs rounded">Ambil</button>
             </form>
-            @elseif($item->status_peminjaman === 'diambil' && $item->status_pengembalian !== 'selesai')
+            <!-- @elseif($item->status_peminjaman === 'diambil' && $item->status_pengembalian !== 'selesai')
             <button onclick="openModalSelesai({{ $item->id }})" class="bg-green-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded">Selesai</button>
             @else
             <span class="text-gray-400 italic">Selesai</span>
-            @endif
+            @endif -->
 
             {{-- DETAIL --}}
             <button onclick="showDetail({{ $item->id }})" class="text-gray-600 hover:text-blue-700" title="Detail">
