@@ -138,8 +138,8 @@
         <select name="gedung_id"
           onchange="this.form.submit()"
           class="border border-grey-500 text-sm px-4 py-2 h-10 rounded w-52">
-          @foreach(array_filter($gedungs, fn($g) => $g['id'] != 8) as $gedung)
-          <option value="{{ $gedung['id'] }}">{{ $gedung['nama'] }}</option>
+          @foreach($gedungs->where('id', '!=', 8) as $gedung)
+          <option value="{{ $gedung->id }}">{{ $gedung->nama }}</option>
           @endforeach
         </select>
       </form>
