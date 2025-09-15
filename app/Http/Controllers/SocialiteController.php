@@ -109,7 +109,7 @@ class SocialiteController extends Controller
         $posisi = strtolower($pegawai['posisi'] ?? '');
 
         // Tentukan role
-        $role = (str_contains($posisi, 'sarana dan prasarana')) ? 'admin' : 'dosen';
+        $role = (str_contains($posisi, 'Staf Sarana dan Prasarana')) ? 'admin' : 'dosen';
 
         return (object) [
             'prodi' => $pegawai['prodi'] ?? null,
